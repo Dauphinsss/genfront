@@ -55,21 +55,9 @@ export default function Home() {
     setIsAuthLoading(true);
 
     if (provider === "google") {
-      // flujo real → backend Nest
       window.location.href = `http://localhost:4000/auth/google`;
     } else {
-      // flujo mock → sin backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockUser: User = {
-        name: "María González",
-        email: "maria@outlook.com",
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=microsoft`,
-      };
-
-      localStorage.setItem("pyson_user", JSON.stringify(mockUser));
-      setUser(mockUser);
-      setIsAuthLoading(false);
+      window.location.href = `http://localhost:4000/auth/microsoft`;
     }
   };
 
