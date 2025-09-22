@@ -40,6 +40,8 @@ El diagrama C1 muestra a los actores externos (estudiantes, profesores) y los si
     />
 </div>
 
+<h2 style="border-bottom: none;">C2 - Contenedores</h2>
+
 El diagrama C2 descompone el sistema principal en contenedores (Aplicación Web, API Backend, Base de Datos, etc.) y muestra sus relaciones.
 
 <div align="center">
