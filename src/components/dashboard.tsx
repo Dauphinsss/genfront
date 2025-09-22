@@ -139,7 +139,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
         {currentView === "inicio" && (
           <>
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2 text-foreground">Hola, {user.name.split(" ")[0]}</h2>
+              <h2 className="text-3xl font-bold mb-2 text-foreground">Hola, {user.name}</h2>
               <p className="text-muted-foreground">Tus cursos de programación</p>
             </div>
 

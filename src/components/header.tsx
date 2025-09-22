@@ -113,7 +113,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                 alt={user.name}
                 className="w-8 h-8 rounded-full border border-border"
               />
-              <span className="text-sm font-medium">{user.name.split(" ")[0]}</span>
+              <span className="text-sm font-medium">{user.name}</span>
             </div>
 
             <Button

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Dashboard } from '@/components/dashboard';
-import { Header } from '@/components/header';
-import { LoginSection } from '@/components/login-section';
-import { useState, useEffect } from 'react';
+import { Dashboard } from "@/components/dashboard";
+import { Header } from "@/components/header";
+import { LoginSection } from "@/components/login-section";
+import { useState, useEffect } from "react";
 
 interface User {
   name: string;
@@ -22,18 +22,18 @@ export default function Home() {
       setIsLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const savedUser = localStorage.getItem('pyson_user');
+      const savedUser = localStorage.getItem("pyson_user");
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       }
 
-      const savedTheme = localStorage.getItem('pyson_theme');
+      const savedTheme = localStorage.getItem("pyson_theme");
       const prefersDark =
-        savedTheme === 'dark' ||
+        savedTheme === "dark" ||
         (!savedTheme &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches);
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
       setIsDark(prefersDark);
-      document.documentElement.classList.toggle('dark', prefersDark);
+      document.documentElement.classList.toggle("dark", prefersDark);
 
       setIsLoading(false);
     };
@@ -44,30 +44,36 @@ export default function Home() {
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
-    document.documentElement.classList.toggle('dark', newIsDark);
-    localStorage.setItem('pyson_theme', newIsDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", newIsDark);
+    localStorage.setItem("pyson_theme", newIsDark ? "dark" : "light");
   };
 
-  const handleLogin = async (provider: 'google' | 'microsoft') => {
-    console.log('[v0] Logging in with:', provider);
-
+  const handleLogin = async (provider: "google" | "microsoft") => {
+    console.log("[v0] Logging in with:", provider);
     setIsAuthLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const mockUser: User = {
-      name: provider === 'google' ? 'Juan Pérez' : 'María González',
-      email: provider === 'google' ? 'juan@gmail.com' : 'maria@outlook.com',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${provider}`,
-    };
+    if (provider === "google") {
+      // flujo real → backend Nest
+      window.location.href = `http://localhost:4000/auth/google`;
+    } else {
+      // flujo mock → sin backend
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setUser(mockUser);
-    localStorage.setItem('pyson_user', JSON.stringify(mockUser));
-    setIsAuthLoading(false);
+      const mockUser: User = {
+        name: "María González",
+        email: "maria@outlook.com",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=microsoft`,
+      };
+
+      localStorage.setItem("pyson_user", JSON.stringify(mockUser));
+      setUser(mockUser);
+      setIsAuthLoading(false);
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem('pyson_user');
+    localStorage.removeItem("pyson_user");
   };
 
   if (isLoading) {
