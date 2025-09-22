@@ -3,6 +3,7 @@
 import { Dashboard } from "@/components/dashboard";
 import { Header } from "@/components/header";
 import { LoginSection } from "@/components/login-section";
+import ParticleBackground from "@/components/particleBackground";
 import { useState, useEffect } from "react";
 
 interface User {
@@ -101,6 +102,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Header onToggleTheme={toggleTheme} isDark={isDark} />
+      <ParticleBackground/>
       <LoginSection onLogin={handleLogin} isLoading={isAuthLoading} />
     </main>
   );
