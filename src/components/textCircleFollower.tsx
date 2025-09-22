@@ -12,8 +12,8 @@ export default function TextCircleFollower() {
         gsap.to(wrapperRef.current, {
           x: e.clientX - 75, // restamos la mitad del ancho (200px/2)
           y: e.clientY - 75, // restamos la mitad del alto (200px/2)
-          duration: 0.7,
-          ease: "power2",
+          duration: 1,
+          ease: "power3.out",
         });
       }
     };
