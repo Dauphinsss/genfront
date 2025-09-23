@@ -111,4 +111,112 @@ Este modelo representa el sistema desde el enfoque funcional y de negocio. En la
 <br>
 <br>
 
-<h1 style="border-bottom: none;">Arquitectura del Software</h1>
+<h1 style="border-bottom: none;">Pilares de calidad del sistema</h1>
+
+<h2 style="border-bottom: none;">1. Seguridad</h2>
+
+Manejar datos de estudiantes, calificaciones y comentarios.
+Acciones clave:
+
+ <h4>AuthN / AuthZ (Autenticacion y Autorizacion)</h4>
+  <ul>
+    <li>Usa OAuth 2.0 / OpenID Connect con Google y Microsoft para el registro/login.</li>
+    <li>Implementa RBAC (Role-Based Access Control): roles Docente y Estudiante, con permisos diferenciados por curso y modulo.</li>
+    <li>Verifica access/ID tokens en el backend (NestJS) usando librerias oficiales de Google/Microsoft. </li>
+  </ul>
+
+  <h4>Gestion de credenciales</h4>
+  <ul>
+    <li>No almacenes tokens sensibles en el cliente.</li>
+    <li>Maneja refresh tokens y la caducidad de sesiones de forma segura.</li>
+  </ul>
+
+  <h4>Cifrado y protección de datos</h4>
+  <ul>
+    <li>Cifrado en transitoo (TLS/HTTPS) y en reposo .</li>
+  </ul>
+
+  <h4>Auditoría y cumplimiento</h4>
+  <ul>
+    <li>Registra quien califica, editao accedea datos.</li>
+    <li>Manten logs de seguridad.</li>
+    </li>
+  </ul>
+</section>
+
+<h2 style="border-bottom: none;">2. Integridad</h2>
+
+ Evaluaciones, progreso y calificaciones no pueden perderse ni duplicarse.
+
+ <h4>Acciones clave</h4>
+<ul>
+  <li>Usar transacciones en inscripciones, envios y calificaciones; aplicar operaciones idempotentes.</li>
+  <li>Implementar backups y restauracion probada; mantener versiones de contenido (historial de edicion).</li>
+</ul>
+
+<h4>Indicadores</h4>
+<ul>
+  <li>Disponibilidad.</li>
+  <li>Tasa de errores en envios.</li>
+  <li>Numero de reintentos exitosos.</li>
+  <li>RPO/RTO definidos y medidos.</li>
+</ul>
+</section>
+
+<h2 style="border-bottom: none;">3. Escalabilidad</h2>
+
+Picos en entregas y horas de clase.
+
+<h4>Acciones clave</h4>
+<ul>
+  <li>CDN para contenido estatico, cache de paginas/materiales, paginacion en listados.</li>
+  <li>Jobs asincronos para transcribir videos, generar previews de slides, recomputar recomendaciones.</li>
+  <li>Carga diferida (lazy load) de medios; compresion y streaming adaptativo.</li>
+  <li>Observabilidad basica: metricas (p95 latencia), logs estructurados y trazas.</li>
+</ul>
+
+<h4>Indicadores</h4>
+<ul>
+  <li>p95 de latencia por endpoint.</li>
+  <li>TTFB.</li>
+  <li>Tasa de cache hit.</li>
+  <li>Coste por usuario.</li>
+</ul>
+
+<h2 style="border-bottom: none;">4. Testeabilidad</h2>
+
+El dominio crece (modulos, topicos, labs, hints, recomendaciones). 
+Mantener velocidad sin romper.
+
+<h4>Acciones clave</h4>
+<ul>
+  <li>Arquitectura modular (Curso, Modulo, Topico, Laboratorio, Inscripcion, Calificacion) con servicios y repositorios claros.</li>
+  <li>Piramide de tests: unitarios (dominio), de integracion (repos/colas), E2E (flujos: inscribir -> ver material -> enviar -> calificar).</li>
+  <li>Seeds/fixtures para escenarios reales (docente/estudiante, curso sin-inscripcion).</li>
+  <li>CI con coverage gate y lint; feature flags para cambios de UX.</li>
+</ul>
+
+<h4>Indicadores</h4>
+<ul>
+  <li>Cobertura >80% en dominio.</li>
+  <li>Tiempo de build.</li>
+  <li>Lead time.</li>
+  <li>Tasa de regresiones.</li>
+</ul>
+
+<h2 style="border-bottom: none;">5. Accesibilidad</h2>
+
+<p>Debe ser usable para todos los estudiantes y docentes.</p>
+
+<h4>Acciones clave</h4>
+<ul>
+  <li>Cumplir con las pautas WCAG 2.2 nivel AA: contraste suficiente, foco visible, navegacion completa con teclado.</li>
+  <li>Usar componentes accesibles para la inscripcion, modales de retroalimentacion y tablas de calificaciones.</li>
+</ul>
+
+<h4>Indicadores</h4>
+<ul>
+  <li>Porcentaje de pantallas auditadas con conformidad AA.</li>
+  <li>Numero de errores de accesibilidad por pagina.</li>
+  <li>Tasa de finalizacion de tareas usando solo teclado.</li>
+</ul>
