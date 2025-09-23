@@ -61,3 +61,27 @@ El diagrama C2 descompone el sistema principal en contenedores (Aplicación Web,
 <p style="color:#a7a7a7">
     <i>Los diagramas pueden ser editados con la herramienta online de Structurizr:</i> https://structurizr.com/dsl
 </p>
+
+***
+<br>
+<br>
+
+<h1 style="border-bottom: none;">Arquitectura de Capas</h1>
+
+Este proyecto incluye diagramas de **arquitectura por capas**, modelados con notación de **Lucidchart**. 
+
+<h2 style="border-bottom: none;">Arquitectura por Capas Tecnológicas</h2>
+
+<p align="justify">
+Este modelo organiza el sistema desde el punto de vista de las tecnologías utilizadas. La capa de Frontend (Next.js/React) se encarga de la interacción con el usuario. La capa de Backend 
+(NestJS) implementa la lógica de negocio mediante controladores, servicios y módulos. La capa de ORM (Prisma) gestiona el acceso a datos y el mapeo de entidades. Finalmente, la Base de Datos (Sqlite) asegura el almacenamiento persistente.
+</p>
+
+<div align="center">
+    <img src="docs/diagrams/ArquitecturaCapasTecn.png"
+        alt="C1 - System Context"
+        width="600"
+        style="border-radius: 12px; border: 1px solid #ccc;"
+    />
+</div>
+
