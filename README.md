@@ -24,6 +24,24 @@ Puedes comenzar a editar la página modificando los archivos del proyecto. La p�
 <br>
 <br>
 
+<h1 style="border-bottom: none;">Modelo de Base de Datos</h1>
+
+<div align="center">
+    <img src="docs/diagrams/Database-model.png"
+        alt="Diagrama de Base de Datos"
+        width="600"
+        style="border-radius: 12px; border: 1px solid #ccc;"
+    />
+</div>
+
+<p align="center">
+    📄 <a href="docs/pdfs/Database-model.pdf">Ver modelo completo en PDF</a>
+</p>
+
+***
+<br>
+<br>
+
 <h1 style="border-bottom: none;">Arquitectura del Software</h1>
 
 Este proyecto incluye diagramas en notación C4, modelados con **Structurizr DSL**
@@ -220,3 +238,13 @@ Mantener velocidad sin romper.
   <li>Numero de errores de accesibilidad por pagina.</li>
   <li>Tasa de finalizacion de tareas usando solo teclado.</li>
 </ul>
+
+***
+<br>
+<br>
+
+<h1 style="border-bottom: none;">Testing con TDD y Unit Test</h1>
+
+<p align="center">
+    📄 <a href="docs/pdfs/Unit_Test-TDD.pdf">Ver documento de pruebas</a>
+</p>
