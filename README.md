@@ -70,18 +70,45 @@ El diagrama C2 descompone el sistema principal en contenedores (Aplicación Web,
 
 Este proyecto incluye diagramas de **arquitectura por capas**, modelados con notación de **Lucidchart**. 
 
-<h2 style="border-bottom: none;">Arquitectura por Capas Tecnológicas</h2>
+<h2 style="border-bottom: none;">Arquitectura por Capas Tecnologicas</h2>
 
 <p align="justify">
-Este modelo organiza el sistema desde el punto de vista de las tecnologías utilizadas. La capa de Frontend (Next.js/React) se encarga de la interacción con el usuario. La capa de Backend 
-(NestJS) implementa la lógica de negocio mediante controladores, servicios y módulos. La capa de ORM (Prisma) gestiona el acceso a datos y el mapeo de entidades. Finalmente, la Base de Datos (Sqlite) asegura el almacenamiento persistente.
+Este modelo organiza el sistema desde el punto de vista de las tecnologias utilizadas. La capa de Frontend (Next.js/React) se encarga de la interaccion con el usuario. La capa de Backend 
+(NestJS) implementa la logica de negocio mediante controladores, servicios y modulos. La capa de ORM (Prisma) gestiona el acceso a datos y el mapeo de entidades. Finalmente, la Base de Datos (Sqlite/Postgrestsql) asegura el almacenamiento persistente.
 </p>
 
 <div align="center">
     <img src="docs/diagrams/ArquitecturaCapasTecn.png"
+        alt="C1 - System Context"V
+        width="600"
+        style="border-radius: 12px; border: 1px solid #ccc;"
+    />
+</div>
+
+<h2 style="border-bottom: none;">Arquitectura por Capas Funcionales</h2>
+
+<p align="justify">
+Este modelo representa el sistema desde el enfoque funcional y de negocio. En la capa de interaccion, se gestionan estudiantes y docentes. La capa de negocio incluye procesos clave como inscripciones, cursos, materiales, laboratorios, retroalimentaciones y calificaciones. La capa intermedia muestra las tecnologías que soportan el flujo (Next.js, NestJS y Prisma ORM). Por ultimo, la capa de sistema se apoya en los servidores y la base de datos que sostienen toda la aplicación.
+</p>
+
+<div align="center">
+    <img src="docs/diagrams/ArquitecturaCapasFun.png"
         alt="C1 - System Context"
         width="600"
         style="border-radius: 12px; border: 1px solid #ccc;"
     />
 </div>
 
+***
+
+<h2 style="border-bottom: none;">Funente de los Diagramas</h2>
+
+<p style="color:#a7a7a7">
+<i>Los diagramas puedes se editados utlizando la herramienta online de </i> https://www.lucidchart.com/pages
+</p>
+
+***
+<br>
+<br>
+
+<h1 style="border-bottom: none;">Arquitectura del Software</h1>
