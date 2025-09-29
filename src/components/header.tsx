@@ -17,6 +17,7 @@ interface HeaderProps {
 }
 
 export function Header({ user, currentView = "inicio", onViewChange, onToggleTheme, onLogout, isDark }: HeaderProps) {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   if (!user) {
@@ -57,12 +58,14 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
     <header className="w-full bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="text-2xl font-bold text-foreground">Pyson</div>
+          <a href="/" className="text-2xl font-bold text-foreground" aria-label="Ir a la página principal">
+            Pyson
+          </a>
 
           <nav className="hidden md:flex items-center space-x-8">
             <button
               onClick={() => onViewChange?.("inicio")}
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
+              className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
                 currentView === "inicio" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -71,7 +74,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
             
             <button
               onClick={() => onViewChange?.("perfil")}
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
+              className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
                 currentView === "perfil" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -80,7 +83,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
 
             <a
               href="/settings"
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
+              className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
                 currentView === "configuracion" ? "text-foreground" : "text-muted-foreground"
               }`}
               aria-label="Ir a ajustes"
@@ -90,7 +93,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
 
             <button
               onClick={onLogout}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:cursor-pointer"
             >
               Cerrar sesión
             </button>
@@ -101,7 +104,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               variant="ghost"
               size="sm"
               onClick={onToggleTheme}
-              className="w-9 h-9 p-0 hidden sm:flex"
+              className="w-9 h-9 p-0 hidden sm:flex hover:cursor-pointer"
               aria-label="Cambiar tema"
             >
               {isDark ? (
@@ -125,14 +128,49 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               )}
             </Button>
 
-            <div className="hidden md:flex items-center space-x-3" aria-label="Abrir ajustes de usuario">
-              <img
-                src={user.avatar || "/placeholder.svg?height=32&width=32"}
-                alt={user.name}
-                className="w-8 h-8 rounded-full border border-border"
-              />
-              <span className="text-sm font-medium">{user.name}</span>
-            </div>
+            <div className="relative hidden md:block">
+              <button
+                onClick={() => setIsUserMenuOpen(v => !v)}
+                className="flex items-center gap-3 focus:outline-none hover:cursor-pointer"
+                aria-haspopup="menu"
+                aria-expanded={isUserMenuOpen}
+                aria-label="Abrir menú de usuario"  
+              >
+                <img
+                  src={user.avatar || "/placeholder.svg?height=32&width=32"}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full border border-border"
+                />
+                <span className="text-sm font-medium">{user.name}</span>
+              </button>
+
+              {isUserMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50"
+                >
+                  <a
+                    href="/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="block px-4 py-2 text-sm hover:bg-secondary hover:text-foreground hover:cursor-pointer"
+                    aria-label="Ir a ajustes de perfil"
+                    role="menuitem"
+                  >
+                    Configuración
+                  </a>
+                  <button
+                    onClick={() => {
+                      onLogout?.()
+                      setIsUserMenuOpen(false)
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-secondary hover:text-foreground hover:cursor-pointer"
+                    role="menuitem"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>  
 
             <Button
               variant="ghost"
