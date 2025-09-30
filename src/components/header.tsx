@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { useEffect, useRef } from "react"
 
 interface HeaderProps {
   user?: {
@@ -19,6 +20,21 @@ interface HeaderProps {
 export function Header({ user, currentView = "inicio", onViewChange, onToggleTheme, onLogout, isDark }: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   if (!user) {
     return (
@@ -81,16 +97,6 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               Perfil
             </button>
 
-            <a
-              href="/settings"
-              className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
-                currentView === "configuracion" ? "text-foreground" : "text-muted-foreground"
-              }`}
-              aria-label="Ir a ajustes"
-            >
-              Configuración
-            </a>
-
             <button
               onClick={onLogout}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:cursor-pointer"
@@ -146,18 +152,22 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
 
               {isUserMenuOpen && (
                 <div
+                  ref={menuRef}
                   role="menu"
                   className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50"
                 >
-                  <a
-                    href="/settings"
-                    onClick={() => setIsUserMenuOpen(false)}
-                    className="block px-4 py-2 text-sm hover:bg-secondary hover:text-foreground hover:cursor-pointer"
-                    aria-label="Ir a ajustes de perfil"
-                    role="menuitem"
+                  <button
+                    onClick={() => {
+                      onViewChange?.("perfil")
+                      setIsUserMenuOpen(false)
+                    }}
+                    className={
+                      `w-full text-left px-4 py-2 text-sm hover:bg-secondary hover:text-foreground hover:cursor-pointer`
+                    }
                   >
-                    Configuración
-                  </a>
+                    Perfil
+                  </button>
+
                   <button
                     onClick={() => {
                       onLogout?.()
