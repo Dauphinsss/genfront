@@ -10,8 +10,8 @@ interface HeaderProps {
     email: string
     avatar: string
   }
-  currentView?: "inicio" | "perfil" | "configuracion"
-  onViewChange?: (view: "inicio" | "perfil" | "configuracion" ) => void
+  currentView?: "inicio" | "perfil"
+  onViewChange?: (view: "inicio" | "perfil" ) => void
   onToggleTheme?: () => void
   onLogout?: () => void // Added onLogout prop
   isDark?: boolean
@@ -222,9 +222,11 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               >
                 Inicio
               </button>
-              <a
-                href="/settings"
-                onClick={() => setIsMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  onViewChange?.("perfil")
+                  setIsMobileMenuOpen(false)
+                }}
                 className={`block w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
                   currentView === "perfil"
                     ? "text-foreground bg-secondary"
@@ -232,8 +234,8 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                 }`}
                 aria-label="Ir a ajustes de perfil"
               >
-                Perfil
-              </a>
+                Configuración
+              </button>
               <div className="flex items-center justify-between px-3 py-2">
                 <span className="text-sm font-medium text-muted-foreground">Tema</span>
                 <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0">
