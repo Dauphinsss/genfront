@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { CourseCard } from "./course-card"
-import { Header } from "./header"
-import { Plus, BookOpen } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Header } from "./header";
+import { Plus, BookOpen, GraduationCap, History } from "lucide-react";
 
 interface DashboardProps {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
-  onLogout: () => void
-  onToggleTheme?: () => void
-  isDark?: boolean
+    name: string;
+    email: string;
+    avatar: string;
+    isTeacher?: boolean;
+  };
+  onLogout: () => void;
+  onToggleTheme?: () => void;
+  isDark?: boolean;
 }
 
 const mockCourses = [
@@ -25,6 +25,7 @@ const mockCourses = [
     title: "Python Básico",
     description: "Fundamentos de Python desde cero",
     instructor: "Prof. María García",
+    instructorAvatar: "/placeholder.svg?height=40&width=40",
     students: 24,
     progress: 65,
     role: "student" as const,
@@ -35,6 +36,7 @@ const mockCourses = [
     title: "Estructuras de Datos",
     description: "Listas, diccionarios y más",
     instructor: "Prof. Carlos López",
+    instructorAvatar: "/placeholder.svg?height=40&width=40",
     students: 18,
     progress: 30,
     role: "student" as const,
@@ -45,38 +47,86 @@ const mockCourses = [
     title: "Python Avanzado",
     description: "POO y conceptos avanzados",
     instructor: "Tú",
+    instructorAvatar: "/placeholder.svg?height=40&width=40",
     students: 32,
     role: "teacher" as const,
     lastActivity: "Hace 3 horas",
   },
-]
+];
 
-export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [showJoinCourse, setShowJoinCourse] = useState(false)
-  const [courseCode, setCourseCode] = useState("")
-  const [currentView, setCurrentView] = useState<"inicio" | "perfil">("inicio")
+const mockPastCourses = [
+  {
+    id: "past-1",
+    title: "Introducción a la Programación",
+    description: "Conceptos básicos de programación",
+    instructor: "Prof. Ana Martínez",
+    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    students: 30,
+    progress: 100,
+    role: "student" as const,
+    lastActivity: "Hace 3 meses",
+    completed: true,
+  },
+  {
+    id: "past-2",
+    title: "Algoritmos I",
+    description: "Fundamentos de algoritmos",
+    instructor: "Prof. Roberto Silva",
+    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    students: 25,
+    progress: 100,
+    role: "student" as const,
+    lastActivity: "Hace 6 meses",
+    completed: true,
+  },
+];
 
-  const filteredCourses = mockCourses.filter(
-    (course) =>
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+export function Dashboard({
+  user,
+  onLogout,
+  onToggleTheme,
+  isDark,
+}: DashboardProps) {
+  const [courseCode, setCourseCode] = useState("");
+  const [currentView, setCurrentView] = useState<
+    "inicio" | "perfil" | "pasados"
+  >("inicio");
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [enrolledCourse, setEnrolledCourse] = useState<
+    (typeof mockCourses)[0] | null
+  >(null);
 
-  const studentCourses = filteredCourses.filter((c) => c.role === "student")
-  const teacherCourses = filteredCourses.filter((c) => c.role === "teacher")
+  const studentCourses = mockCourses.filter((c) => c.role === "student");
+  const teacherCourses = mockCourses.filter((c) => c.role === "teacher");
 
   const handleEnterCourse = (courseId: string) => {
-    console.log("[v0] Entering course:", courseId)
-  }
+    setSelectedCourse(courseId);
+  };
 
   const handleJoinCourse = () => {
-    if (courseCode.trim()) {
-      console.log("[v0] Joining course with code:", courseCode)
-      setCourseCode("")
-      setShowJoinCourse(false)
+    if (courseCode.trim() && !enrolledCourse) {
+      const newCourse = {
+        id: Date.now().toString(),
+        title: "Nuevo Curso",
+        description: "Curso al que te acabas de unir",
+        instructor: "Prof. Juan Pérez",
+        instructorAvatar: "/placeholder.svg?height=40&width=40",
+        students: 15,
+        progress: 0,
+        role: "student" as const,
+        lastActivity: "Ahora",
+      };
+      setEnrolledCourse(newCourse);
+      setSelectedCourse(newCourse.id);
+      setCourseCode("");
     }
-  }
+  };
+
+  const currentCourse = selectedCourse
+    ? [...mockCourses, ...(enrolledCourse ? [enrolledCourse] : [])].find(
+        (c) => c.id === selectedCourse
+      )
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +135,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
         currentView={currentView}
         onViewChange={setCurrentView}
         onToggleTheme={onToggleTheme}
-        onLogout={onLogout} // Pass onLogout to Header
+        onLogout={onLogout}
         isDark={isDark}
       />
 
@@ -102,32 +152,61 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                   />
                   <div>
                     <h2 className="text-xl text-foreground">{user.name}</h2>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center p-4 bg-secondary rounded-lg">
-                    <p className="text-3xl font-bold text-foreground">{studentCourses.length}</p>
-                    <p className="text-sm text-muted-foreground">Cursos como estudiante</p>
+                    <p className="text-3xl font-bold text-foreground">
+                      {user.isTeacher
+                        ? studentCourses.length
+                        : enrolledCourse
+                        ? 1
+                        : 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.isTeacher
+                        ? "Cursos como estudiante"
+                        : "Cursos inscritos"}
+                    </p>
                   </div>
-                  <div className="text-center p-4 bg-secondary rounded-lg">
-                    <p className="text-3xl font-bold text-foreground">{teacherCourses.length}</p>
-                    <p className="text-sm text-muted-foreground">Cursos como docente</p>
-                  </div>
+                  {user.isTeacher && (
+                    <div className="text-center p-4 bg-secondary rounded-lg">
+                      <p className="text-3xl font-bold text-foreground">
+                        {teacherCourses.length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Cursos como docente
+                      </p>
+                    </div>
+                  )}
                   <div className="text-center p-4 bg-secondary rounded-lg">
                     <p className="text-3xl font-bold text-green-600">
-                      {Math.round(
-                        studentCourses.reduce((acc, course) => acc + (course.progress || 0), 0) / studentCourses.length,
-                      ) || 0}
+                      {user.isTeacher
+                        ? Math.round(
+                            studentCourses.reduce(
+                              (acc, course) => acc + (course.progress || 0),
+                              0
+                            ) / studentCourses.length
+                          ) || 0
+                        : enrolledCourse?.progress || 0}
                       %
                     </p>
-                    <p className="text-sm text-muted-foreground">Progreso promedio</p>
+                    <p className="text-sm text-muted-foreground">
+                      Progreso promedio
+                    </p>
                   </div>
                 </div>
                 <div className="mt-6 pt-6 border-t border-border">
-                  <Button variant="outline" onClick={onLogout} className="w-full rounded-lg bg-transparent">
+                  <Button
+                    variant="outline"
+                    onClick={onLogout}
+                    className="w-full rounded-lg bg-transparent"
+                  >
                     Cerrar sesión
                   </Button>
                 </div>
@@ -136,86 +215,214 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
           </div>
         )}
 
+        {currentView === "pasados" && (
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-2 text-foreground">
+                Cursos pasados
+              </h2>
+              <p className="text-muted-foreground">
+                Cursos que completaste anteriormente
+              </p>
+            </div>
+
+            {mockPastCourses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mockPastCourses.map((course) => (
+                  <Card
+                    key={course.id}
+                    className="border-border hover:border-foreground/20 transition-colors"
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg">{course.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {course.description}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3 mb-4">
+                        <img
+                          src={course.instructorAvatar || "/placeholder.svg"}
+                          alt={course.instructor}
+                          className="w-8 h-8 rounded-full border border-border"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            {course.instructor}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {course.lastActivity}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-green-600 font-semibold">
+                          Completado
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {course.progress}%
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="border-border text-center py-12">
+                <CardContent>
+                  <History className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">
+                    No hay cursos pasados
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Aún no has completado ningún curso
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
         {currentView === "inicio" && (
           <>
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2 text-foreground">Hola, {user.name}</h2>
-              <p className="text-muted-foreground">Tus cursos de programación</p>
-            </div>
+            {!user.isTeacher && !enrolledCourse && (
+              <div className="max-w-2xl mx-auto">
+                <div className="mb-8 text-center">
+                  <h2 className="text-3xl font-bold mb-2 text-foreground">
+                    Hola, {user.name.split(" ")[0]}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Únete a un curso para comenzar a aprender
+                  </p>
+                </div>
 
-            <div className="flex justify-end mb-6">
-              <Button
-                onClick={() => setShowJoinCourse(!showJoinCourse)}
-                className="rounded-lg bg-foreground text-background hover:bg-foreground/90"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Unirse a curso
-              </Button>
-            </div>
+                <Card className="border-border text-center py-12">
+                  <CardContent className="space-y-6">
+                    <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto">
+                      <BookOpen className="w-10 h-10 text-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2 text-foreground">
+                        Unirse a un curso
+                      </h3>
+                      <p className="text-muted-foreground mb-6">
+                        Ingresa el código que te proporcionó tu instructor para
+                        unirte a un curso
+                      </p>
+                    </div>
+                    <div className="max-w-md mx-auto space-y-4">
+                      <Input
+                        placeholder="Código del curso"
+                        value={courseCode}
+                        onChange={(e) =>
+                          setCourseCode(e.target.value.toUpperCase())
+                        }
+                        className="text-center text-lg rounded-lg h-12"
+                      />
+                      <Button
+                        onClick={handleJoinCourse}
+                        disabled={!courseCode.trim()}
+                        size="lg"
+                        className="w-full rounded-lg bg-foreground text-background hover:bg-foreground/90"
+                      >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Unirse
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {showJoinCourse && (
-              <Card className="mb-8 border-border">
-                <CardContent className="pt-6">
-                  <div className="flex gap-4">
-                    <Input
-                      placeholder="Código del curso"
-                      value={courseCode}
-                      onChange={(e) => setCourseCode(e.target.value.toUpperCase())}
-                      className="flex-1 rounded-lg"
-                    />
-                    <Button
-                      onClick={handleJoinCourse}
-                      disabled={!courseCode.trim()}
-                      className="rounded-lg bg-foreground text-background hover:bg-foreground/90"
-                    >
-                      Unirse
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {filteredCourses.length === 0 && (
-              <Card className="text-center py-12 border-border">
-                <CardContent>
-                  <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2 text-foreground">No tienes cursos</h3>
-                  <p className="text-muted-foreground mb-6">Únete a tu primer curso con el código de tu instructor</p>
+                <div className="mt-6 text-center">
                   <Button
-                    onClick={() => setShowJoinCourse(true)}
-                    className="rounded-lg bg-foreground text-background hover:bg-foreground/90"
+                    variant="ghost"
+                    onClick={() => setCurrentView("pasados")}
+                    className="rounded-lg hover:bg-secondary"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Unirse a un curso
+                    <History className="w-4 h-4 mr-2" />
+                    Ver cursos pasados
                   </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {studentCourses.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Mis cursos</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {studentCourses.map((course) => (
-                    <CourseCard key={course.id} course={course} onEnter={handleEnterCourse} />
-                  ))}
                 </div>
               </div>
             )}
 
-            {teacherCourses.length > 0 && (
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Mis clases</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {teacherCourses.map((course) => (
-                    <CourseCard key={course.id} course={course} onEnter={handleEnterCourse} />
-                  ))}
+            {!user.isTeacher && enrolledCourse && (
+              <div className="max-w-4xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold mb-2 text-foreground">
+                    Hola, {user.name.split(" ")[0]}
+                  </h2>
+                  <p className="text-muted-foreground">Tu curso actual</p>
                 </div>
+
+                <Card className="border-border">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-2xl mb-2">
+                          {enrolledCourse.title}
+                        </CardTitle>
+                        <p className="text-muted-foreground">
+                          {enrolledCourse.description}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center gap-4 p-4 bg-secondary rounded-lg">
+                      <img
+                        src={
+                          enrolledCourse.instructorAvatar || "/placeholder.svg"
+                        }
+                        alt={enrolledCourse.instructor}
+                        className="w-12 h-12 rounded-full border border-border"
+                      />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Docente</p>
+                        <p className="font-semibold text-foreground">
+                          {enrolledCourse.instructor}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+                      <GraduationCap className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold mb-2 text-foreground">
+                        Curso vacío
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Aún no se ha añadido material a este curso. El docente
+                        agregará contenido pronto.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="mt-6 text-center">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setCurrentView("pasados")}
+                    className="rounded-lg hover:bg-secondary"
+                  >
+                    <History className="w-4 h-4 mr-2" />
+                    Ver cursos pasados
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {user.isTeacher && (
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold mb-2 text-foreground">
+                  Hola, {user.name.split(" ")[0]}
+                </h2>
+                <p className="text-muted-foreground">
+                  Tus cursos de programación
+                </p>
               </div>
             )}
           </>
         )}
       </main>
     </div>
-  )
+  );
 }

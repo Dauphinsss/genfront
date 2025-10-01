@@ -1,23 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   user?: {
-    name: string
-    email: string
-    avatar: string
-  }
-  currentView?: "inicio" | "perfil"
-  onViewChange?: (view: "inicio" | "perfil") => void
-  onToggleTheme?: () => void
-  onLogout?: () => void // Added onLogout prop
-  isDark?: boolean
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  currentView?: "inicio" | "perfil" | "pasados";
+  onViewChange?: (view: "inicio" | "perfil" | "pasados") => void;
+  onToggleTheme?: () => void;
+  onLogout?: () => void; // Added onLogout prop
+  isDark?: boolean;
 }
 
-export function Header({ user, currentView = "inicio", onViewChange, onToggleTheme, onLogout, isDark }: HeaderProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export function Header({
+  user,
+  currentView = "inicio",
+  onViewChange,
+  onToggleTheme,
+  onLogout,
+  isDark,
+}: HeaderProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Filtrar currentView para mostrar solo las opciones del menú
+  const menuCurrentView = currentView === "pasados" ? "inicio" : currentView;
 
   if (!user) {
     return (
@@ -26,9 +36,19 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
           <div className="flex items-center justify-between h-16">
             <div className="text-2xl font-bold text-foreground">Pyson</div>
 
-            <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleTheme}
+              className="w-9 h-9 p-0"
+            >
               {isDark ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -37,7 +57,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                   />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -50,7 +75,7 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
           </div>
         </div>
       </header>
-    )
+    );
   }
 
   return (
@@ -63,7 +88,9 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
             <button
               onClick={() => onViewChange?.("inicio")}
               className={`text-sm font-medium transition-colors hover:text-foreground ${
-                currentView === "inicio" ? "text-foreground" : "text-muted-foreground"
+                menuCurrentView === "inicio"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               Inicio
@@ -71,7 +98,9 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
             <button
               onClick={() => onViewChange?.("perfil")}
               className={`text-sm font-medium transition-colors hover:text-foreground ${
-                currentView === "perfil" ? "text-foreground" : "text-muted-foreground"
+                menuCurrentView === "perfil"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               Perfil
@@ -85,9 +114,19 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
           </nav>
 
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0 hidden sm:flex">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleTheme}
+              className="w-9 h-9 p-0 hidden sm:flex"
+            >
               {isDark ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -96,7 +135,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                   />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -122,8 +166,18 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden w-9 h-9 p-0"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </Button>
           </div>
@@ -142,11 +196,11 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               </div>
               <button
                 onClick={() => {
-                  onViewChange?.("inicio")
-                  setIsMobileMenuOpen(false)
+                  onViewChange?.("inicio");
+                  setIsMobileMenuOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                  currentView === "inicio"
+                  menuCurrentView === "inicio"
                     ? "text-foreground bg-secondary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
@@ -155,11 +209,11 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               </button>
               <button
                 onClick={() => {
-                  onViewChange?.("perfil")
-                  setIsMobileMenuOpen(false)
+                  onViewChange?.("perfil");
+                  setIsMobileMenuOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                  currentView === "perfil"
+                  menuCurrentView === "perfil"
                     ? "text-foreground bg-secondary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
@@ -167,10 +221,22 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                 Perfil
               </button>
               <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-sm font-medium text-muted-foreground">Tema</span>
-                <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Tema
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleTheme}
+                  className="w-9 h-9 p-0"
+                >
                   {isDark ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -179,7 +245,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                       />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -192,8 +263,8 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               </div>
               <button
                 onClick={() => {
-                  onLogout?.()
-                  setIsMobileMenuOpen(false)
+                  onLogout?.();
+                  setIsMobileMenuOpen(false);
                 }}
                 className="block w-full text-left px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
@@ -204,5 +275,5 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
         )}
       </div>
     </header>
-  )
+  );
 }
