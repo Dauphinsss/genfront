@@ -25,17 +25,14 @@ async function createTopicAPI({
   const res = await fetch(`${API}/api/topics`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // si tu backend usa cookies/sesión:
-    // credentials: "include",
+
     body: JSON.stringify({
       courseId,  
       title,
       kind,
-      // evita mandar string vacío si el backend valida "required & non-empty"
       text: kind === "TEXT" ? (text?.trim() || undefined) : undefined,
       imageUrl: kind === "IMAGE" ? imageUrl : undefined,
-      // si tu backend requiere courseId en el body además del path, inclúyelo:
-      // courseId
+
     }),
   });
 
