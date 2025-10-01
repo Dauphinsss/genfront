@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Clock, ChevronRight } from "lucide-react";
@@ -28,6 +29,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, onEnter }: CourseCardProps) {
+  const router = useRouter();
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/20">
       <CardHeader className="pb-3">
@@ -83,7 +85,11 @@ export function CourseCard({ course, onEnter }: CourseCardProps) {
         )}
 
         <Button
-          onClick={() => onEnter(course.id)}
+          onClick={() => {
+            if(course.role === "teacher") {
+              router.push(`/teacher/courses/${course.id}/topics`);
+          }
+        }}
           className="w-full bg-secondary text-primary
           group-hover:bg-primary group-hover:text-secondary transition-colors"
         >
@@ -91,6 +97,7 @@ export function CourseCard({ course, onEnter }: CourseCardProps) {
           Entrar al curso
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
+        
       </CardContent>
     </Card>
   );
