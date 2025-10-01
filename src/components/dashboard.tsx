@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Header } from "./header";
 import { Plus, BookOpen, GraduationCap, History } from "lucide-react";
+import axios from "axios";
 
 interface DashboardProps {
   user: {
@@ -103,22 +104,43 @@ export function Dashboard({
     setSelectedCourse(courseId);
   };
 
-  const handleJoinCourse = () => {
+  const handleJoinCourse = async () => {
     if (courseCode.trim() && !enrolledCourse) {
-      const newCourse = {
-        id: Date.now().toString(),
-        title: "Nuevo Curso",
-        description: "Curso al que te acabas de unir",
-        instructor: "Prof. Juan Pérez",
-        instructorAvatar: "/placeholder.svg?height=40&width=40",
-        students: 15,
-        progress: 0,
-        role: "student" as const,
-        lastActivity: "Ahora",
-      };
-      setEnrolledCourse(newCourse);
-      setSelectedCourse(newCourse.id);
-      setCourseCode("");
+      try {
+        const token = localStorage.getItem("pyson_token");
+        
+        const response = await axios.post('http://localhost:4000/courses/join', 
+          {
+            courseCode: courseCode.trim()
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        console.log('Inscripción exitosa:', response.data);
+        
+        const newCourse = {
+          id: response.data.courseId || Date.now().toString(),
+          title: response.data.title || "Nuevo Curso",
+          description: response.data.description || "Curso al que te acabas de unir",
+          instructor: response.data.instructor || "Prof. Juan Pérez",
+          instructorAvatar: "/placeholder.svg?height=40&width=40",
+          students: response.data.students || 15,
+          progress: 0,
+          role: "student" as const,
+          lastActivity: "Ahora",
+        };
+        
+        setEnrolledCourse(newCourse);
+        setSelectedCourse(newCourse.id);
+        setCourseCode("");
+      } catch (error) {
+        console.error('Error:', axios.isAxiosError(error) ? error.response?.data?.message : error);
+      }
     }
   };
 

@@ -4,25 +4,19 @@ const nextConfig: NextConfig = {
   typescript: {
     tsconfigPath: "./tsconfig.json",
   },
+
   experimental: {
     optimizePackageImports: ["@radix-ui/react-icons", "lucide-react"],
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
+  },
+
+  turbopack: {
+
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"], 
+        as: "component",
       },
     },
-  },
-  webpack: (config) => {
-    config.cache = {
-      type: "filesystem",
-      buildDependencies: {
-        config: [__filename],
-      },
-    };
-    return config;
   },
 };
 

@@ -1,28 +1,32 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 
 const steps = [
   {
     step: "01",
     title: "Regístrate gratis",
-    description: "Crea tu cuenta en segundos y accede a todo el contenido básico sin costo.",
+    description:
+      "Crea tu cuenta en segundos y accede a todo el contenido básico sin costo.",
   },
   {
     step: "02",
     title: "Elige tu ruta",
-    description: "Selecciona una ruta de aprendizaje basada en tu nivel y objetivos.",
+    description:
+      "Selecciona una ruta de aprendizaje basada en tu nivel y objetivos.",
   },
   {
     step: "03",
     title: "Practica y aprende",
-    description: "Completa ejercicios interactivos y proyectos prácticos paso a paso.",
+    description:
+      "Completa ejercicios interactivos y proyectos prácticos paso a paso.",
   },
   {
     step: "04",
     title: "Construye proyectos",
-    description: "Aplica tus conocimientos en proyectos reales y construye tu portafolio.",
+    description:
+      "Aplica tus conocimientos en proyectos reales y construye tu portafolio.",
   },
-]
+];
 
 export function HowItWorksSection() {
   return (
@@ -31,7 +35,9 @@ export function HowItWorksSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
             Cómo funciona{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Pyson</span>
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Pyson
+            </span>
           </h2>
           <p className="text-xl text-muted-foreground text-pretty max-w-3xl mx-auto">
             Un proceso simple y efectivo para dominar Python desde cero
@@ -47,7 +53,9 @@ export function HowItWorksSection() {
                     {step.step}
                   </div>
                   <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                  <p className="text-muted-foreground text-pretty">{step.description}</p>
+                  <p className="text-muted-foreground text-pretty">
+                    {step.description}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -61,5 +69,5 @@ export function HowItWorksSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
