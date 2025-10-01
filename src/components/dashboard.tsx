@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -57,23 +57,119 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
   const [courseCode, setCourseCode] = useState("")
   const [currentView, setCurrentView] = useState<"inicio" | "perfil">("inicio")
   
-  // Estados para configuración
+  const [currentUser, setCurrentUser] = useState(user)
   const [displayName, setDisplayName] = useState(user.name)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(true)
   const [language, setLanguage] = useState("es")
   const [privacy, setPrivacy] = useState("public")
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  
+  // Estados originales para cancelar cambios
+  const [originalUser, setOriginalUser] = useState(user)
+  const [originalDisplayName, setOriginalDisplayName] = useState(user.name)
+  const [originalEmailNotifications, setOriginalEmailNotifications] = useState(true)
+  const [originalPushNotifications, setOriginalPushNotifications] = useState(true)
+  const [originalLanguage, setOriginalLanguage] = useState("es")
+  const [originalPrivacy, setOriginalPrivacy] = useState("public")
 
-  const onPickAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (currentView === "perfil") {
+      setOriginalUser(currentUser);
+      setOriginalDisplayName(displayName);
+      setOriginalEmailNotifications(emailNotifications);
+      setOriginalPushNotifications(pushNotifications);
+      setOriginalLanguage(language);
+      setOriginalPrivacy(privacy);
+    }
+  }, [currentView]);
+
+  const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!/^image\/(png|jpeg)$/.test(file.type) || file.size > 2 * 1024 * 1024) {
-      alert("Por favor selecciona una imagen PNG o JPEG menor a 2MB.");
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      alert('Solo se permiten imágenes JPG, PNG, WebP o GIF');
       return;
     }
+    
+    if (file.size > 10 * 1024 * 1024) {
+      alert('La imagen debe ser menor a 10MB');
+      return;
+    }
+
     setAvatarPreview(URL.createObjectURL(file));
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const token = localStorage.getItem('pyson_token');
+      
+      const response = await fetch('http://localhost:4000/upload/avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setCurrentUser(result.data.user);
+        localStorage.setItem('pyson_user', JSON.stringify(result.data.user));
+        setOriginalUser(result.data.user);
+        setAvatarPreview(null);
+      } else {
+        alert('Error al subir avatar: ' + result.message);
+        setAvatarPreview(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión al subir avatar');
+      setAvatarPreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Guardar cambios y volver al inicio
+  const handleSaveChanges = async () => {
+    setSaving(true);
+    
+    try {
+      setOriginalUser(currentUser);
+      setOriginalDisplayName(displayName);
+      setOriginalEmailNotifications(emailNotifications);
+      setOriginalPushNotifications(pushNotifications);
+      setOriginalLanguage(language);
+      setOriginalPrivacy(privacy);
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setCurrentView("inicio");
+      
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      alert('Error al guardar los cambios');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Restaurar valores originales
+  const handleCancelChanges = () => {
+    setCurrentUser(originalUser);
+    setDisplayName(originalDisplayName);
+    setEmailNotifications(originalEmailNotifications);
+    setPushNotifications(originalPushNotifications);
+    setLanguage(originalLanguage);
+    setPrivacy(originalPrivacy);
+    setAvatarPreview(null);
   };
 
   const filteredCourses = mockCourses.filter(
@@ -100,18 +196,17 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
   return (
     <div className="min-h-screen bg-background">
       <Header
-        user={user}
+        user={currentUser}
         currentView={currentView}
         onViewChange={setCurrentView}
         onToggleTheme={onToggleTheme}
-        onLogout={onLogout} // Pass onLogout to Header
+        onLogout={onLogout}
         isDark={isDark}
       />
 
       <main className="container mx-auto px-4 py-8">
         {currentView === "perfil" && (
           <div className="max-w-4xl mx-auto space-y-8">
-            {/* Header del Perfil */}
             <div>
               <h1 className="text-3xl font-bold text-foreground">Mi Perfil</h1>
               <p className="text-muted-foreground mt-2">Administra tu cuenta y preferencias</p>
@@ -122,13 +217,13 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   <img
-                    src={avatarPreview || user.avatar || "/placeholder.svg?height=48&width=48"}
-                    alt={user.name}
-                    className="w-12 h-12 rounded-full border border-border"
+                    src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=48&width=48"}
+                    alt={currentUser.name}
+                    className="w-12 h-12 rounded-full border border-border object-cover"
                   />
                   <div>
                     <h2 className="text-xl text-foreground">{displayName}</h2>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">{currentUser.email}</p>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -164,19 +259,30 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-4">
                   <img
-                    src={avatarPreview || user.avatar || "/placeholder.svg?height=80&width=80"}
+                    src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=80&width=80"}
                     alt="Avatar"
                     className="w-20 h-20 rounded-full object-cover border border-border"
                   />
                   <div>
                     <label
                       htmlFor="file"
-                      className="inline-flex items-center px-3 py-2 rounded-md border cursor-pointer hover:bg-secondary text-sm"
+                      className={`inline-flex items-center px-3 py-2 rounded-md border cursor-pointer hover:bg-secondary text-sm ${
+                        uploading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      Cambiar foto
+                      {uploading ? 'Subiendo...' : 'Cambiar foto'}
                     </label>
-                    <input id="file" type="file" accept="image/png,image/jpeg" className="hidden" onChange={onPickAvatar} />
-                    <p className="text-xs text-muted-foreground mt-1">PNG/JPG, máx. 2MB</p>
+                    <input 
+                      id="file" 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={onPickAvatar}
+                      disabled={uploading}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG, WebP o GIF, máx. 10MB
+                    </p>
                   </div>
                 </div>
 
@@ -196,7 +302,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                     <Input
                       id="email"
                       type="email"
-                      value={user.email}
+                      value={currentUser.email}
                       disabled
                       className="bg-muted text-muted-foreground"
                     />
@@ -206,13 +312,18 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                 <div className="flex items-center gap-3">
                   <Button
                     disabled={saving}
-                    onClick={() => {
-                      setSaving(true)
-                      setTimeout(() => setSaving(false), 2000)
-                    }}
-                    className="bg-foreground text-background hover:bg-foreground/90"
+                    onClick={handleSaveChanges}
+                    className="bg-foreground text-background hover:bg-foreground/70 cursor-pointer"
                   >
                     {saving ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelChanges}
+                    className="border-border hover:bg-secondary cursor-pointer"
+                  >
+                    Cancelar cambios
                   </Button>
                 </div>
               </CardContent>
@@ -253,8 +364,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                     className="w-full rounded-md border px-3 py-2 bg-background"
                   >
                     <option value="es">Español</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
+                    <option value="des" disabled style={{ color: "#6b7280" }}>Idiomas adicionales no disponibles</option>
                   </select>
                 </div>
               </CardContent>
@@ -327,12 +437,6 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                     <option value="private">Privado</option>
                   </select>
                 </div>
-
-                <div className="pt-4 border-t border-border">
-                  <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                    Cambiar contraseña
-                  </Button>
-                </div>
               </CardContent>
             </Card>
 
@@ -356,7 +460,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
         {currentView === "inicio" && (
           <>
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2 text-foreground">Hola, {user.name}</h2>
+              <h2 className="text-3xl font-bold mb-2 text-foreground">Hola, {currentUser.name}</h2>
               <p className="text-muted-foreground">Tus cursos de programación</p>
             </div>
 
