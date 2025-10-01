@@ -1,20 +1,17 @@
 "use client";
 
 import { Dashboard } from "@/components/dashboard";
+import { AdminDashboard } from "@/components/admin-dashboard";
 import { Header } from "@/components/header";
 import { LoginSection } from "@/components/login-section";
 import ParticleBackground from "@/components/particleBackground";
 import TextCircleFollower from "@/components/textCircleFollower";
 import { useState, useEffect } from "react";
-
-interface User {
-  name: string;
-  email: string;
-  avatar: string;
-}
+import { UserWithRoles } from "@/types/user";
+import { getPrimaryRole, isAdmin } from "@/lib/roles";
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithRoles | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -26,7 +23,37 @@ export default function Home() {
 
       const savedUser = localStorage.getItem("pyson_user");
       if (savedUser) {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        // Simular roles para demo - en producción esto vendría del backend
+        const userWithRoles: UserWithRoles = {
+          ...parsedUser,
+          user_id: parsedUser.id || "1",
+          first_name: parsedUser.name?.split(" ")[0] || "",
+          last_name: parsedUser.name?.split(" ").slice(1).join(" ") || "",
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          roles: [
+            // Simular rol de administrador para demo
+            {
+              role_id: "3",
+              name: "administrador",
+              description: "Administrador del sistema",
+              created_at: "2024-01-01T00:00:00Z",
+              updated_at: "2024-01-01T00:00:00Z"
+            }
+          ],
+          primaryRole: getPrimaryRole([
+            {
+              role_id: "3",
+              name: "administrador",
+              description: "Administrador del sistema",
+              created_at: "2024-01-01T00:00:00Z",
+              updated_at: "2024-01-01T00:00:00Z"
+            }
+          ])
+        };
+        setUser(userWithRoles);
       }
 
       const savedTheme = localStorage.getItem("pyson_theme");
@@ -78,6 +105,19 @@ export default function Home() {
   }
 
   if (user) {
+    // Verificar si es administrador y mostrar panel de admin
+    if (isAdmin(user)) {
+      return (
+        <AdminDashboard
+          user={user}
+          onLogout={handleLogout}
+          onToggleTheme={toggleTheme}
+          isDark={isDark}
+        />
+      );
+    }
+
+    // Dashboard normal para estudiantes y docentes
     return (
       <Dashboard
         user={user}

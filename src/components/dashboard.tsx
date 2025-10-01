@@ -8,12 +8,10 @@ import { CourseCard } from "./course-card"
 import { Header } from "./header"
 import { Plus, BookOpen } from "lucide-react"
 
+import { UserWithRoles } from "@/types/user";
+
 interface DashboardProps {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
+  user: UserWithRoles
   onLogout: () => void
   onToggleTheme?: () => void
   isDark?: boolean
