@@ -90,8 +90,7 @@ export function CourseCard({ course, onEnter }: CourseCardProps) {
               router.push(`/teacher/courses/${course.id}/topics`);
           }
         }}
-          className="w-full bg-secondary text-primary
-          group-hover:bg-primary group-hover:text-secondary transition-colors"
+          className="w-full bg-secondary text-primary group-hover:bg-primary group-hover:text-secondary transition-colors"
         >
           <BookOpen className="w-4 h-4 mr-2" />
           Entrar al curso
