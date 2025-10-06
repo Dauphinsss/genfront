@@ -33,7 +33,7 @@ export default function BlockRow({
         +
       </button>
 
-      {/* Renderizado  */}
+      {/* */}
       {block.kind === "TEXT" ? (
         <TextBlockComp
           block={block}
