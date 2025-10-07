@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { CourseCard } from "./course-card"
 import { Header } from "./header"
 import { Plus, BookOpen } from "lucide-react"
+import { getProfile, updateProfile } from "@/services/profile"
 
 interface DashboardProps {
   user: {
@@ -19,37 +20,7 @@ interface DashboardProps {
   isDark?: boolean
 }
 
-const mockCourses = [
-  {
-    id: "1",
-    title: "Python Básico",
-    description: "Fundamentos de Python desde cero",
-    instructor: "Prof. María García",
-    students: 24,
-    progress: 65,
-    role: "student" as const,
-    lastActivity: "Hace 2 días",
-  },
-  {
-    id: "2",
-    title: "Estructuras de Datos",
-    description: "Listas, diccionarios y más",
-    instructor: "Prof. Carlos López",
-    students: 18,
-    progress: 30,
-    role: "student" as const,
-    lastActivity: "Hace 1 semana",
-  },
-  {
-    id: "3",
-    title: "Python Avanzado",
-    description: "POO y conceptos avanzados",
-    instructor: "Tú",
-    students: 32,
-    role: "teacher" as const,
-    lastActivity: "Hace 3 horas",
-  },
-]
+const mockCourses: any[] = []
 
 export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState("")
@@ -74,6 +45,15 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
   const [originalPushNotifications, setOriginalPushNotifications] = useState(true)
   const [originalLanguage, setOriginalLanguage] = useState("es")
   const [originalPrivacy, setOriginalPrivacy] = useState("public")
+
+  const [profile, setProfile] = useState(null);
+  const token = localStorage.getItem('pyson_token') || '';
+
+  useEffect(() => {
+    if (token) {
+      getProfile(token).then(data => setProfile(data)).catch(err => console.error(err)); 
+    }
+  }, [token]);
 
   useEffect(() => {
     if (currentView === "perfil") {
@@ -141,15 +121,15 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
   // Guardar cambios y volver al inicio
   const handleSaveChanges = async () => {
     setSaving(true);
-    
+    const updatedProfile = await updateProfile(token, { name: displayName });
+    setCurrentUser(updatedProfile);
+    setDisplayName(updatedProfile.name);
+    localStorage.setItem('pyson_user', JSON.stringify(updatedProfile));
+
     try {
       setOriginalUser(currentUser);
       setOriginalDisplayName(displayName);
-      setOriginalEmailNotifications(emailNotifications);
-      setOriginalPushNotifications(pushNotifications);
-      setOriginalLanguage(language);
-      setOriginalPrivacy(privacy);
-      
+
       await new Promise(resolve => setTimeout(resolve, 1000));
       setCurrentView("inicio");
       
@@ -160,16 +140,10 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
       setSaving(false);
     }
   };
-
-  // Restaurar valores originales
+  
   const handleCancelChanges = () => {
     setCurrentUser(originalUser);
     setDisplayName(originalDisplayName);
-    setEmailNotifications(originalEmailNotifications);
-    setPushNotifications(originalPushNotifications);
-    setLanguage(originalLanguage);
-    setPrivacy(originalPrivacy);
-    setAvatarPreview(null);
   };
 
   const filteredCourses = mockCourses.filter(
@@ -212,104 +186,53 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
               <p className="text-muted-foreground mt-2">Administra tu cuenta y preferencias</p>
             </div>
 
-            {/* Estadísticas del Usuario */}
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <img
-                    src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=48&width=48"}
-                    alt={currentUser.name}
-                    className="w-12 h-12 rounded-full border border-border object-cover"
+            {/* Información Personal */}
+            <Card className="border-border mx-auto">
+              <CardHeader className="flex flex-col items-center pb-2">
+                <img
+                  src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=80&width=80"}
+                  alt="Avatar"
+                  className="w-20 h-20 rounded-full object-cover border border-border mb-2"
+                />
+                <label
+                  htmlFor="file"
+                  className={`block text-xs px-3 py-1 rounded bg-foreground text-background cursor-pointer hover:bg-foreground/90 mb-1 ${
+                    uploading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {uploading ? "Subiendo..." : "Cambiar foto"}
+                  <input
+                    id="file"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={onPickAvatar}
+                    disabled={uploading}
                   />
-                  <div>
-                    <h2 className="text-xl text-foreground">{displayName}</h2>
-                    <p className="text-sm text-muted-foreground">{currentUser.email}</p>
-                  </div>
-                </CardTitle>
+                </label>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-4 bg-secondary rounded-lg">
-                    <p className="text-3xl font-bold text-foreground">{studentCourses.length}</p>
-                    <p className="text-sm text-muted-foreground">Cursos como estudiante</p>
-                  </div>
-                  <div className="text-center p-4 bg-secondary rounded-lg">
-                    <p className="text-3xl font-bold text-foreground">{teacherCourses.length}</p>
-                    <p className="text-sm text-muted-foreground">Cursos como docente</p>
-                  </div>
-                  <div className="text-center p-4 bg-secondary rounded-lg">
-                    <p className="text-3xl font-bold text-green-600">
-                      {Math.round(
-                        studentCourses.reduce((acc, course) => acc + (course.progress || 0), 0) / studentCourses.length,
-                      ) || 0}
-                      %
-                    </p>
-                    <p className="text-sm text-muted-foreground">Progreso promedio</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Información Personal */}
-            <Card className="border-border">
-              <CardHeader>
-                <CardTitle>Información Personal</CardTitle>
-                <p className="text-sm text-muted-foreground">Actualiza tu información de perfil</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=80&width=80"}
-                    alt="Avatar"
-                    className="w-20 h-20 rounded-full object-cover border border-border"
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">Nombre para mostrar</label>
+                  <Input
+                    id="name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Escribe tu nombre"
+                    className="w-full"
                   />
-                  <div>
-                    <label
-                      htmlFor="file"
-                      className={`inline-flex items-center px-3 py-2 rounded-md border cursor-pointer hover:bg-secondary text-sm ${
-                        uploading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {uploading ? 'Subiendo...' : 'Cambiar foto'}
-                    </label>
-                    <input 
-                      id="file" 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={onPickAvatar}
-                      disabled={uploading}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      JPG, PNG, WebP o GIF, máx. 10MB
-                    </p>
-                  </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label htmlFor="name" className="text-sm font-medium">Nombre para mostrar</label>
-                    <Input
-                      id="name"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Escribe tu nombre"
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <label htmlFor="email" className="text-sm font-medium">Correo electrónico</label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={currentUser.email}
-                      disabled
-                      className="bg-muted text-muted-foreground"
-                    />
-                  </div>
+                <div className="mb-6">
+                  <label htmlFor="email" className="block text-sm font-medium mb-1">Correo electrónico</label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={currentUser.email}
+                    disabled
+                    className="w-full bg-muted text-muted-foreground"
+                  />
                 </div>
-
-                <div className="flex items-center gap-3">
+                <div className="flex justify-end gap-2">
                   <Button
                     disabled={saving}
                     onClick={handleSaveChanges}
@@ -317,7 +240,6 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                   >
                     {saving ? "Guardando..." : "Guardar cambios"}
                   </Button>
-                  
                   <Button
                     variant="outline"
                     onClick={handleCancelChanges}
@@ -328,6 +250,7 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
                 </div>
               </CardContent>
             </Card>
+
 
             {/* Cerrar Sesión */}
             <Card className="border-border">
