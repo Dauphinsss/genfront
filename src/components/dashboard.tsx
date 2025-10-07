@@ -8,6 +8,7 @@ import { CourseCard } from "./course-card"
 import { Header } from "./header"
 import { Plus, BookOpen } from "lucide-react"
 import { getProfile, updateProfile } from "@/services/profile"
+import axios from "axios"
 
 interface DashboardProps {
   user: {
@@ -90,25 +91,33 @@ export function Dashboard({ user, onLogout, onToggleTheme, isDark }: DashboardPr
 
       const token = localStorage.getItem('pyson_token');
       
-      const response = await fetch('http://localhost:4000/upload/avatar', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
+      const response = await axios.post(
+        'http://localhost:4000/api/me/avatar',
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
 
-      const result = await response.json();
+      const result = response.data;
       
-      if (result.success) {
-        setCurrentUser(result.data.user);
-        localStorage.setItem('pyson_user', JSON.stringify(result.data.user));
-        setOriginalUser(result.data.user);
+      if (result.success && result.user) {
+        setCurrentUser((prev) => ({
+          ...prev,
+          avatar: result.user.avatar,
+        }));
+        localStorage.setItem('pyson_user', JSON.stringify({
+          ...currentUser,
+          avatar: result.user.avatar,
+        }));
         setAvatarPreview(null);
       } else {
-        alert('Error al subir avatar: ' + result.message);
+        alert('Error al subir avatar: ' + (result.message || ''));
         setAvatarPreview(null);
       }
+
     } catch (error) {
       console.error('Error:', error);
       alert('Error de conexión al subir avatar');
