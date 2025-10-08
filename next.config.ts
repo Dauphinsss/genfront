@@ -6,16 +6,30 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ["@radix-ui/react-icons", "lucide-react"],
+    // Optimización automática de imports para reducir bundle size
+    optimizePackageImports: [
+      "@radix-ui/react-icons",
+      "lucide-react",
+      "@react-three/fiber",
+      "@react-three/drei",
+      "three",
+      "gsap",
+    ],
   },
 
+  // Nueva sintaxis de Turbopack (actualizada)
   turbopack: {
-
     rules: {
       "*.svg": {
-        loaders: ["@svgr/webpack"], 
-        as: "component",
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
+    },
+    // Resolvers optimizados para librerías pesadas
+    resolveAlias: {
+
+      three: "three",
+      gsap: "gsap",
     },
   },
 };

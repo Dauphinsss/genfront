@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Menu } from "@/lib/icons";
 
 interface HeaderProps {
   user?: {
@@ -12,8 +13,9 @@ interface HeaderProps {
   currentView?: "inicio" | "perfil" | "pasados";
   onViewChange?: (view: "inicio" | "perfil" | "pasados") => void;
   onToggleTheme?: () => void;
-  onLogout?: () => void; // Added onLogout prop
+  onLogout?: () => void;
   isDark?: boolean;
+  onMenuToggle?: () => void; // Para abrir el sidebar móvil
 }
 
 export function Header({
@@ -23,6 +25,7 @@ export function Header({
   onToggleTheme,
   onLogout,
   isDark,
+  onMenuToggle,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -80,9 +83,22 @@ export function Header({
 
   return (
     <header className="w-full bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4  sm:px-3">
         <div className="flex items-center justify-between h-16">
-          <div className="text-2xl font-bold text-foreground">Pyson</div>
+          {/* Menu button - visible en móvil y desktop cuando hay usuario */}
+          <div className="flex items-center gap-2">
+            {user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onMenuToggle}
+                className="w-10 h-10 p-0 hover:bg-secondary"
+              >
+                <Menu className="" />
+              </Button>
+            )}
+            <div className="text-2xl font-bold text-foreground">Pyson</div>
+          </div>
 
           <nav className="hidden md:flex items-center space-x-8">
             <button
