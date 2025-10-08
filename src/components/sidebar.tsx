@@ -1,49 +1,224 @@
 "use client";
 
-import { useState } from "react";
-import { Home, Calendar, Settings, Archive } from "@/lib/icons";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { Home, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight } from "lucide-react";
+import { useAuth } from "@/components/context/AuthContext";
+
+export type DashboardView = "inicio" | "perfil" | "pasados" | string;
 
 interface SidebarProps {
-  currentView: "inicio" | "perfil" | "pasados";
-  onViewChange: (view: "inicio" | "perfil" | "pasados") => void;
+  currentView: DashboardView;
+  onViewChange: (view: DashboardView) => void;
   isCollapsed?: boolean;
 }
+
+const PRIVILEGE_CONFIGS: Record<string, any> = {
+  manage_users: {
+    icon: Users,
+    label: "Gestionar Usuarios",
+    viewId: "admin-users"
+  },
+  manage_privileges: {
+    icon: Shield,
+    label: "Gestionar Privilegios",
+    viewId: "admin-privileges"
+  },
+  manage_courses: {
+    icon: Archive,
+    label: "Gestionar Cursos",
+    viewId: "admin-courses"
+  },
+};
+
+const STATIC_MENU_ITEMS = [
+  {
+    id: "inicio",
+    label: "Inicio",
+    icon: Home,
+    view: "inicio" as const,
+  },
+  {
+    id: "calendario",
+    label: "Calendario",
+    icon: Calendar,
+    view: "inicio" as const,
+    disabled: true,
+  },
+  {
+    id: "pasados",
+    label: "Clases archivadas",
+    icon: Archive,
+    view: "pasados" as const,
+  },
+  {
+    id: "configuracion",
+    label: "Configuración",
+    icon: Settings,
+    view: "perfil" as const,
+  },
+];
+
+const useDynamicAdminItems = () => {
+  const { privileges } = useAuth();
+  
+  return useMemo(
+    () =>
+      privileges
+        .filter((privilege) => PRIVILEGE_CONFIGS[privilege.name])
+        .map((privilege) => {
+          const config = PRIVILEGE_CONFIGS[privilege.name];
+          return {
+            id: config.viewId,
+            label: config.label,
+            icon: config.icon,
+            view: config.viewId,
+            privilegeName: privilege.name,
+          };
+        }),
+    [privileges]
+  );
+};
+
+interface MenuItemProps {
+  item: typeof STATIC_MENU_ITEMS[0];
+  isActive: boolean;
+  shouldExpand: boolean;
+  onViewChange: (view: DashboardView) => void;
+  onClose?: () => void;
+}
+
+const MenuItem = ({ item, isActive, shouldExpand, onViewChange, onClose }: MenuItemProps) => {
+  const Icon = item.icon;
+  
+  return (
+    <li key={item.id}>
+      <button
+        onClick={() => {
+          if (!item.disabled) {
+            onViewChange(item.view);
+            onClose?.();
+          }
+        }}
+        disabled={item.disabled}
+        className={`
+          w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+          transition-all duration-200
+          ${isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}
+          ${item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+          ${!shouldExpand ? "justify-center" : ""}
+        `}
+        title={!shouldExpand ? item.label : ""}
+      >
+        <Icon className="w-5 h-5 flex-shrink-0" />
+        {shouldExpand && <span className="text-sm truncate whitespace-nowrap">{item.label}</span>}
+      </button>
+    </li>
+  );
+};
+
+interface AdminSectionProps {
+  dynamicAdminItems: ReturnType<typeof useDynamicAdminItems>;
+  currentView: DashboardView;
+  shouldExpand: boolean;
+  adminOpen: boolean;
+  setAdminOpen: (open: boolean) => void;
+  onViewChange: (view: DashboardView) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+const AdminSection = ({
+  dynamicAdminItems,
+  currentView,
+  shouldExpand,
+  adminOpen,
+  setAdminOpen,
+  onViewChange,
+  onClose,
+  isMobile = false,
+}: AdminSectionProps) => {
+  if (dynamicAdminItems.length === 0) return null;
+
+  return (
+    <>
+      <li className="my-2">
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </li>
+
+      <li>
+        <button
+          onClick={() => shouldExpand && setAdminOpen(!adminOpen)}
+          className={`
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+            text-muted-foreground hover:bg-secondary hover:text-foreground
+            transition-all duration-200
+            ${!shouldExpand ? "justify-center" : ""}
+          `}
+          title={!shouldExpand ? "Administración" : ""}
+        >
+          <Shield className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+          {shouldExpand && (
+            <>
+              <span className="text-sm font-medium flex-1 text-left truncate whitespace-nowrap">
+                Administración
+              </span>
+              {adminOpen ? (
+                <ChevronDown className="w-4 h-4 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              )}
+            </>
+          )}
+        </button>
+
+        {shouldExpand && adminOpen && (
+          <ul className="mt-1 ml-7 space-y-1">
+            {dynamicAdminItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.view;
+
+              return (
+                <li key={item.id}>
+                  <button
+                    onClick={() => {
+                      onViewChange(item.view);
+                      onClose?.();
+                    }}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2 rounded-lg
+                      transition-all duration-200 text-sm
+                      ${
+                        isActive
+                          ? isMobile
+                            ? "bg-neutral-800 text-neutral-300 font-medium"
+                            : "bg-primary/10 text-primary font-medium"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }
+                    `}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate whitespace-nowrap">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </li>
+    </>
+  );
+};
 
 export function Sidebar({
   currentView,
   onViewChange,
   isCollapsed = false,
 }: SidebarProps) {
+  const { privileges } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
-
-  const menuItems = [
-    {
-      id: "inicio",
-      label: "Inicio",
-      icon: Home,
-      view: "inicio" as const,
-    },
-    {
-      id: "calendario",
-      label: "Calendario",
-      icon: Calendar,
-      view: "inicio" as const,
-      disabled: true,
-    },
-    {
-      id: "pasados",
-      label: "Clases archivadas",
-      icon: Archive,
-      view: "pasados" as const,
-    },
-    {
-      id: "configuracion",
-      label: "Configuración",
-      icon: Settings,
-      view: "perfil" as const,
-    },
-  ];
-
+  const [adminOpen, setAdminOpen] = useState(true);
+  
+  const dynamicAdminItems = useDynamicAdminItems();
   const shouldExpand = !isCollapsed || isHovered;
 
   return (
@@ -58,49 +233,31 @@ export function Sidebar({
       `}
     >
       <div className="flex flex-col h-full">
-        {/* Menu Items */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentView === item.view;
+            {/* Menú estático */}
+            {STATIC_MENU_ITEMS.map((item) => (
+              <MenuItem
+                key={item.id}
+                item={item}
+                isActive={currentView === item.view}
+                shouldExpand={shouldExpand}
+                onViewChange={onViewChange}
+              />
+            ))}
 
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => !item.disabled && onViewChange(item.view)}
-                    disabled={item.disabled}
-                    className={`
-                      w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                      transition-all duration-200
-                      ${
-                        isActive
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      }
-                      ${
-                        item.disabled
-                          ? "opacity-50 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }
-                      ${!shouldExpand ? "justify-center" : ""}
-                    `}
-                    title={!shouldExpand ? item.label : ""}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    {shouldExpand && (
-                      <span className="text-sm truncate whitespace-nowrap">
-                        {item.label}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
+            {/* Administración Dinámica */}
+            <AdminSection
+              dynamicAdminItems={dynamicAdminItems}
+              currentView={currentView}
+              shouldExpand={shouldExpand}
+              adminOpen={adminOpen}
+              setAdminOpen={setAdminOpen}
+              onViewChange={onViewChange}
+            />
           </ul>
         </nav>
 
-        {/* Footer Info */}
         <div className="p-4 border-t border-border">
           <div
             className={`
@@ -111,15 +268,20 @@ export function Sidebar({
           >
             <p className="whitespace-nowrap">Pyson Learning Platform</p>
             <p className="text-[10px] whitespace-nowrap">Versión 1.0.0</p>
+            {dynamicAdminItems.length > 0 && (
+              <div className="pt-2 mt-2 border-t border-border/50">
+                <p className="text-[10px] text-neutral-300 font-medium whitespace-nowrap flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  Admin ({privileges.length})
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </aside>
   );
-}
-
-// Mobile Sidebar Component
-export function MobileSidebar({
+}export function MobileSidebar({
   isOpen,
   onClose,
   currentView,
@@ -127,40 +289,14 @@ export function MobileSidebar({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  currentView: "inicio" | "perfil" | "pasados";
-  onViewChange: (view: "inicio" | "perfil" | "pasados") => void;
+  currentView: DashboardView;
+  onViewChange: (view: DashboardView) => void;
 }) {
-  const menuItems = [
-    {
-      id: "inicio",
-      label: "Inicio",
-      icon: Home,
-      view: "inicio" as const,
-    },
-    {
-      id: "calendario",
-      label: "Calendario",
-      icon: Calendar,
-      view: "inicio" as const,
-      disabled: true,
-    },
-    {
-      id: "pasados",
-      label: "Clases archivadas",
-      icon: Archive,
-      view: "pasados" as const,
-    },
-    {
-      id: "configuracion",
-      label: "Configuración",
-      icon: Settings,
-      view: "perfil" as const,
-    },
-  ];
+  const [adminOpen, setAdminOpen] = useState(false);
+  const dynamicAdminItems = useDynamicAdminItems();
 
   return (
     <>
-      {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-[60] md:hidden"
@@ -168,7 +304,6 @@ export function MobileSidebar({
         />
       )}
 
-      {/* Mobile Sidebar */}
       <aside
         className={`
           fixed left-0 top-0 h-screen w-64 bg-background border-r border-border
@@ -178,53 +313,44 @@ export function MobileSidebar({
         `}
       >
         <div className="flex flex-col h-full pt-16">
-          {/* Logo/Header Area */}
           <div className="px-4 py-3 border-b border-border">
             <h2 className="text-xl font-bold text-foreground">Pyson</h2>
+            {dynamicAdminItems.length > 0 && (
+              <p className="text-xs text-neutral-300 font-medium mt-1 flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                Panel Admin
+              </p>
+            )}
           </div>
 
-          {/* Menu Items */}
           <nav className="flex-1 overflow-y-auto py-4">
             <ul className="space-y-1 px-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentView === item.view;
+              {/* Menú estático */}
+              {STATIC_MENU_ITEMS.map((item) => (
+                <MenuItem
+                  key={item.id}
+                  item={item}
+                  isActive={currentView === item.view}
+                  shouldExpand={true}
+                  onViewChange={onViewChange}
+                  onClose={onClose}
+                />
+              ))}
 
-                return (
-                  <li key={item.id}>
-                    <button
-                      onClick={() => {
-                        if (!item.disabled) {
-                          onViewChange(item.view);
-                          onClose();
-                        }
-                      }}
-                      disabled={item.disabled}
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                        transition-all duration-200
-                        ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                        }
-                        ${
-                          item.disabled
-                            ? "opacity-50 cursor-not-allowed"
-                            : "cursor-pointer"
-                        }
-                      `}
-                    >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm truncate">{item.label}</span>
-                    </button>
-                  </li>
-                );
-              })}
+              {/* Administración Dinámica */}
+              <AdminSection
+                dynamicAdminItems={dynamicAdminItems}
+                currentView={currentView}
+                shouldExpand={true}
+                adminOpen={adminOpen}
+                setAdminOpen={setAdminOpen}
+                onViewChange={onViewChange}
+                onClose={onClose}
+                isMobile
+              />
             </ul>
           </nav>
 
-          {/* Footer Info */}
           <div className="p-4 border-t border-border">
             <div className="text-xs text-muted-foreground space-y-1">
               <p>Pyson Learning Platform</p>

@@ -33,6 +33,18 @@ export default function LoginCallback() {
 
         // Guardamos usuario en localStorage
         localStorage.setItem("pyson_user", JSON.stringify(user));
+ 
+        const { data: privileges } = await axios.get(
+          "http://localhost:4000/privileges/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        localStorage.setItem("pyson_privileges", JSON.stringify(privileges));
+
       } catch (err) {
         console.error("Error en login:", err);
       } finally {

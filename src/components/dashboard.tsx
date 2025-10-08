@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Header } from "./header";
-import { Sidebar, MobileSidebar } from "./sidebar";
+import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
-import { getProfile, updateProfile } from "@/services/profile"
+import { getProfile, updateProfile } from "@/services/profile";
+import { UsersManagement } from "@/components/admin/UsersManagement";
+import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
 import axios from "axios";
 
 interface DashboardProps {
@@ -92,9 +94,7 @@ export function Dashboard({
   isDark,
 }: DashboardProps) {
   const [courseCode, setCourseCode] = useState("");
-  const [currentView, setCurrentView] = useState<
-    "inicio" | "perfil" | "pasados"
-  >("inicio");
+  const [currentView, setCurrentView] = useState<DashboardView>("inicio");
   const [enrolledCourse, setEnrolledCourse] = useState<
     (typeof mockCourses)[0] | null
   >(null);
@@ -463,6 +463,18 @@ export function Dashboard({
                   </CardContent>
                 </Card>
               )}
+            </div>
+          )}
+
+          {currentView === "admin-users" && (
+            <div className="max-w-7xl mx-auto">
+              <UsersManagement />
+            </div>
+          )}
+
+          {currentView === "admin-privileges" && (
+            <div className="max-w-7xl mx-auto">
+              <PrivilegesManagement />
             </div>
           )}
 

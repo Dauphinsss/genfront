@@ -12,12 +12,12 @@ interface HeaderProps {
     email: string;
     avatar: string;
   };
-  currentView?: "inicio" | "perfil" | "pasados";
-  onViewChange?: (view: "inicio" | "perfil" | "pasados" ) => void;
+  currentView?: string;
+  onViewChange?: (view: string) => void;
   onToggleTheme?: () => void;
   onLogout?: () => void;
   isDark?: boolean;
-  onMenuToggle?: () => void; // Para abrir el sidebar móvil
+  onMenuToggle?: () => void;
 }
 
 export function Header({
@@ -32,8 +32,9 @@ export function Header({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Filtrar currentView para mostrar solo las opciones del menú
-  const menuCurrentView = currentView === "pasados" ? "inicio" : currentView;
+  const menuCurrentView = ["admin-users", "admin-privileges", "admin-courses", "pasados"].includes(currentView) 
+    ? "inicio" 
+    : currentView;
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -103,7 +104,6 @@ export function Header({
     <header className="w-full bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="w-full px-4 sm:px-3">
         <div className="flex items-center justify-between h-16">
-          {/* Menu button - visible en móvil y desktop cuando hay usuario */}
           <div className="flex items-center gap-2">
             {user && (
               <Button
@@ -153,16 +153,11 @@ export function Header({
 
           <div className="flex items-center space-x-3">
             <Button
-             
               variant="ghost"
-             
               size="sm"
-             
               onClick={onToggleTheme}
-             
               className="w-9 h-9 p-0 hidden sm:flex hover:cursor-pointer"
               aria-label="Cambiar tema"
-            
             >
               {isDark ? (
                 <svg
@@ -274,7 +269,7 @@ export function Header({
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <div href="/settings" className="flex items-center space-x-3 px-3 py-2" aria-label="Ir a ajustes de perfil">
+              <a href="/settings" className="flex items-center space-x-3 px-3 py-2" aria-label="Ir a ajustes de perfil">
                 <Image
                   src={user.avatar || "/placeholder.svg?height=32&width=32"}
                   alt={user.name}
@@ -283,7 +278,7 @@ export function Header({
                   className="w-8 h-8 rounded-full border border-border"
                 />
                 <span className="text-sm font-medium">{user.name}</span>
-              </div>
+              </a>
               <button
                 onClick={() => {
                   onViewChange?.("inicio");
