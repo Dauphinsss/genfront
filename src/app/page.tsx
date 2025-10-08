@@ -6,6 +6,7 @@ import { LoginSection } from "@/components/login-section";
 import ParticleBackground from "@/components/particleBackground";
 import TextCircleFollower from "@/components/textCircleFollower";
 import { useState, useEffect } from "react";
+import { AuthProvider } from "@/components/context/AuthContext";
 
 interface User {
   name: string;
@@ -13,7 +14,7 @@ interface User {
   avatar: string;
 }
 
-export default function Home() {
+function HomeContent() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function Home() {
   useEffect(() => {
     const checkExistingSession = async () => {
       setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const savedUser = localStorage.getItem("pyson_user");
       if (savedUser) {
@@ -64,6 +65,8 @@ export default function Home() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("pyson_user");
+    localStorage.removeItem("pyson_token");
+    localStorage.removeItem("pyson_privileges");
   };
 
   if (isLoading) {
@@ -97,5 +100,13 @@ export default function Home() {
         <LoginSection onLogin={handleLogin} isLoading={isAuthLoading} />
       </main>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <AuthProvider>
+      <HomeContent />
+    </AuthProvider>
   );
 }
