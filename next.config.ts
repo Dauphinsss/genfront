@@ -40,7 +40,6 @@ const nextConfig: NextConfig = {
     },
     // Resolvers optimizados para librerías pesadas
     resolveAlias: {
-
       three: "three",
       gsap: "gsap",
     },
