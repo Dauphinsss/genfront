@@ -237,7 +237,7 @@ export function Dashboard({
     localStorage.setItem('pyson_user', JSON.stringify(updatedProfile));
 
     try {
-      setOriginalUser(currentUser);
+      setOriginalUser(updatedProfile);
       setOriginalDisplayName(displayName);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -264,8 +264,8 @@ export function Dashboard({
 
   useEffect(() => {
     if (currentView === "perfil") {
-      setOriginalUser(currentUser);
-      setOriginalDisplayName(displayName);
+      setCurrentUser(currentUser);
+      setDisplayName(currentUser.name);
     }
   }, [currentView]);
 
@@ -472,7 +472,7 @@ export function Dashboard({
                 <div className="max-w-2xl mx-auto">
                   <div className="mb-8 text-center">
                     <h2 className="text-3xl font-bold mb-2 text-foreground">
-                      Hola, {user.name.split(" ")[0]}
+                      Hola, {currentUser.name.split(" ")[0]}
                     </h2>
                     <p className="text-muted-foreground">
                       Únete a un curso para comenzar a aprender
