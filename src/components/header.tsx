@@ -1,25 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Menu } from "@/lib/icons";
 import { useEffect, useRef } from "react"
 
 interface HeaderProps {
   user?: {
-    name: string
-    email: string
-    avatar: string
-  }
-  currentView?: "inicio" | "perfil"
-  onViewChange?: (view: "inicio" | "perfil" ) => void
-  onToggleTheme?: () => void
-  onLogout?: () => void // Added onLogout prop
-  isDark?: boolean
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  currentView?: "inicio" | "perfil" | "pasados";
+  onViewChange?: (view: "inicio" | "perfil" | "pasados" ) => void;
+  onToggleTheme?: () => void;
+  onLogout?: () => void;
+  isDark?: boolean;
+  onMenuToggle?: () => void; // Para abrir el sidebar móvil
 }
 
-export function Header({ user, currentView = "inicio", onViewChange, onToggleTheme, onLogout, isDark }: HeaderProps) {
+export function Header({
+  user,
+  currentView = "inicio",
+  onViewChange,
+  onToggleTheme,
+  onLogout,
+  isDark,
+  onMenuToggle,
+}: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Filtrar currentView para mostrar solo las opciones del menú
+  const menuCurrentView = currentView === "pasados" ? "inicio" : currentView;
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -43,9 +57,19 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
           <div className="flex items-center justify-between h-16">
             <div className="text-2xl font-bold text-foreground">Pyson</div>
 
-            <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleTheme}
+              className="w-9 h-9 p-0"
+            >
               {isDark ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -54,7 +78,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                   />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -67,22 +96,37 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
           </div>
         </div>
       </header>
-    )
+    );
   }
 
   return (
     <header className="w-full bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-3">
         <div className="flex items-center justify-between h-16">
-          <a href="/" className="text-2xl font-bold text-foreground" aria-label="Ir a la página principal">
+          {/* Menu button - visible en móvil y desktop cuando hay usuario */}
+          <div className="flex items-center gap-2">
+            {user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onMenuToggle}
+                className="w-10 h-10 p-0 hover:bg-secondary"
+              >
+                <Menu className="" />
+              </Button>
+            )}
+            <a href="/" className="text-2xl font-bold text-foreground" aria-label="Ir a la página principal">
             Pyson
           </a>
+          </div>
 
           <nav className="hidden md:flex items-center space-x-8">
             <button
               onClick={() => onViewChange?.("inicio")}
               className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
-                currentView === "inicio" ? "text-foreground" : "text-muted-foreground"
+                menuCurrentView === "inicio"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               Inicio
@@ -91,7 +135,9 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
             <button
               onClick={() => onViewChange?.("perfil")}
               className={`text-sm font-medium transition-colors hover:text-foreground hover:cursor-pointer ${
-                currentView === "perfil" ? "text-foreground" : "text-muted-foreground"
+                menuCurrentView === "perfil"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               Perfil
@@ -107,14 +153,24 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
 
           <div className="flex items-center space-x-3">
             <Button
+             
               variant="ghost"
+             
               size="sm"
+             
               onClick={onToggleTheme}
+             
               className="w-9 h-9 p-0 hidden sm:flex hover:cursor-pointer"
               aria-label="Cambiar tema"
+            
             >
               {isDark ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -123,7 +179,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                   />
                 </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -142,9 +203,11 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                 aria-expanded={isUserMenuOpen}
                 aria-label="Abrir menú de usuario"  
               >
-                <img
+                <Image
                   src={user.avatar || "/placeholder.svg?height=32&width=32"}
                   alt={user.name}
+                width={32}
+                height={32}
                   className="w-8 h-8 rounded-full border border-border"
                 />
                 <span className="text-sm font-medium">{user.name}</span>
@@ -191,8 +254,18 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-nav"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </Button>
           </div>
@@ -201,21 +274,23 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="/settings" className="flex items-center space-x-3 px-3 py-2" aria-label="Ir a ajustes de perfil">
-                <img
+              <div href="/settings" className="flex items-center space-x-3 px-3 py-2" aria-label="Ir a ajustes de perfil">
+                <Image
                   src={user.avatar || "/placeholder.svg?height=32&width=32"}
                   alt={user.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full border border-border"
                 />
                 <span className="text-sm font-medium">{user.name}</span>
-              </a>
+              </div>
               <button
                 onClick={() => {
-                  onViewChange?.("inicio")
-                  setIsMobileMenuOpen(false)
+                  onViewChange?.("inicio");
+                  setIsMobileMenuOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                  currentView === "inicio"
+                  menuCurrentView === "inicio"
                     ? "text-foreground bg-secondary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
@@ -224,11 +299,11 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               </button>
               <button
                 onClick={() => {
-                  onViewChange?.("perfil")
-                  setIsMobileMenuOpen(false)
+                  onViewChange?.("perfil");
+                  setIsMobileMenuOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                  currentView === "perfil"
+                  menuCurrentView === "perfil"
                     ? "text-foreground bg-secondary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
@@ -237,10 +312,22 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                 Configuración
               </button>
               <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-sm font-medium text-muted-foreground">Tema</span>
-                <Button variant="ghost" size="sm" onClick={onToggleTheme} className="w-9 h-9 p-0">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Tema
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleTheme}
+                  className="w-9 h-9 p-0"
+                >
                   {isDark ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -249,7 +336,12 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
                       />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -262,8 +354,8 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
               </div>
               <button
                 onClick={() => {
-                  onLogout?.()
-                  setIsMobileMenuOpen(false)
+                  onLogout?.();
+                  setIsMobileMenuOpen(false);
                 }}
                 className="block w-full text-left px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
@@ -274,5 +366,5 @@ export function Header({ user, currentView = "inicio", onViewChange, onToggleThe
         )}
       </div>
     </header>
-  )
+  );
 }

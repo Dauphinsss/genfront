@@ -3,9 +3,15 @@
 import { Dashboard } from "@/components/dashboard";
 import { Header } from "@/components/header";
 import { LoginSection } from "@/components/login-section";
-import ParticleBackground from "@/components/particleBackground";
-import TextCircleFollower from "@/components/textCircleFollower";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
+
+// Lazy load de componentes pesados
+const ParticleBackground = lazy(
+  () => import("@/components/particleBackground")
+);
+const TextCircleFollower = lazy(
+  () => import("@/components/textCircleFollower")
+);
 
 interface User {
   name: string;
@@ -90,10 +96,16 @@ export default function Home() {
 
   return (
     <>
-      <TextCircleFollower />
+      <Suspense fallback={null}>
+        <TextCircleFollower />
+      </Suspense>
       <main className="min-h-screen bg-background">
         <Header onToggleTheme={toggleTheme} isDark={isDark} />
-        <ParticleBackground />
+        <Suspense
+          fallback={<div className="absolute inset-0 pointer-events-none" />}
+        >
+          <ParticleBackground />
+        </Suspense>
         <LoginSection onLogin={handleLogin} isLoading={isAuthLoading} />
       </main>
     </>
