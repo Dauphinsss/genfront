@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Menu } from "@/lib/icons";
 
@@ -168,9 +169,11 @@ export function Header({
             </Button>
 
             <div className="hidden md:flex items-center space-x-3">
-              <img
+              <Image
                 src={user.avatar || "/placeholder.svg?height=32&width=32"}
                 alt={user.name}
+                width={32}
+                height={32}
                 className="w-8 h-8 rounded-full border border-border"
               />
               <span className="text-sm font-medium">{user.name}</span>
@@ -203,9 +206,11 @@ export function Header({
           <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <div className="flex items-center space-x-3 px-3 py-2">
-                <img
+                <Image
                   src={user.avatar || "/placeholder.svg?height=32&width=32"}
                   alt={user.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full border border-border"
                 />
                 <span className="text-sm font-medium">{user.name}</span>

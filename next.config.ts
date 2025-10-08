@@ -5,6 +5,19 @@ const nextConfig: NextConfig = {
     tsconfigPath: "./tsconfig.json",
   },
 
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
+
   experimental: {
     // Optimización automática de imports para reducir bundle size
     optimizePackageImports: [

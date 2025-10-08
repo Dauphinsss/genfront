@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -93,7 +94,6 @@ export function Dashboard({
   const [currentView, setCurrentView] = useState<
     "inicio" | "perfil" | "pasados"
   >("inicio");
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [enrolledCourse, setEnrolledCourse] = useState<
     (typeof mockCourses)[0] | null
   >(null);
@@ -113,10 +113,6 @@ export function Dashboard({
 
   const studentCourses = mockCourses.filter((c) => c.role === "student");
   const teacherCourses = mockCourses.filter((c) => c.role === "teacher");
-
-  const handleEnterCourse = (courseId: string) => {
-    setSelectedCourse(courseId);
-  };
 
   const handleJoinCourse = async () => {
     if (courseCode.trim() && !enrolledCourse) {
@@ -152,7 +148,6 @@ export function Dashboard({
         };
 
         setEnrolledCourse(newCourse);
-        setSelectedCourse(newCourse.id);
         setCourseCode("");
       } catch (error) {
         console.error(
@@ -162,12 +157,6 @@ export function Dashboard({
       }
     }
   };
-
-  const currentCourse = selectedCourse
-    ? [...mockCourses, ...(enrolledCourse ? [enrolledCourse] : [])].find(
-        (c) => c.id === selectedCourse
-      )
-    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -186,7 +175,6 @@ export function Dashboard({
         currentView={currentView}
         onViewChange={setCurrentView}
         isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
       {/* Mobile Sidebar */}
@@ -210,9 +198,11 @@ export function Dashboard({
               <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <img
+                    <Image
                       src={user.avatar || "/placeholder.svg?height=48&width=48"}
                       alt={user.name}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 rounded-full border border-border"
                     />
                     <div>
@@ -308,9 +298,11 @@ export function Dashboard({
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center gap-3 mb-4">
-                          <img
+                          <Image
                             src={course.instructorAvatar || "/placeholder.svg"}
                             alt={course.instructor}
+                            width={32}
+                            height={32}
                             className="w-8 h-8 rounded-full border border-border"
                           />
                           <div>
@@ -436,12 +428,14 @@ export function Dashboard({
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center gap-4 p-4 bg-secondary rounded-lg">
-                        <img
+                        <Image
                           src={
                             enrolledCourse.instructorAvatar ||
                             "/placeholder.svg"
                           }
                           alt={enrolledCourse.instructor}
+                          width={48}
+                          height={48}
                           className="w-12 h-12 rounded-full border border-border"
                         />
                         <div>

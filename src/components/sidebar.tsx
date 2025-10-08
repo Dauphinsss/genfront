@@ -1,21 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Home, Calendar, Settings, Archive, Menu } from "@/lib/icons";
+import { Home, Calendar, Settings, Archive } from "@/lib/icons";
 
 interface SidebarProps {
   currentView: "inicio" | "perfil" | "pasados";
   onViewChange: (view: "inicio" | "perfil" | "pasados") => void;
   isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 export function Sidebar({
   currentView,
   onViewChange,
   isCollapsed = false,
-  onToggleCollapse,
 }: SidebarProps) {
   const [isHovered, setIsHovered] = useState(false);
 
