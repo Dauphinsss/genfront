@@ -310,95 +310,147 @@ export function Dashboard({
       >
         <div className="container mx-auto">
           {currentView === "perfil" && (
-            <div className="max-w-4xl mx-auto space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Mi Perfil</h1>
-              <p className="text-muted-foreground mt-2">Administra tu cuenta y preferencias</p>
-            </div>
+            <div className="max-w-md mx-auto py-8">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h1 className="text-xl font-medium text-foreground mb-1">Mi Perfil</h1>
+                <p className="text-xs text-muted-foreground">Información personal</p>
+              </div>
 
-            {/* Información Personal */}
-            <Card className="border-border mx-auto">
-              <CardHeader className="flex flex-col items-center pb-2">
-                <Image
-                  src={avatarPreview || currentUser.avatar || "/placeholder.svg"}
-                  alt="Avatar"
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 rounded-full object-cover border border-border mb-2"
-                />
-                <label
-                  htmlFor="file"
-                  className={`block text-xs px-3 py-1 rounded bg-foreground text-background cursor-pointer hover:bg-foreground/90 mb-1 ${
-                    uploading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {uploading ? "Subiendo..." : "Cambiar foto"}
-                  <input
-                    id="file"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={onPickAvatar}
-                    disabled={uploading}
-                  />
-                </label>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium mb-1">Nombre para mostrar</label>
-                  <Input
-                    id="name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Escribe tu nombre"
-                    className="w-full"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label htmlFor="email" className="block text-sm font-medium mb-1">Correo electrónico</label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={currentUser.email}
-                    disabled
-                    className="w-full bg-muted text-muted-foreground"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    disabled={saving}
-                    onClick={handleSaveChanges}
-                    className="bg-foreground text-background hover:bg-foreground/70 cursor-pointer"
-                  >
-                    {saving ? "Guardando..." : "Guardar cambios"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleCancelChanges}
-                    className="border-border hover:bg-secondary cursor-pointer"
-                  >
-                    Cancelar cambios
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-
-            {/* Cerrar Sesión */}
-            <Card className="border-border">
-              <CardContent className="pt-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium">Cerrar sesión</h3>
-                    <p className="text-xs text-muted-foreground">Salir de tu cuenta en este dispositivo</p>
+              {/* Carnet Principal */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-xl rounded-2xl overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Header del carnet */}
+                  <div className="bg-gradient-to-r from-foreground/5 to-foreground/10 px-6 py-4 border-b border-border/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-sm font-semibold text-foreground">Configuración personal</h2>
+                        <p className="text-xs text-muted-foreground">Información de la cuenta</p>
+                      </div>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    </div>
                   </div>
-                  <Button variant="outline" onClick={onLogout} className="border-border">
-                    Cerrar sesión
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                  {/* Contenido del carnet */}
+                  <div className="p-6">
+                    <div className="flex items-start gap-6">
+                      {/* Avatar section */}
+                      <div className="flex-shrink-0">
+                        <div className="relative group">
+                          <div className="relative">
+                            <Image
+                              src={avatarPreview || currentUser.avatar || "/placeholder.svg"}
+                              alt="Avatar"
+                              width={80}
+                              height={80}
+                              className="w-20 h-20 rounded-lg object-cover border-2 border-border/30 shadow-sm"
+                            />
+                            {uploading && (
+                              <div className="absolute inset-0 bg-background/90 rounded-lg flex items-center justify-center">
+                                <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
+                          <label
+                            htmlFor="file"
+                            className={`absolute -bottom-1 -right-1 w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center cursor-pointer hover:bg-foreground/90 transition-all duration-200 shadow-sm text-xs ${
+                              uploading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            ✏️
+                            <input
+                              id="file"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={onPickAvatar}
+                              disabled={uploading}
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Información */}
+                      <div className="flex-1 space-y-4">
+                        {/* Nombre */}
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground block mb-1">
+                            Nombre
+                          </label>
+                          <Input
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            className="border-border/30 bg-background/50 focus:bg-background text-sm h-8 rounded-lg"
+                            placeholder="Tu nombre"
+                          />
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground block mb-1">
+                            Email
+                          </label>
+                          <div className="text-sm text-foreground bg-muted/30 px-3 py-2 rounded-lg border border-border/20">
+                            {currentUser.email}
+                          </div>
+                        </div>
+
+                        {/* Tema */}
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground block mb-2">
+                            Apariencia
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-foreground">Tema oscuro</span>
+                            <button
+                              onClick={onToggleTheme}
+                              className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                                isDark ? 'bg-foreground' : 'bg-muted'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-3 w-3 transform rounded-full bg-background transition-transform ${
+                                  isDark ? 'translate-x-3.5' : 'translate-x-0.5'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botones de acción */}
+                    <div className="flex gap-2 mt-6 pt-4 border-t border-border/20">
+                      <Button
+                        onClick={handleSaveChanges}
+                        disabled={saving}
+                        className="flex-1 h-8 text-xs bg-foreground text-background hover:bg-foreground/90"
+                      >
+                        {saving ? "Guardando..." : "Guardar cambios"}
+                      </Button>
+                      <Button
+                        onClick={handleCancelChanges}
+                        variant="outline"
+                        className="flex-1 h-8 text-xs border-border/30 hover:bg-muted/50"
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Cerrar sesión */}
+              <div className="mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={onLogout}
+                  className="w-full h-9 text-sm border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg"
+                >
+                  Cerrar sesión
+                </Button>
+              </div>
+            </div>
           )}
 
           {currentView === "pasados" && (
