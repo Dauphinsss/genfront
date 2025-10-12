@@ -11,7 +11,7 @@ export async function getProfile(token: string) {
   return res.data;
 }
 
-export async function updateProfile(token: string, data: any) {
+export async function updateProfile(token: string, data: Record<string, unknown>) {
   const res = await axios.patch(API_URL, data, {
     headers: {
       Authorization: `Bearer ${token}`,

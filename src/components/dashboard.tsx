@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Header } from "./header";
 import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
-import { getProfile, updateProfile } from "@/services/profile";
+import { updateProfile } from "@/services/profile";
 import { UsersManagement } from "@/components/admin/UsersManagement";
 import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
 import axios from "axios";
@@ -25,16 +25,29 @@ interface DashboardProps {
   isDark?: boolean;
 }
 
-const mockCourses = [
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  instructor: string;
+  instructorAvatar: string;
+  students: number;
+  progress?: number;
+  role: "student" | "teacher";
+  lastActivity: string;
+  completed?: boolean;
+}
+
+const mockCourses: Course[] = [
   {
     id: "1",
     title: "Python Básico",
     description: "Fundamentos de Python desde cero",
     instructor: "Prof. María García",
-    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    instructorAvatar: "/placeholder.svg",
     students: 24,
     progress: 65,
-    role: "student" as const,
+    role: "student",
     lastActivity: "Hace 2 días",
   },
   {
@@ -42,10 +55,10 @@ const mockCourses = [
     title: "Estructuras de Datos",
     description: "Listas, diccionarios y más",
     instructor: "Prof. Carlos López",
-    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    instructorAvatar: "/placeholder.svg",
     students: 18,
     progress: 30,
-    role: "student" as const,
+    role: "student",
     lastActivity: "Hace 1 semana",
   },
   {
@@ -53,23 +66,23 @@ const mockCourses = [
     title: "Python Avanzado",
     description: "POO y conceptos avanzados",
     instructor: "Tú",
-    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    instructorAvatar: "/placeholder.svg",
     students: 32,
-    role: "teacher" as const,
+    role: "teacher",
     lastActivity: "Hace 3 horas",
   },
 ];
 
-const mockPastCourses = [
+const mockPastCourses: Course[] = [
   {
     id: "past-1",
     title: "Introducción a la Programación",
     description: "Conceptos básicos de programación",
     instructor: "Prof. Ana Martínez",
-    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    instructorAvatar: "/placeholder.svg",
     students: 30,
     progress: 100,
-    role: "student" as const,
+    role: "student",
     lastActivity: "Hace 3 meses",
     completed: true,
   },
@@ -78,10 +91,10 @@ const mockPastCourses = [
     title: "Algoritmos I",
     description: "Fundamentos de algoritmos",
     instructor: "Prof. Roberto Silva",
-    instructorAvatar: "/placeholder.svg?height=40&width=40",
+    instructorAvatar: "/placeholder.svg",
     students: 25,
     progress: 100,
-    role: "student" as const,
+    role: "student",
     lastActivity: "Hace 6 meses",
     completed: true,
   },
@@ -112,14 +125,12 @@ export function Dashboard({
     }
   };
 
-  const studentCourses = mockCourses.filter((c) => c.role === "student");
-  const teacherCourses = mockCourses.filter((c) => c.role === "teacher");
+  console.debug('Available courses:', mockCourses.length);
   const [currentUser, setCurrentUser] = useState(user)
   const [displayName, setDisplayName] = useState(user.name)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [profile, setProfile] = useState(null);
   const token = localStorage.getItem('pyson_token') || '';
 
   const [originalUser, setOriginalUser] = useState(user)
@@ -257,17 +268,11 @@ export function Dashboard({
   };
 
   useEffect(() => {
-    if (token) {
-      getProfile(token).then(data => setProfile(data)).catch(err => console.error(err)); 
-    }
-  }, [token]);
-
-  useEffect(() => {
     if (currentView === "perfil") {
-      setCurrentUser(currentUser);
-      setDisplayName(currentUser.name);
+      setOriginalUser(currentUser);
+      setOriginalDisplayName(displayName);
     }
-  }, [currentView]);
+  }, [currentView, currentUser, displayName]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -314,9 +319,11 @@ export function Dashboard({
             {/* Información Personal */}
             <Card className="border-border mx-auto">
               <CardHeader className="flex flex-col items-center pb-2">
-                <img
-                  src={avatarPreview || currentUser.avatar || "/placeholder.svg?height=80&width=80"}
+                <Image
+                  src={avatarPreview || currentUser.avatar || "/placeholder.svg"}
                   alt="Avatar"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 rounded-full object-cover border border-border mb-2"
                 />
                 <label

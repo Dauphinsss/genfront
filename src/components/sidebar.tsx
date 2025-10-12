@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Home, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "@/components/context/AuthContext";
 
@@ -12,7 +12,13 @@ interface SidebarProps {
   isCollapsed?: boolean;
 }
 
-const PRIVILEGE_CONFIGS: Record<string, any> = {
+interface PrivilegeConfig {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  viewId: string;
+}
+
+const PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
   manage_users: {
     icon: Users,
     label: "Gestionar Usuarios",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -156,9 +157,11 @@ export function UsersManagement() {
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="relative">
-                    <img
-                      src={user.avatar || "/placeholder.svg?height=80&width=80"}
+                    <Image
+                      src={user.avatar || "/placeholder.svg"}
                       alt={user.name}
+                      width={80}
+                      height={80}
                       className="w-20 h-20 rounded-full border-2 border-border"
                     />
                     {user.privileges.length > 0 && (
@@ -241,9 +244,11 @@ export function UsersManagement() {
               {/* Header */}
               <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <img
-                    src={selectedUser.avatar || "/placeholder.svg?height=48&width=48"}
+                  <Image
+                    src={selectedUser.avatar || "/placeholder.svg"}
                     alt={selectedUser.name}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full border-2 border-border"
                   />
                   <div>
