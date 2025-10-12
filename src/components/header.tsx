@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu } from "@/lib/icons";
 import { useEffect, useRef } from "react"
@@ -113,11 +114,11 @@ export function Header({
                 className="w-10 h-10 p-0 hover:bg-secondary"
               >
                 <Menu className="" />
-              </Button>
-            )}
-            <a href="/" className="text-2xl font-bold text-foreground" aria-label="Ir a la página principal">
+              </Button>)}
+
+            <Link href="/" className="text-2xl font-bold text-foreground" >
             Pyson
-          </a>
+           </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
