@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { BookOpen, Users, Clock, ChevronRight } from "lucide-react";
 
 interface Course {
@@ -18,7 +19,7 @@ interface Course {
   instructor: string;
   students: number;
   progress?: number;
-  role: "student" | "teacher";
+  role: "student" | "teacher" | "admin";
   lastActivity: string;
 }
 
@@ -28,6 +29,8 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, onEnter }: CourseCardProps) {
+  
+  const router = useRouter();
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/20">
       <CardHeader className="pb-3">
@@ -83,7 +86,7 @@ export function CourseCard({ course, onEnter }: CourseCardProps) {
         )}
 
         <Button
-          onClick={() => onEnter(course.id)}
+          onClick={() => {router.push(`/page/${course.id}/courses`); }}
           className="w-full bg-secondary text-primary
           group-hover:bg-primary group-hover:text-secondary transition-colors"
         >

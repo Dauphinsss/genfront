@@ -32,7 +32,7 @@ export default function TextCircleFollower() {
       ref={wrapperRef}
       className="fixed top-0 left-0 w-[150px] h-[150px] pointer-events-none z-50 flex items-center justify-center"
     >
-     <div className="animate-spin-slow">
+      <div className="animate-spin-slow">
 
         {Array.from(text).map((ch, i) => (
           <span
