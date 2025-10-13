@@ -310,7 +310,7 @@ export function Dashboard({
       >
         <div className="container mx-auto">
           {currentView === "perfil" && (
-            <div className="max-w-md mx-auto py-8">
+            <div className="max-w-2xl mx-auto py-8 flex flex-col items-center">
               {/* Header */}
               <div className="text-center mb-6">
                 <h1 className="text-xl font-medium text-foreground mb-1">Mi Perfil</h1>
@@ -318,7 +318,7 @@ export function Dashboard({
               </div>
 
               {/* Carnet Principal */}
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-xl rounded-2xl overflow-hidden">
+              <Card className="w-full max-w-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-xl rounded-2xl overflow-hidden">
                 <CardContent className="p-0">
                   {/* Header del carnet */}
                   <div className="bg-gradient-to-r from-foreground/5 to-foreground/10 px-6 py-4 border-b border-border/20">
@@ -343,7 +343,7 @@ export function Dashboard({
                               alt="Avatar"
                               width={80}
                               height={80}
-                              className="w-20 h-20 rounded-lg object-cover border-2 border-border/30 shadow-sm"
+                              className="w-31 h-31 rounded-lg object-cover border-2 border-border/30 shadow-sm"
                             />
                             {uploading && (
                               <div className="absolute inset-0 bg-background/90 rounded-lg flex items-center justify-center">
@@ -390,31 +390,9 @@ export function Dashboard({
                           <label className="text-xs font-medium text-muted-foreground block mb-1">
                             Email
                           </label>
-                          <div className="text-sm text-foreground bg-muted/30 px-3 py-2 rounded-lg border border-border/20">
+                            <div className="text-sm text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg border border-border/20 cursor-not-allowed select-none">
                             {currentUser.email}
-                          </div>
-                        </div>
-
-                        {/* Tema */}
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-2">
-                            Apariencia
-                          </label>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-foreground">Tema oscuro</span>
-                            <button
-                              onClick={onToggleTheme}
-                              className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-                                isDark ? 'bg-foreground' : 'bg-muted'
-                              }`}
-                            >
-                              <span
-                                className={`inline-block h-3 w-3 transform rounded-full bg-background transition-transform ${
-                                  isDark ? 'translate-x-3.5' : 'translate-x-0.5'
-                                }`}
-                              />
-                            </button>
-                          </div>
+                            </div>
                         </div>
                       </div>
                     </div>
@@ -441,11 +419,11 @@ export function Dashboard({
               </Card>
 
               {/* Cerrar sesión */}
-              <div className="mt-6">
+              <div className="mt-6 w-full max-w-xl">
                 <Button 
                   variant="outline" 
                   onClick={onLogout}
-                  className="w-full h-9 text-sm border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg"
+                  className="w-full h-11 text-base font-medium border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg"
                 >
                   Cerrar sesión
                 </Button>
