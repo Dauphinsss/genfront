@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Home, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight } from "lucide-react";
+import { Home, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight, BookOpen } from "lucide-react";
 import { useAuth } from "@/components/context/AuthContext";
 
 export type DashboardView = "inicio" | "perfil" | "pasados" | string;
@@ -33,6 +33,14 @@ const PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
     icon: Archive,
     label: "Gestionar Cursos",
     viewId: "admin-courses"
+  },
+};
+
+const TEACHER_PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
+  create_topics: {
+    icon: BookOpen,
+    label: "Crear Tópicos",
+    viewId: "teacher-topics"
   },
 };
 
@@ -73,6 +81,27 @@ const useDynamicAdminItems = () => {
         .filter((privilege) => PRIVILEGE_CONFIGS[privilege.name])
         .map((privilege) => {
           const config = PRIVILEGE_CONFIGS[privilege.name];
+          return {
+            id: config.viewId,
+            label: config.label,
+            icon: config.icon,
+            view: config.viewId,
+            privilegeName: privilege.name,
+          };
+        }),
+    [privileges]
+  );
+};
+
+const useDynamicTeacherItems = () => {
+  const { privileges } = useAuth();
+  
+  return useMemo(
+    () =>
+      privileges
+        .filter((privilege) => TEACHER_PRIVILEGE_CONFIGS[privilege.name])
+        .map((privilege) => {
+          const config = TEACHER_PRIVILEGE_CONFIGS[privilege.name];
           return {
             id: config.viewId,
             label: config.label,
@@ -132,6 +161,100 @@ interface AdminSectionProps {
   onClose?: () => void;
   isMobile?: boolean;
 }
+
+interface TeacherSectionProps {
+  dynamicTeacherItems: ReturnType<typeof useDynamicTeacherItems>;
+  currentView: DashboardView;
+  shouldExpand: boolean;
+  teacherOpen: boolean;
+  setTeacherOpen: (open: boolean) => void;
+  onViewChange: (view: DashboardView) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+const TeacherSection = ({
+  dynamicTeacherItems,
+  currentView,
+  shouldExpand,
+  teacherOpen,
+  setTeacherOpen,
+  onViewChange,
+  onClose,
+  isMobile = false,
+}: TeacherSectionProps) => {
+  if (dynamicTeacherItems.length === 0) return null;
+
+  return (
+    <>
+      <li className="my-2">
+        <div className={`h-px bg-border/50 ${shouldExpand ? "mx-2" : ""}`} />
+      </li>
+      <li>
+        <button
+          onClick={() => shouldExpand && setTeacherOpen(!teacherOpen)}
+          className={`
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+            transition-all duration-200
+            ${isMobile ? "text-neutral-300" : "text-muted-foreground"}
+            ${shouldExpand ? "hover:bg-secondary cursor-pointer" : "cursor-default"}
+            ${!shouldExpand ? "justify-center" : ""}
+          `}
+        >
+          {shouldExpand ? (
+            <>
+              <BookOpen className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium truncate whitespace-nowrap flex-1 text-left">
+                Profesor
+              </span>
+              {teacherOpen ? (
+                <ChevronDown className="w-4 h-4 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              )}
+            </>
+          ) : (
+            <BookOpen className="w-5 h-5 flex-shrink-0" />
+          )}
+        </button>
+
+        {shouldExpand && teacherOpen && (
+          <ul className="mt-1 ml-7 space-y-1">
+            {dynamicTeacherItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.view;
+
+              return (
+                <li key={item.id}>
+                  <button
+                    onClick={() => {
+                      onViewChange(item.view);
+                      onClose?.();
+                    }}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2 rounded-lg
+                      transition-all duration-200 text-sm
+                      ${
+                        isActive
+                          ? isMobile
+                            ? "bg-neutral-800 text-neutral-300 font-medium"
+                            : "bg-primary/10 text-primary font-medium"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }
+                    `}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate whitespace-nowrap">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </li>
+    </>
+  );
+};
 
 const AdminSection = ({
   dynamicAdminItems,
@@ -222,8 +345,10 @@ export function Sidebar({
 }: SidebarProps) {
   const { privileges } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const [teacherOpen, setTeacherOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
   
+  const dynamicTeacherItems = useDynamicTeacherItems();
   const dynamicAdminItems = useDynamicAdminItems();
   const shouldExpand = !isCollapsed || isHovered;
 
@@ -251,6 +376,16 @@ export function Sidebar({
                 onViewChange={onViewChange}
               />
             ))}
+
+            {/* Sección Profesor */}
+            <TeacherSection
+              dynamicTeacherItems={dynamicTeacherItems}
+              currentView={currentView}
+              shouldExpand={shouldExpand}
+              teacherOpen={teacherOpen}
+              setTeacherOpen={setTeacherOpen}
+              onViewChange={onViewChange}
+            />
 
             {/* Administración Dinámica */}
             <AdminSection
@@ -298,7 +433,9 @@ export function Sidebar({
   currentView: DashboardView;
   onViewChange: (view: DashboardView) => void;
 }) {
+  const [teacherOpen, setTeacherOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const dynamicTeacherItems = useDynamicTeacherItems();
   const dynamicAdminItems = useDynamicAdminItems();
 
   return (
@@ -342,6 +479,18 @@ export function Sidebar({
                   onClose={onClose}
                 />
               ))}
+
+              {/* Sección Profesor */}
+              <TeacherSection
+                dynamicTeacherItems={dynamicTeacherItems}
+                currentView={currentView}
+                shouldExpand={true}
+                teacherOpen={teacherOpen}
+                setTeacherOpen={setTeacherOpen}
+                onViewChange={onViewChange}
+                onClose={onClose}
+                isMobile
+              />
 
               {/* Administración Dinámica */}
               <AdminSection

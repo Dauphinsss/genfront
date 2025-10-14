@@ -183,7 +183,7 @@ function Sidebar({
           className="bg-sidebar text-sidebar-foreground w-[var(--sidebar-width)] p-0 [&>button]:hidden"
           style={
             {
-              ["--sidebar-width" as any]: SIDEBAR_WIDTH_MOBILE,
+              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
           side={side}

@@ -11,6 +11,7 @@ import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
 import { updateProfile } from "@/services/profile";
 import { UsersManagement } from "@/components/admin/UsersManagement";
 import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
+import { TopicsView } from "@/components/teacher/TopicsView";
 import axios from "axios";
 
 interface DashboardProps {
@@ -500,6 +501,12 @@ export function Dashboard({
                   </CardContent>
                 </Card>
               )}
+            </div>
+          )}
+
+          {currentView === "teacher-topics" && (
+            <div className="max-w-7xl mx-auto">
+              <TopicsView />
             </div>
           )}
 
