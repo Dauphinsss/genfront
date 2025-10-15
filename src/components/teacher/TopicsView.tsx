@@ -7,7 +7,7 @@ import { BookOpen, Plus, Calendar, FileText, Trash2, Loader2 } from "lucide-reac
 import { TopicEditor } from "./TopicEditor";
 import { CreateTopicModal } from "./CreateTopicModal";
 import type { Topic, CreateTopicDto } from "@/types/topic";
-import { getAllTopics, createTopic, createContent, deleteTopic } from "@/services/topics";
+import { getAllTopics, deleteTopic } from "@/services/topics";
 
 export function TopicsView() {
   const [topics, setTopics] = useState<Topic[]>([]);

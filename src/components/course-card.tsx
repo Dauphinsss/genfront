@@ -25,10 +25,9 @@ interface Course {
 
 interface CourseCardProps {
   course: Course;
-  onEnter: (courseId: string) => void;
 }
 
-export function CourseCard({ course, onEnter }: CourseCardProps) {
+export function CourseCard({ course }: CourseCardProps) {
   
   const router = useRouter();
   return (

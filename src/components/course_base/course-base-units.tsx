@@ -3,10 +3,16 @@
 import { useCourse } from "@/lib/course-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Edit, ChevronRight, ArrowLeft } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Plus, Trash2, Edit, ChevronRight } from "lucide-react"
+import { useState } from "react"
 import axios, { AxiosError } from "axios"
 import { AdminSidebar } from "./course-base-sidebar"
+
+type Lesson = {
+  id: number;
+  title: string;
+  unitId: number;
+};
 
 export default function CourseBaseEdit() {
   const { course, updateCourse } = useCourse()
@@ -14,7 +20,7 @@ export default function CourseBaseEdit() {
   const [editingUnit, setEditingUnit] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null)
-  const [lessons, setLessons] = useState<any[]>([])
+  const [lessons, setLessons] = useState<Lesson[]>([])
   const [loading, setLoading] = useState(false)
   const [editingLesson, setEditingLesson] = useState<number | null>(null)
   const [editLessonTitle, setEditLessonTitle] = useState("")
@@ -90,12 +96,7 @@ export default function CourseBaseEdit() {
 
 
   // CRUD DE LECCIONES
- 
-   type Lesson = {
-  id: number;
-  title: string;
-  unitId: number;
-};
+
   const fetchLessons = async (unitId: number) => {
     try {
       setLoading(true)
