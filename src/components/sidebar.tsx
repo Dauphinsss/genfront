@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Home, BookOpen, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight, Edit, BookOpen } from "lucide-react";
+import { Home, BookOpen, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight, Edit } from "lucide-react";
 import { useAuth } from "@/components/context/AuthContext";
 
 export type DashboardView = "inicio" | "perfil" | "pasados" | string;
@@ -40,14 +40,6 @@ const PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
     icon: Edit,
     label: "Editar Curso Base",
     viewId: "admin-base-course-edit",
-  },
-};
-
-const TEACHER_PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
-  create_topics: {
-    icon: BookOpen,
-    label: "Crear Tópicos",
-    viewId: "teacher-topics"
   },
 };
 
