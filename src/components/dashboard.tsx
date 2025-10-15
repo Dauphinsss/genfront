@@ -12,7 +12,8 @@ import { updateProfile } from "@/services/profile";
 import { UsersManagement } from "@/components/admin/UsersManagement";
 import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
 import axios from "axios";
-
+import CourseBase from "@/components/course_base/lesson-page";
+import CourseBaseEdit  from "@/components/course_base/course-base-units";
 interface DashboardProps {
   user: {
     name: string;
@@ -512,6 +513,18 @@ export function Dashboard({
           {currentView === "admin-privileges" && (
             <div className="max-w-7xl mx-auto">
               <PrivilegesManagement />
+            </div>
+          )}
+
+          {currentView === "admin-base-course" && (
+            <div className="max-w-7xl mx-auto">
+              <CourseBase />
+            </div>
+          )}
+
+          {currentView === "admin-base-course-edit" && (
+            <div className="max-w-7xl mx-auto">
+              <CourseBaseEdit />
             </div>
           )}
 
