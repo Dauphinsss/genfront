@@ -9,7 +9,6 @@ import { Header } from "./header";
 import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
 import { UsersManagement } from "@/components/admin/UsersManagement";
-import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
 import { TopicsView } from "@/components/teacher/TopicsView";
 import { ProfileView } from "@/components/profile";
 import axios from "axios";
@@ -305,12 +304,6 @@ export function Dashboard({
           {currentView === "admin-users" && (
             <div className="max-w-7xl mx-auto">
               <UsersManagement />
-            </div>
-          )}
-
-          {currentView === "admin-privileges" && (
-            <div className="max-w-7xl mx-auto">
-              <PrivilegesManagement />
             </div>
           )}
 

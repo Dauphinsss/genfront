@@ -5,9 +5,16 @@ import Image from "next/image";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, UserPlus, UserMinus, X, Check, Loader2, Shield } from "lucide-react";
+import {
+  Search,
+  UserPlus,
+  UserMinus,
+  X,
+  Check,
+  Loader2,
+  Shield,
+} from "lucide-react";
 
 interface Privilege {
   id: number;
@@ -30,7 +37,9 @@ export function UsersManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [updatingPrivilege, setUpdatingPrivilege] = useState<number | null>(null);
+  const [updatingPrivilege, setUpdatingPrivilege] = useState<number | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -63,7 +72,11 @@ export function UsersManagement() {
     setTimeout(() => setSelectedUser(null), 300);
   };
 
-  const togglePrivilege = async (userId: number, privilegeId: number, has: boolean) => {
+  const togglePrivilege = async (
+    userId: number,
+    privilegeId: number,
+    has: boolean
+  ) => {
     const token = localStorage.getItem("pyson_token");
     setUpdatingPrivilege(privilegeId);
 
@@ -88,7 +101,10 @@ export function UsersManagement() {
                 ...u,
                 privileges: has
                   ? u.privileges.filter((p) => p.id !== privilegeId)
-                  : [...u.privileges, allPrivileges.find((p) => p.id === privilegeId)!],
+                  : [
+                      ...u.privileges,
+                      allPrivileges.find((p) => p.id === privilegeId)!,
+                    ],
               }
             : u
         )
@@ -101,7 +117,10 @@ export function UsersManagement() {
                 ...prev,
                 privileges: has
                   ? prev.privileges.filter((p) => p.id !== privilegeId)
-                  : [...prev.privileges, allPrivileges.find((p) => p.id === privilegeId)!],
+                  : [
+                      ...prev.privileges,
+                      allPrivileges.find((p) => p.id === privilegeId)!,
+                    ],
               }
             : null
         );
@@ -129,11 +148,14 @@ export function UsersManagement() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            <Shield className="w-7 h-7 mr-2 inline-block" />
+            Gestión de Usuarios
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Administra los privilegios de los usuarios del sistema
+            Toca un usuario para ver y modificar sus privilegios
           </p>
         </div>
 
@@ -147,68 +169,55 @@ export function UsersManagement() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredUsers.map((user) => (
             <Card
               key={user.id}
               className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] border-border"
               onClick={() => openModal(user)}
             >
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="relative">
+              <CardContent >
+                <div className="flex md:flex-col items-start md:items-center md:text-center gap-3">
+                  {/* Avatar */}
+                  <div className="relative flex-shrink-0">
                     <Image
                       src={user.avatar || "/placeholder.svg"}
                       alt={user.name}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 rounded-full border-2 border-border"
+                      width={64}
+                      height={64}
+                      className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-border object-cover"
                     />
                     {user.privileges.length > 0 && (
-                      <div className="absolute -bottom-1 -right-1 bg-neutral-800 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-semibold border-2 border-neutral-700 shadow-md
-">
+                      <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center text-[10px] md:text-xs font-semibold shadow-md">
                         {user.privileges.length}
                       </div>
                     )}
                   </div>
-                  
-                  <div className="space-y-1 w-full">
-                    <h3 className="font-semibold text-foreground truncate">{user.name}</h3>
-                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 md:w-full text-left md:text-center space-y-1 md:space-y-0.5">
+                    <h3 className="font-semibold text-sm md:text-sm text-foreground truncate">
+                      {user.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user.email}
+                    </p>
+                    
+                    
                   </div>
 
-                  <div className="flex flex-wrap gap-2 justify-center w-full min-h-[28px]">
-                    {user.privileges.length > 0 ? (
-                      <>
-                        {user.privileges.slice(0, 3).map((priv) => (
-                          <Badge key={priv.id} variant="secondary" className="text-xs">
-                            {priv.name}
-                          </Badge>
-                        ))}
-                        {user.privileges.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{user.privileges.length - 3}
-                          </Badge>
-                        )}
-                      </>
-                    ) : (
-                      <Badge variant="outline" className="text-xs text-muted-foreground">
-                        Sin privilegios
-                      </Badge>
-                    )}
-                  </div>
-
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="w-full"
+                  {/* Button - solo visible en desktop */}
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="hidden md:flex w-full h-8 text-xs mt-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       openModal(user);
                     }}
                   >
-                    <Shield className="w-4 h-4 mr-2" />
-                    Gestionar privilegios
+                    <Shield className="w-3.5 h-3.5 mr-1.5" />
+                    Gestionar
                   </Button>
                 </div>
               </CardContent>
@@ -235,62 +244,71 @@ export function UsersManagement() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-200"
             onClick={closeModal}
           />
-          
+
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div
               className="bg-background border border-border rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden pointer-events-auto animate-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              <div className="sticky top-0 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <Image
                     src={selectedUser.avatar || "/placeholder.svg"}
                     alt={selectedUser.name}
-                    width={48}
-                    height={48}
-                    className="w-12 h-12 rounded-full border-2 border-border"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full border-2 border-border"
                   />
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">{selectedUser.name}</h2>
-                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                    <h2 className="text-base font-bold text-foreground">
+                      {selectedUser.name}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedUser.email}
+                    </p>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={closeModal}>
-                  <X className="w-5 h-5" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={closeModal}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
-                <div className="space-y-6">
+              <div className="p-4 overflow-y-auto max-h-[calc(90vh-100px)]">
+                <div className="space-y-4">
                   {/* Privilegios Actuales */}
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-950 rounded-full">
-                        <Check className="w-4 h-4 text-green-600" />
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center justify-center w-7 h-7 text-secondary  bg-primary rounded-full">
+                        <Check className="w-3.5 h-3.5 " />
                       </div>
-                      <h3 className="text-lg font-semibold text-foreground">
+                      <h3 className="text-base font-semibold text-foreground">
                         Privilegios Activos
                       </h3>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         ({selectedUser.privileges.length})
                       </span>
                     </div>
 
                     {selectedUser.privileges.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {selectedUser.privileges.map((priv) => (
                           <div
                             key={priv.id}
-                            className="flex items-start justify-between p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg"
+                            className="flex items-start justify-between p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg"
                           >
-                            <div className="flex-1 min-w-0 mr-3">
-                              <p className="font-medium text-sm text-foreground truncate">
+                            <div className="flex-1 min-w-0 mr-2">
+                              <p className="font-medium text-xs text-foreground truncate">
                                 {priv.name}
                               </p>
                               {priv.description && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
                                   {priv.description}
                                 </p>
                               )}
@@ -298,23 +316,25 @@ export function UsersManagement() {
                             <Button
                               size="sm"
                               variant="destructive"
-                              className="flex-shrink-0"
-                              onClick={() => togglePrivilege(selectedUser.id, priv.id, true)}
+                              className="flex-shrink-0 h-7 w-7 p-0"
+                              onClick={() =>
+                                togglePrivilege(selectedUser.id, priv.id, true)
+                              }
                               disabled={updatingPrivilege === priv.id}
                             >
                               {updatingPrivilege === priv.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
-                                <UserMinus className="w-4 h-4" />
+                                <UserMinus className="w-3 h-3" />
                               )}
                             </Button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 bg-secondary rounded-lg">
-                        <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground">
+                      <div className="text-center py-6 bg-secondary rounded-lg">
+                        <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground">
                           Este usuario no tiene privilegios asignados
                         </p>
                       </div>
@@ -323,57 +343,81 @@ export function UsersManagement() {
 
                   {/* Privilegios Disponibles */}
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-950 rounded-full">
-                        <UserPlus className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center justify-center w-7 h-7 bg-primary rounded-full">
+                        <UserPlus className="w-3.5 h-3.5 text-secondary" />
                       </div>
-                      <h3 className="text-lg font-semibold text-foreground">
+                      <h3 className="text-base font-semibold text-foreground">
                         Privilegios Disponibles
                       </h3>
-                      <span className="text-sm text-muted-foreground">
-                        ({allPrivileges.filter((priv) => !selectedUser.privileges.some((p) => p.id === priv.id)).length})
+                      <span className="text-xs text-muted-foreground">
+                        (
+                        {
+                          allPrivileges.filter(
+                            (priv) =>
+                              !selectedUser.privileges.some(
+                                (p) => p.id === priv.id
+                              )
+                          ).length
+                        }
+                        )
                       </span>
                     </div>
 
-                    {allPrivileges.filter((priv) => !selectedUser.privileges.some((p) => p.id === priv.id)).length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {allPrivileges.filter(
+                      (priv) =>
+                        !selectedUser.privileges.some((p) => p.id === priv.id)
+                    ).length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {allPrivileges
-                          .filter((priv) => !selectedUser.privileges.some((p) => p.id === priv.id))
+                          .filter(
+                            (priv) =>
+                              !selectedUser.privileges.some(
+                                (p) => p.id === priv.id
+                              )
+                          )
                           .map((priv) => (
                             <div
                               key={priv.id}
-                              className="flex items-start justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
+                              className="flex items-start justify-between p-3 border border-border rounded-lg hover:border-primary/50 transition-colors"
                             >
-                              <div className="flex-1 min-w-0 mr-3">
-                                <p className="font-medium text-sm text-foreground truncate">
+                              <div className="flex-1 min-w-0 mr-2">
+                                <p className="font-medium text-xs text-foreground truncate">
                                   {priv.name}
                                 </p>
                                 {priv.description && (
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
                                     {priv.description}
                                   </p>
                                 )}
                               </div>
                               <Button
                                 size="sm"
-                                className="flex-shrink-0"
-                                onClick={() => togglePrivilege(selectedUser.id, priv.id, false)}
+                                className="flex-shrink-0 h-7 w-7 p-0"
+                                onClick={() =>
+                                  togglePrivilege(
+                                    selectedUser.id,
+                                    priv.id,
+                                    false
+                                  )
+                                }
                                 disabled={updatingPrivilege === priv.id}
                               >
                                 {updatingPrivilege === priv.id ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <Loader2 className="w-3 h-3 animate-spin" />
                                 ) : (
-                                  <UserPlus className="w-4 h-4" />
+                                  <UserPlus className="w-3 h-3" />
                                 )}
                               </Button>
                             </div>
                           ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 bg-secondary rounded-lg">
-                        <Check className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground">
-                          Este usuario ya tiene todos los privilegios disponibles
+                      <div className="text-center py-6 bg-secondary rounded-lg">
+                        <Check className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground">
+                          Este usuario ya tiene todos los privilegios
+                          disponibles
                         </p>
                       </div>
                     )}
@@ -382,8 +426,8 @@ export function UsersManagement() {
               </div>
 
               {/* Footer */}
-              <div className="sticky bottom-0 bg-background border-t border-border px-6 py-4 flex justify-end">
-                <Button onClick={closeModal} variant="outline">
+              <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 flex justify-end">
+                <Button onClick={closeModal} variant="outline" size="sm">
                   Cerrar
                 </Button>
               </div>

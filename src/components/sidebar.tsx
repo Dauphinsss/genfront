@@ -24,11 +24,6 @@ const PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
     label: "Gestionar Usuarios",
     viewId: "admin-users"
   },
-  manage_privileges: {
-    icon: Shield,
-    label: "Gestionar Privilegios",
-    viewId: "admin-privileges"
-  },
   manage_courses: {
     icon: Archive,
     label: "Gestionar Cursos",
