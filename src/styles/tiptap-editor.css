@@ -1,0 +1,91 @@
+/* Estilos para el editor TipTap */
+
+/* Placeholder cuando el editor está vacío */
+.ProseMirror.is-empty::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.ProseMirror {
+  position: relative;
+}
+
+/* Imágenes redimensionables */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ProseMirror img:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Imagen seleccionada */
+.ProseMirror img.tiptap-image-selected {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Clear floats después de contenido con imágenes flotantes */
+.ProseMirror p:has(img[style*="float"]) + p {
+  clear: both;
+}
+
+/* Asegurar que el texto se envuelva correctamente alrededor de imágenes flotantes */
+.ProseMirror img[style*="float: left"] {
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror img[style*="float: right"] {
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Clearfix para contenedores con imágenes flotantes */
+.ProseMirror::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Estilos para el modo vista previa */
+.prose img {
+  border-radius: 0.5rem;
+}
+
+.prose img[style*="float: left"] {
+  float: left;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose img[style*="float: right"] {
+  float: right;
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose img[style*="margin-left: auto"] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive para imágenes grandes */
+@media (max-width: 768px) {
+  .ProseMirror img[style*="float"] {
+    float: none !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+  }
+}
