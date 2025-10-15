@@ -15,6 +15,10 @@ export function TopicsView() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | undefined>();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isNewTopic, setIsNewTopic] = useState(false);
 
   // Cargar topics al montar
   useEffect(() => {
@@ -38,30 +42,26 @@ export function TopicsView() {
   };
 
   const handleCreateSubmit = async (data: CreateTopicDto & { description?: string }) => {
-    try {
-      // 1. Crear el topic
-      const newTopic = await createTopic({ name: data.name, type: data.type });
-      
-      // 2. Crear el content vacío asociado
-      await createContent(newTopic.id, {
-        description: data.description,
-        htmlContent: '<p>Comienza a escribir tu contenido...</p>',
-      });
+    // Crear un tópico "vacío" con placeholder en htmlContent
+    const tempTopic: Topic = {
+      id: 0,
+      name: data.name,
+      type: data.type,
+      createdAt: new Date().toISOString(),
+      content: {
+      id: 0,
+      topicId: 0,
+      description: data.description || '',
+      htmlContent: "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      resources: []
+      }
+    };
 
-      // 3. Obtener el topic completo con content
-      const { getTopicById } = await import("@/services/topics");
-      const fullTopic = await getTopicById(newTopic.id);
-
-      // 4. Abrir editor con el topic completo
-      setEditingTopic(fullTopic);
-      setIsEditing(true);
-
-      // 5. Recargar lista en background
-      loadTopics();
-    } catch (error) {
-      console.error("Error creating topic:", error);
-      throw error;
-    }
+    setEditingTopic(tempTopic);
+    setIsNewTopic(true);
+    setIsEditing(true);
   };
 
   const handleEdit = async (topic: Topic) => {
@@ -69,6 +69,7 @@ export function TopicsView() {
       const { getTopicById } = await import("@/services/topics");
       const fullTopic = await getTopicById(topic.id);
       setEditingTopic(fullTopic);
+      setIsNewTopic(false);
       setIsEditing(true);
     } catch (error) {
       console.error("Error loading topic:", error);
@@ -81,33 +82,48 @@ export function TopicsView() {
     await loadTopics();
     setIsEditing(false);
     setEditingTopic(undefined);
+    setIsNewTopic(false);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditingTopic(undefined);
+    setIsNewTopic(false);
   };
 
-  const handleDelete = async (topicId: number, event: React.MouseEvent) => {
+  const handleDelete = (topicId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    
-    if (!confirm("¿Estás seguro de eliminar este tópico? Esta acción no se puede deshacer.")) {
-      return;
-    }
+    setTopicToDelete(topicId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (topicToDelete === null) return;
 
     try {
-      await deleteTopic(topicId);
+      setIsDeleting(true);
+      await deleteTopic(topicToDelete);
       await loadTopics();
+      setShowDeleteConfirm(false);
+      setTopicToDelete(null);
     } catch (error) {
       console.error("Error deleting topic:", error);
       alert("Error al eliminar el tópico");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setTopicToDelete(null);
   };
 
   if (isEditing) {
     return (
       <TopicEditor 
-        topic={editingTopic} 
+        topic={editingTopic}
+        isNewTopic={isNewTopic}
         onSave={handleSave} 
         onCancel={handleCancel} 
       />
@@ -218,6 +234,53 @@ export function TopicsView() {
         </div>
       )}
       </div>
+
+      {/* Modal de confirmación personalizado */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-lg shadow-lg max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    ¿Eliminar tópico?
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Esta acción no se puede deshacer. El tópico y todo su contenido serán eliminados permanentemente.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={cancelDelete}
+                  disabled={isDeleting}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    'Eliminar'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

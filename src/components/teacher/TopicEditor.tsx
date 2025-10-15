@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -10,7 +10,7 @@ import { ResizableImage } from "@/lib/tiptap-extensions/resizable-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateContent, uploadResource } from "@/services/topics";
+import { createTopic, createContent, updateTopic, updateContent, uploadResource, deleteTopic } from "@/services/topics";
 import "@/styles/tiptap-editor.css";
 import {
   Bold,
@@ -39,20 +39,20 @@ import type { Topic } from "@/types/topic";
 
 interface TopicEditorProps {
   topic?: Topic;
+  isNewTopic?: boolean;
   onSave: () => Promise<void>;
   onCancel: () => void;
 }
 
-export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
+export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: TopicEditorProps) {
   const [name, setName] = useState(topic?.name || "");
   const [description, setDescription] = useState(topic?.content?.description || "");
   const [showPreview, setShowPreview] = useState(false);
+  const [wasAutoCreated, setWasAutoCreated] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
-  const [imageWidth, setImageWidth] = useState("400");
-  const [imageAlign, setImageAlign] = useState<"left" | "center" | "right">("left");
   const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,29 +83,48 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
         multicolor: true,
       }),
     ],
-    content: topic?.content?.htmlContent || '<p>Comienza a escribir tu contenido...</p>',
+    content: topic?.content?.htmlContent || '',
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-[400px] px-4 py-3 dark:prose-invert',
+        'data-placeholder': 'Comienza a escribir tu contenido...',
       },
     },
+    onUpdate: ({ editor }) => {
+      // Actualizar clase cuando el contenido cambia
+      const isEmpty = editor.isEmpty;
+      const proseMirrorEl = editor.view.dom;
+      if (isEmpty) {
+        proseMirrorEl.classList.add('is-empty');
+      } else {
+        proseMirrorEl.classList.remove('is-empty');
+      }
+    },
   });
+
+  // Agregar clase inicial si está vacío
+  useEffect(() => {
+    if (editor) {
+      const isEmpty = editor.isEmpty;
+      const proseMirrorEl = editor.view.dom;
+      if (isEmpty) {
+        proseMirrorEl.classList.add('is-empty');
+      }
+    }
+  }, [editor]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !editor) return;
 
-    // Validar tamaño (50MB max)
     if (file.size > 50 * 1024 * 1024) {
       alert("El archivo es demasiado grande. Máximo 50MB");
       return;
     }
 
     try {
-      // Subir archivo al backend y obtener URL
       const resourceUrl = await uploadFileToBackend(file);
       
-      // Insertar imagen con la URL del backend
       insertImageWithOptions(resourceUrl);
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -115,34 +134,7 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
 
   const insertImageWithOptions = (src: string) => {
     if (!editor) return;
-
-    const width = parseInt(imageWidth) || 400;
-    let style = `width: ${width}px; height: auto;`;
-    
-    // Agregar alineación según la opción seleccionada
-    if (imageAlign === "left") {
-      style += " float: left; margin-right: 1rem; margin-bottom: 0.5rem;";
-    } else if (imageAlign === "right") {
-      style += " float: right; margin-left: 1rem; margin-bottom: 0.5rem;";
-    } else if (imageAlign === "center") {
-      style += " display: block; margin-left: auto; margin-right: auto;";
-    }
-
-    editor.chain().focus().setImage({ 
-      src
-    }).run();
-
-    // Aplicar estilos después de insertar
-    const { state } = editor;
-    const { selection } = state;
-    const node = state.doc.nodeAt(selection.from - 1);
-    
-    if (node && node.type.name === 'image') {
-      editor.commands.updateAttributes('image', {
-        style,
-        width: width.toString(),
-      });
-    }
+    editor.chain().focus().setImage({ src }).run();
   };
 
   const handleAddImageUrl = () => {
@@ -153,7 +145,6 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
     }
   };
 
-  // Handlers para otros tipos de archivos
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !editor) return;
@@ -216,21 +207,57 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
     }
   };
 
+  const handleCancel = async () => {
+    // Si el tópico fue creado automáticamente al subir archivos, eliminarlo
+    if (wasAutoCreated && topic?.id && topic.id !== 0) {
+      try {
+        await deleteTopic(topic.id);
+      } catch (error) {
+        console.error("Error deleting auto-created topic:", error);
+      }
+    }
+    onCancel();
+  };
+
   const handleSave = async () => {
-    if (!topic?.content?.id) {
-      alert("Error: No se puede guardar sin un content válido");
+    if (!name.trim()) {
+      alert("Error: El título es obligatorio");
       return;
     }
 
     setIsSaving(true);
     try {
-      // Actualizar el contenido en el backend
-      await updateContent(topic.content.id, {
-        htmlContent: editor?.getHTML() || "",
-        description: description.trim(),
-      });
+      if (isNewTopic) {
+        // Crear nuevo tópico
+        const newTopic = await createTopic({
+          name: name.trim(),
+          type: topic?.type || "content",
+        });
 
-      // Llamar a onSave para recargar la lista
+        // Crear el contenido
+        await createContent(newTopic.id, {
+          description: description.trim(),
+          htmlContent: editor?.getHTML() || "<p></p>",
+        });
+      } else {
+        // Actualizar tópico existente
+        if (!topic?.content?.id || !topic?.id) {
+          alert("Error: No se puede guardar sin un topic válido");
+          return;
+        }
+
+        // Actualizar el nombre del tópico
+        await updateTopic(topic.id, {
+          name: name.trim(),
+        });
+
+        // Actualizar el contenido
+        await updateContent(topic.content.id, {
+          htmlContent: editor?.getHTML() || "",
+          description: description.trim(),
+        });
+      }
+
       await onSave();
     } catch (error) {
       console.error("Error saving content:", error);
@@ -240,8 +267,35 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
     }
   };
 
-  // Subir archivo y obtener URL del backend
   const uploadFileToBackend = async (file: File): Promise<string> => {
+    // Si es un tópico nuevo y no tiene ID, crearlo automáticamente
+    if (isNewTopic && (!topic?.id || topic.id === 0)) {
+      if (!name.trim()) {
+        throw new Error("Debes ingresar un título antes de subir archivos");
+      }
+
+      // Crear el tópico automáticamente
+      const newTopic = await createTopic({
+        name: name.trim(),
+        type: topic?.type || "content",
+      });
+
+      const newContent = await createContent(newTopic.id, {
+        description: description.trim(),
+        htmlContent: editor?.getHTML() || "<p></p>",
+      });
+
+      // Actualizar el topic local con los IDs reales
+      if (topic) {
+        topic.id = newTopic.id;
+        topic.content!.id = newContent.id;
+        topic.content!.topicId = newTopic.id;
+      }
+
+      // Marcar que fue creado automáticamente
+      setWasAutoCreated(true);
+    }
+
     if (!topic?.content?.id) {
       throw new Error("No content ID available");
     }
@@ -258,11 +312,12 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
     return <div className="flex items-center justify-center min-h-[400px]">Cargando editor...</div>;
   }
 
-  if (!topic?.content?.id) {
+  // Permitir edición si es nuevo o si tiene content.id
+  if (!isNewTopic && !topic?.content?.id) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="text-lg text-muted-foreground">Error: No se puede editar un tópico sin contenido</div>
-        <Button onClick={onCancel} variant="outline">Volver</Button>
+        <Button onClick={handleCancel} variant="outline">Volver</Button>
       </div>
     );
   }
@@ -279,7 +334,7 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
                 placeholder="Nombre del tópico..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="text-2xl font-bold border-0 px-0 focus-visible:ring-0 bg-transparent margint-1 text-foreground"
+                className="text-2xl font-bold border-0 px-4 focus-visible:ring-0 bg-transparent text-foreground"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -294,7 +349,7 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onCancel}
+                onClick={handleCancel}
               >
                 <X className="w-4 h-4 mr-2" />
                 Cancelar
@@ -342,7 +397,7 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
               placeholder="Descripción breve (opcional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="text-sm border-0 px-0 focus-visible:ring-0 bg-transparent text-muted-foreground"
+              className="text-sm border-0 px-4 focus-visible:ring-0 bg-transparent text-muted-foreground"
             />
           </div>
 
@@ -452,24 +507,27 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => videoInputRef.current?.click()}
-                title="Insertar video"
+                disabled
+                title="Insertar video (próximamente)"
+                className="opacity-50 cursor-not-allowed"
               >
                 <Video className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => audioInputRef.current?.click()}
-                title="Insertar audio"
+                disabled
+                title="Insertar audio (próximamente)"
+                className="opacity-50 cursor-not-allowed"
               >
                 <Music className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => documentInputRef.current?.click()}
-                title="Insertar documento (PDF)"
+                disabled
+                title="Insertar documento (próximamente)"
+                className="opacity-50 cursor-not-allowed"
               >
                 <FileText className="w-4 h-4" />
               </Button>
@@ -533,79 +591,54 @@ export function TopicEditor({ topic, onSave, onCancel }: TopicEditorProps) {
         {showImageDialog && (
           <div className="border-t border-border bg-muted/30 px-6 py-3 space-y-3">
             <div className="max-w-7xl mx-auto">
-              {/* URL de imagen */}
-              <div className="flex items-end gap-4 mb-3">
-                <div className="flex-1">
-                  <Label className="text-xs mb-1 block">URL de la imagen</Label>
-                  <Input
-                    type="text"
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddImageUrl()}
-                  />
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <ImageIcon className="w-4 h-4 mr-2" />
-                  Subir archivo
-                </Button>
-              </div>
-
-              {/* Controles de tamaño y alineación */}
-              <div className="flex items-center gap-4 pt-3 border-t border-border/50">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs whitespace-nowrap">Ancho (px):</Label>
-                  <Input
-                    type="number"
-                    min="100"
-                    max="1200"
-                    value={imageWidth}
-                    onChange={(e) => setImageWidth(e.target.value)}
-                    className="w-24 h-8 text-sm"
-                  />
+              {/* Opciones de imagen: URL o Archivo */}
+              <div className="flex items-center gap-4 mb-3">
+                {/* URL de imagen */}
+                <div className="flex-1 flex items-end gap-2">
+                  <div className="flex-1">
+                    <Label className="text-xs mb-1 block">URL de la imagen</Label>
+                    <Input
+                      type="text"
+                      placeholder="https://ejemplo.com/imagen.jpg"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddImageUrl()}
+                    />
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={handleAddImageUrl}
+                    className="shrink-0"
+                  >
+                    Insertar
+                  </Button>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs whitespace-nowrap">Alineación:</Label>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant={imageAlign === "left" ? "default" : "outline"}
-                      onClick={() => setImageAlign("left")}
-                      className="h-8 px-2"
+                {/* Divisor "O" */}
+                <div className="flex items-center justify-center px-3 text-muted-foreground font-semibold">
+                  Ó
+                </div>
+
+                {/* Subir archivo */}
+                <div className="flex items-end gap-2">
+                  <div className="min-w-[200px]">
+                    <Label className="text-xs mb-1 block">Subir desde dispositivo</Label>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full whitespace-nowrap"
                     >
-                      <AlignLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={imageAlign === "center" ? "default" : "outline"}
-                      onClick={() => setImageAlign("center")}
-                      className="h-8 px-2"
-                    >
-                      <AlignCenter className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={imageAlign === "right" ? "default" : "outline"}
-                      onClick={() => setImageAlign("right")}
-                      className="h-8 px-2"
-                    >
-                      <AlignRight className="w-4 h-4" />
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Subir archivo
                     </Button>
                   </div>
                 </div>
-
-                <Button size="sm" onClick={handleAddImageUrl} className="ml-auto">
-                  Insertar
-                </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
                   onClick={() => setShowImageDialog(false)}
+                  className="ml-auto"
                 >
                   <X className="w-4 h-4" />
                 </Button>

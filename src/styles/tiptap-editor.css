@@ -1,5 +1,19 @@
 /* Estilos para el editor TipTap */
 
+/* Placeholder cuando el editor está vacío */
+.ProseMirror.is-empty::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.ProseMirror {
+  position: relative;
+}
+
 /* Imágenes redimensionables */
 .ProseMirror img {
   max-width: 100%;
