@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Header } from "./header";
 import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
-import { updateProfile } from "@/services/profile";
 import { UsersManagement } from "@/components/admin/UsersManagement";
 import { PrivilegesManagement } from "@/components/admin/PrivilegesManagement";
 import { TopicsView } from "@/components/teacher/TopicsView";
+import { ProfileView } from "@/components/profile";
 import axios from "axios";
 
 interface DashboardProps {
@@ -126,75 +126,15 @@ export function Dashboard({
     }
   };
 
-  console.debug('Available courses:', mockCourses.length);
-  const [currentUser, setCurrentUser] = useState(user)
-  const [displayName, setDisplayName] = useState(user.name)
-  const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const token = localStorage.getItem('pyson_token') || '';
+  console.debug("Available courses:", mockCourses.length);
+  const [currentUser, setCurrentUser] = useState(user);
 
-  const [originalUser, setOriginalUser] = useState(user)
-  const [originalDisplayName, setOriginalDisplayName] = useState(user.name)
-
-  const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
-      alert('Solo se permiten imágenes JPG, PNG, WebP o GIF');
-      return;
-    }
-    
-    if (file.size > 10 * 1024 * 1024) {
-      alert('La imagen debe ser menor a 10MB');
-      return;
-    }
-
-    setAvatarPreview(URL.createObjectURL(file));
-    setUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      const token = localStorage.getItem('pyson_token');
-      
-      const response = await axios.post(
-        'http://localhost:4000/api/me/avatar',
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
-
-      const result = response.data;
-      
-      if (result.success && result.user) {
-        setCurrentUser((prev) => ({
-          ...prev,
-          avatar: result.user.avatar,
-        }));
-        localStorage.setItem('pyson_user', JSON.stringify({
-          ...currentUser,
-          avatar: result.user.avatar,
-        }));
-        setAvatarPreview(null);
-      } else {
-        alert('Error al subir avatar: ' + (result.message || ''));
-        setAvatarPreview(null);
-      }
-
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error de conexión al subir avatar');
-      setAvatarPreview(null);
-    } finally {
-      setUploading(false);
-    }
+  const handleUserUpdate = (updatedUser: {
+    name: string;
+    email: string;
+    avatar: string;
+  }) => {
+    setCurrentUser(updatedUser);
   };
 
   const handleJoinCourse = async () => {
@@ -241,40 +181,6 @@ export function Dashboard({
     }
   };
 
-  const handleSaveChanges = async () => {
-    setSaving(true);
-    const updatedProfile = await updateProfile(token, { name: displayName });
-    setCurrentUser(updatedProfile);
-    setDisplayName(updatedProfile.name);
-    localStorage.setItem('pyson_user', JSON.stringify(updatedProfile));
-
-    try {
-      setOriginalUser(updatedProfile);
-      setOriginalDisplayName(displayName);
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCurrentView("inicio");
-      
-    } catch (error) {
-      console.error('Error al guardar:', error);
-      alert('Error al guardar los cambios');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCancelChanges = () => {
-    setCurrentUser(originalUser);
-    setDisplayName(originalDisplayName);
-  };
-
-  useEffect(() => {
-    if (currentView === "perfil") {
-      setOriginalUser(currentUser);
-      setOriginalDisplayName(displayName);
-    }
-  }, [currentView, currentUser, displayName]);
-
   return (
     <div className="min-h-screen bg-background">
       <Header
@@ -311,125 +217,11 @@ export function Dashboard({
       >
         <div className="container mx-auto">
           {currentView === "perfil" && (
-            <div className="max-w-2xl mx-auto py-8 flex flex-col items-center">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <h1 className="text-xl font-medium text-foreground mb-1">Mi Perfil</h1>
-                <p className="text-xs text-muted-foreground">Información personal</p>
-              </div>
-
-              {/* Carnet Principal */}
-              <Card className="w-full max-w-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <CardContent className="p-0">
-                  {/* Header del carnet */}
-                  <div className="bg-gradient-to-r from-foreground/5 to-foreground/10 px-6 py-4 border-b border-border/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-sm font-semibold text-foreground">Configuración personal</h2>
-                        <p className="text-xs text-muted-foreground">Información de la cuenta</p>
-                      </div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Contenido del carnet */}
-                  <div className="p-6">
-                    <div className="flex items-start gap-6">
-                      {/* Avatar section */}
-                      <div className="flex-shrink-0">
-                        <div className="relative group">
-                          <div className="relative">
-                            <Image
-                              src={avatarPreview || currentUser.avatar || "/placeholder.svg"}
-                              alt="Avatar"
-                              width={80}
-                              height={80}
-                              className="w-31 h-31 rounded-lg object-cover border-2 border-border/30 shadow-sm"
-                            />
-                            {uploading && (
-                              <div className="absolute inset-0 bg-background/90 rounded-lg flex items-center justify-center">
-                                <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            )}
-                          </div>
-                          <label
-                            htmlFor="file"
-                            className={`absolute -bottom-1 -right-1 w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center cursor-pointer hover:bg-foreground/90 transition-all duration-200 shadow-sm text-xs ${
-                              uploading ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
-                          >
-                            ✏️
-                            <input
-                              id="file"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={onPickAvatar}
-                              disabled={uploading}
-                            />
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Información */}
-                      <div className="flex-1 space-y-4">
-                        {/* Nombre */}
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">
-                            Nombre
-                          </label>
-                          <Input
-                            value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
-                            className="border-border/30 bg-background/50 focus:bg-background text-sm h-8 rounded-lg"
-                            placeholder="Tu nombre"
-                          />
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">
-                            Email
-                          </label>
-                            <div className="text-sm text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg border border-border/20 cursor-not-allowed select-none">
-                            {currentUser.email}
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Botones de acción */}
-                    <div className="flex gap-2 mt-6 pt-4 border-t border-border/20">
-                      <Button
-                        onClick={handleSaveChanges}
-                        disabled={saving}
-                        className="flex-1 h-8 text-xs bg-foreground text-background hover:bg-foreground/90"
-                      >
-                        {saving ? "Guardando..." : "Guardar cambios"}
-                      </Button>
-                      <Button
-                        onClick={handleCancelChanges}
-                        variant="outline"
-                        className="flex-1 h-8 text-xs border-border/30 hover:bg-muted/50"
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Cerrar sesión */}
-              <div className="mt-6 w-full max-w-xl">
-                <Button 
-                  variant="outline" 
-                  onClick={onLogout}
-                  className="w-full h-11 text-base font-medium border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg"
-                >
-                  Cerrar sesión
-                </Button>
-              </div>
-            </div>
+            <ProfileView
+              user={currentUser}
+              onLogout={onLogout}
+              onUserUpdate={handleUserUpdate}
+            />
           )}
 
           {currentView === "pasados" && (
