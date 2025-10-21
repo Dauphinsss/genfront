@@ -3,22 +3,29 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Plus, Calendar, FileText, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Calendar, FileText, Trash2, Loader2, Edit } from "lucide-react";
+import { TopicPreview } from "./TopicPreview";
 import { TopicEditor } from "./TopicEditor";
 import { CreateTopicModal } from "./CreateTopicModal";
+import { useToast } from "@/components/ui/toast";
 import type { Topic, CreateTopicDto } from "@/types/topic";
-import { getAllTopics, deleteTopic } from "@/services/topics";
+import { getAllTopics, deleteTopic, createTopic, createContent, getTopicById } from "@/services/topics";
 
 export function TopicsView() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [previewTopic, setPreviewTopic] = useState<Topic | undefined>();
   const [editingTopic, setEditingTopic] = useState<Topic | undefined>();
+  const [isNewTopic, setIsNewTopic] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isNewTopic, setIsNewTopic] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const { showToast } = useToast();
 
   // Cargar topics al montar
   useEffect(() => {
@@ -42,53 +49,98 @@ export function TopicsView() {
   };
 
   const handleCreateSubmit = async (data: CreateTopicDto & { description?: string }) => {
-    // Crear un tópico "vacío" con placeholder en htmlContent
-    const tempTopic: Topic = {
-      id: 0,
-      name: data.name,
-      type: data.type,
-      createdAt: new Date().toISOString(),
-      content: {
-      id: 0,
-      topicId: 0,
-      description: data.description || '',
-      htmlContent: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      resources: []
-      }
-    };
-
-    setEditingTopic(tempTopic);
-    setIsNewTopic(true);
-    setIsEditing(true);
-  };
-
-  const handleEdit = async (topic: Topic) => {
+    setIsCreating(true);
     try {
-      const { getTopicById } = await import("@/services/topics");
-      const fullTopic = await getTopicById(topic.id);
+      const newTopic = await createTopic({
+        name: data.name,
+        type: data.type,
+      });
+
+      await createContent(newTopic.id, {
+        description: data.description || '',
+        htmlContent: "",
+      });
+
+      const fullTopic = await getTopicById(newTopic.id);
       setEditingTopic(fullTopic);
-      setIsNewTopic(false);
-      setIsEditing(true);
+      setIsNewTopic(true);
+      setShowEditor(true);
+      setShowCreateModal(false);
     } catch (error) {
-      console.error("Error loading topic:", error);
-      alert("Error al cargar el tópico");
+      console.error("Error creating topic:", error);
+      showToast(
+        error instanceof Error ? error.message : "Error al crear el topico",
+        "error"
+      );
+    } finally {
+      setIsCreating(false);
     }
   };
 
-  const handleSave = async () => {
-    // Recargar la lista después de guardar
+  const handleView = async (topic: Topic) => {
+    try {
+      setIsLoadingPreview(true);
+      
+      const fullTopic = await getTopicById(topic.id);
+      
+      setPreviewTopic(fullTopic);
+      setShowPreview(true);
+    } catch (error) {
+      console.error("Error loading topic:", error);
+      showToast(
+        error instanceof Error ? error.message : "Error al cargar el topico",
+        "error"
+      );
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  const handleEdit = async (topic: Topic, event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      const fullTopic = await getTopicById(topic.id);
+      setEditingTopic(fullTopic);
+      setIsNewTopic(false);
+      setShowEditor(true);
+    } catch (error) {
+      console.error("Error loading topic for edit:", error);
+      showToast(
+        error instanceof Error ? error.message : "Error al cargar el topico",
+        "error"
+      );
+    }
+  };
+
+  const handleSaveFromEditor = async () => {
+    console.log("Guardado desde editor completado");
     await loadTopics();
-    setIsEditing(false);
+    setShowEditor(false);
     setEditingTopic(undefined);
     setIsNewTopic(false);
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
+  const handleCancelEditor = async () => {
+    console.log("Cancelado desde editor");
+    
+    if (isNewTopic && editingTopic?.id) {
+      try {
+        await deleteTopic(editingTopic.id);
+        showToast("Creacion cancelada", "info");
+      } catch (error) {
+        console.error("Error al eliminar topic cancelado:", error);
+      }
+    }
+    
+    setShowEditor(false);
     setEditingTopic(undefined);
     setIsNewTopic(false);
+    await loadTopics();
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewTopic(undefined);
   };
 
   const handleDelete = (topicId: number, event: React.MouseEvent) => {
@@ -106,9 +158,10 @@ export function TopicsView() {
       await loadTopics();
       setShowDeleteConfirm(false);
       setTopicToDelete(null);
+      showToast("Topico eliminado correctamente", "success");
     } catch (error) {
       console.error("Error deleting topic:", error);
-      alert("Error al eliminar el tópico");
+      showToast("Error al eliminar el topico", "error");
     } finally {
       setIsDeleting(false);
     }
@@ -119,14 +172,29 @@ export function TopicsView() {
     setTopicToDelete(null);
   };
 
-  if (isEditing) {
+  if (showEditor && editingTopic) {
     return (
-      <TopicEditor 
+      <TopicEditor
         topic={editingTopic}
         isNewTopic={isNewTopic}
-        onSave={handleSave} 
-        onCancel={handleCancel} 
+        onSave={handleSaveFromEditor}
+        onCancel={handleCancelEditor}
       />
+    );
+  }
+
+  if (showPreview && previewTopic) {
+    return <TopicPreview topic={previewTopic} onClose={handleClosePreview} />;
+  }
+
+  if (isLoadingPreview) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <p className="text-muted-foreground">Cargando contenido desde GCS...</p>
+        </div>
+      </div>
     );
   }
 
@@ -136,6 +204,7 @@ export function TopicsView() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateSubmit}
+        isLoading={isCreating}
       />
 
       <div className="max-w-7xl mx-auto">
@@ -192,7 +261,7 @@ export function TopicsView() {
             <Card 
               key={topic.id}
               className="border border-border/50 hover:border-border transition-colors cursor-pointer group"
-              onClick={() => handleEdit(topic)}
+              onClick={() => handleView(topic)}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -206,8 +275,18 @@ export function TopicsView() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
+                      onClick={(e) => handleEdit(topic, e)}
+                      title="Editar contenido"
+                    >
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
                       onClick={(e) => handleDelete(topic.id, e)}
+                      title="Eliminar tópico"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>

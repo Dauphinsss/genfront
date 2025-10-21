@@ -7,20 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import type { CreateTopicDto } from "@/types/topic";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 
 interface CreateTopicModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateTopicDto & { description?: string }) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModalProps) {
+export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externalLoading }: CreateTopicModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type] = useState<"content" | "evaluation">("content");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const actualLoading = externalLoading || isLoading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +50,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModal
   };
 
   const handleClose = () => {
-    if (!isLoading) {
+    if (!actualLoading) {
       setName("");
       setDescription("");
       setError("");
@@ -76,8 +79,10 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModal
               placeholder="Ej: Introducción a Python"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isLoading}
+              disabled={actualLoading}
               autoFocus
+              autoComplete="off"
+              name="topic-name-unique"
             />
           </div>
 
@@ -91,9 +96,11 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModal
               placeholder="Breve descripción del contenido..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={isLoading}
+              disabled={actualLoading}
               rows={3}
               className="w-full px-3 py-2 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              autoComplete="off"
+              name="topic-description-unique"
             />
           </div>
 
@@ -137,12 +144,19 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModal
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={isLoading}
+              disabled={actualLoading}
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || !name.trim()}>
-              {isLoading ? "Creando..." : "Crear y Editar"}
+            <Button type="submit" disabled={actualLoading || !name.trim()}>
+              {actualLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creando...
+                </>
+              ) : (
+                "Crear y Editar"
+              )}
             </Button>
           </div>
         </form>
