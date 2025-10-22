@@ -1,22 +1,31 @@
 "use client"
 
-import { useCourse } from "@/lib/course-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Trash2, Edit, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios, { AxiosError } from "axios"
-import { AdminSidebar } from "./course-base-sidebar"
 
 type Lesson = {
-  id: number;
-  title: string;
-  unitId: number;
-};
+  id: number
+  title: string
+  unitId: number
+}
+
+type Unit = {
+  id: number
+  title: string
+  lessons: Lesson[]
+}
+
+type Course = {
+  id: number
+  title: string
+}
 
 export default function CourseBaseEdit() {
-  const { course, updateCourse } = useCourse()
-
+  const [courseTitle, setCourseTitle] = useState<string>("")
+  const [units, setUnits] = useState<Unit[]>([])
   const [editingUnit, setEditingUnit] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null)
@@ -25,62 +34,91 @@ export default function CourseBaseEdit() {
   const [editingLesson, setEditingLesson] = useState<number | null>(null)
   const [editLessonTitle, setEditLessonTitle] = useState("")
 
-  //  CRUD DE UNIDADES
+  const COURSE_ID = 1
 
+  useEffect(() => {
+    const fetchCourseTitle = async () => {
+      try {
+        const { data } = await axios.get<Course>(`http://localhost:4000/courses/${COURSE_ID}`)
+        setCourseTitle(data.title)
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          console.error("Error al obtener título del curso:", error.response?.data || error.message)
+        } else {
+          console.error(error)
+        }
+      }
+    }
+    fetchCourseTitle()
+  }, [])
+
+  useEffect(() => {
+    const fetchUnits = async () => {
+      try {
+        const { data } = await axios.get<Unit[]>(`http://localhost:4000/courses/${COURSE_ID}/units`)
+        const unitsWithLessons: Unit[] = data.map(u => ({ ...u, lessons: [] }))
+        setUnits(unitsWithLessons)
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          console.error("Error al obtener unidades:", error.response?.data || error.message)
+        } else {
+          console.error(error)
+        }
+      }
+    }
+    fetchUnits()
+  }, [])
+
+  // UNITS CRUD 
   const addUnit = async () => {
     try {
-      const { data: newUnit } = await axios.post("http://localhost:4000/units", {
-        courseBaseId: 1,
-        title: `UNIDAD ${course.units.length + 1}`,
-        index: course.units.length + 1,
+      const { data: newUnit } = await axios.post<Unit>(`http://localhost:4000/units`, {
+        courseBaseId: COURSE_ID,
+        title: `UNIDAD ${units.length + 1}`,
+        index: units.length + 1,
       })
-
-      updateCourse({
-        ...course,
-        units: [...course.units, { ...newUnit, lessons: [] }],
-      })
-    } catch (err) {
-      const error = err as AxiosError<{ error: string }>
-      console.error("Error creando unidad:", error.response?.data?.error || error.message)
+      setUnits(prev => [...prev, { ...newUnit, lessons: [] }])
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error creando unidad:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     }
   }
 
   const saveEdit = async (unitId: number) => {
     if (!editTitle.trim()) return
     try {
-      const { data: updatedUnit } = await axios.patch(`http://localhost:4000/units/${unitId}`, {
+      const { data: updatedUnit } = await axios.patch<Unit>(`http://localhost:4000/units/${unitId}`, {
         title: editTitle,
       })
-
-      updateCourse({
-        ...course,
-        units: course.units.map((u) =>
-          Number(u.id) === unitId ? { ...updatedUnit, lessons: u.lessons } : u
-        ),
-      })
-
+      setUnits(prev => prev.map(u => (u.id === unitId ? { ...updatedUnit, lessons: u.lessons } : u)))
       setEditingUnit(null)
       setEditTitle("")
-    } catch (err) {
-      const error = err as AxiosError<{ error: string }>
-      console.error("Error editando unidad:", error.response?.data?.error || error.message)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error editando unidad:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     }
   }
 
   const deleteUnit = async (unitId: number) => {
     try {
       await axios.delete(`http://localhost:4000/units/${unitId}`)
-      updateCourse({
-        ...course,
-        units: course.units.filter((u) => Number(u.id) !== unitId),
-      })
+      setUnits(prev => prev.filter(u => u.id !== unitId))
       if (selectedUnitId === unitId) {
         setSelectedUnitId(null)
         setLessons([])
       }
-    } catch (err) {
-      const error = err as AxiosError<{ error: string }>
-      console.error("Error eliminando unidad:", error.response?.data?.error || error.message)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error eliminando unidad:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     }
   }
 
@@ -94,16 +132,19 @@ export default function CourseBaseEdit() {
     setEditTitle("")
   }
 
-
-  // CRUD DE LECCIONES
-
+  // LESSONS CRUD 
   const fetchLessons = async (unitId: number) => {
     try {
       setLoading(true)
-      const { data } = await axios.get(`http://localhost:4000/lessons?unitId=${unitId}`)
+      const { data } = await axios.get<Lesson[]>(`http://localhost:4000/lessons?unitId=${unitId}`)
       setLessons(data)
-    } catch (error) {
-      console.error("Error al obtener lecciones:", error)
+      setUnits(prev => prev.map(u => (u.id === unitId ? { ...u, lessons: data } : u)))
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error al obtener lecciones:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     } finally {
       setLoading(false)
     }
@@ -113,43 +154,75 @@ export default function CourseBaseEdit() {
     if (!selectedUnitId) return
     try {
       setLoading(true)
-      const { data: newLesson } = await axios.post(`http://localhost:4000/lessons`, {
+      const { data: newLesson } = await axios.post<Lesson>(`http://localhost:4000/lessons`, {
         title: `Lección ${lessons.length + 1}`,
         unitId: selectedUnitId,
-        index: course.units.length + 1,
+        index: lessons.length + 1,
       })
-      setLessons([...lessons, newLesson])
-    } catch (error) {
-      console.error("Error al agregar lección:", error)
+      setLessons(prev => [...prev, newLesson])
+      setUnits(prev =>
+        prev.map(u => (u.id === selectedUnitId ? { ...u, lessons: [...u.lessons, newLesson] } : u))
+      )
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error al agregar lección:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   const deleteLesson = async (lessonId: number) => {
+    if (!selectedUnitId) return
     try {
       setLoading(true)
       await axios.delete(`http://localhost:4000/lessons/${lessonId}`)
-      setLessons(lessons.filter((l) => l.id !== lessonId))
-    } catch (error) {
-      console.error("Error al eliminar lección:", error)
+      setLessons(prev => prev.filter(l => l.id !== lessonId))
+      setUnits(prev =>
+        prev.map(u =>
+          u.id === selectedUnitId ? { ...u, lessons: u.lessons.filter(l => l.id !== lessonId) } : u
+        )
+      )
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error al eliminar lección:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   const saveEditLesson = async (lessonId: number) => {
+    if (!editLessonTitle.trim()) return
     try {
       setLoading(true)
-      const { data: updatedLesson } = await axios.patch(
+      const { data: updatedLesson } = await axios.patch<Lesson>(
         `http://localhost:4000/lessons/${lessonId}`,
         { title: editLessonTitle }
       )
-      setLessons(lessons.map((l) => (l.id === lessonId ? updatedLesson : l)))
+      setLessons(prev => prev.map(l => (l.id === lessonId ? updatedLesson : l)))
+      setUnits(prev =>
+        prev.map(u =>
+          u.id === selectedUnitId
+            ? {
+                ...u,
+                lessons: u.lessons.map(l => (l.id === lessonId ? { ...l, title: updatedLesson.title } : l)),
+              }
+            : u
+        )
+      )
       setEditingLesson(null)
       setEditLessonTitle("")
-    } catch (error) {
-      console.error("Error al actualizar lección:", error)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error al actualizar lección:", error.response?.data || error.message)
+      } else {
+        console.error(error)
+      }
     } finally {
       setLoading(false)
     }
@@ -165,18 +238,20 @@ export default function CourseBaseEdit() {
     setEditLessonTitle("")
   }
 
-  // Render
-
+  // RENDER 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       <div className="flex-1 overflow-auto">
-        {/* Header principal */}
+        {/* Header */}
         <div className="border-b border-sidebar-border p-4 md:p-6">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Gestión de Contenido</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Organiza unidades y lecciones de tu curso
+                Organiza unidades y lecciones de tu curso{" "}
+                <span className="font-semibold text-primary">
+                  {courseTitle || "(Cargando curso...)"}
+                </span>
               </p>
             </div>
             <Button
@@ -192,8 +267,10 @@ export default function CourseBaseEdit() {
         {/* Unidades */}
         <div className="p-4 md:p-8 max-w-6xl mx-auto">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {course.units.map((unit) => {
-              const unitId = Number(unit.id)
+            {units.map((unit) => {
+              const unitId = unit.id
+              const displayCount = selectedUnitId === unitId ? lessons.length : unit.lessons.length
+
               return (
                 <div
                   key={unitId}
@@ -248,10 +325,11 @@ export default function CourseBaseEdit() {
                           </Button>
                         </div>
                       </div>
+
                       <p className="text-sm text-muted-foreground mb-4">
-                        {unit.lessons.length}{" "}
-                        {unit.lessons.length === 1 ? "lección" : "lecciones"}
+                        {displayCount} {displayCount === 1 ? "lección" : "lecciones"}
                       </p>
+
                       <Button
                         onClick={() => {
                           setSelectedUnitId(unitId)
@@ -270,22 +348,20 @@ export default function CourseBaseEdit() {
             })}
           </div>
 
-          {course.units.length === 0 && (
+          {units.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <p>No hay unidades creadas. Haz clic en Nueva Unidad para comenzar.</p>
             </div>
           )}
         </div>
 
-        {/* Sección de Lecciones */}
+        {/* Lecciones */}
         {selectedUnitId && (
           <div className="border-t border-sidebar-border p-6 max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">
                 Lecciones de{" "}
-                {
-                  course.units.find((u) => Number(u.id) === selectedUnitId)?.title
-                }
+                {units.find((u) => u.id === selectedUnitId)?.title}
               </h2>
               <Button
                 onClick={addLesson}
@@ -336,29 +412,27 @@ export default function CourseBaseEdit() {
                         </div>
                       </div>
                     ) : (
-                      <>
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className="font-semibold text-lg">{lesson.title}</h3>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => startEditLesson(lesson.id, lesson.title)}
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteLesson(lesson.id)}
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-lg">{lesson.title}</h3>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEditLesson(lesson.id, lesson.title)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteLesson(lesson.id)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -367,8 +441,6 @@ export default function CourseBaseEdit() {
           </div>
         )}
       </div>
-
-      <AdminSidebar />
     </div>
   )
 }
