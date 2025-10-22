@@ -8,9 +8,10 @@ import "@/styles/tiptap-editor.css";
 interface TopicPreviewProps {
   topic: Topic;
   onClose: () => void;
+  hideFooter?: boolean;
 }
 
-export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
+export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header fijo con botón volver */}
@@ -75,18 +76,20 @@ export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
         />
       </article>
 
-      {/* Footer opcional */}
-      <footer className="max-w-7xl mx-auto px-6 py-8 mt-12 border-t border-border">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Plataforma de Aprendizaje Pyson
-          </p>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
-          </Button>
-        </div>
-      </footer>
+      {/* Footer solo si no se oculta */}
+      {!hideFooter && (
+        <footer className="max-w-7xl mx-auto px-6 py-8 mt-12 border-t border-border">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Plataforma de Aprendizaje Pyson
+            </p>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

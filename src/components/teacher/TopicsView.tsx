@@ -15,7 +15,7 @@ import {
 import { TopicPreview } from "./TopicPreview";
 import { TopicEditor } from "./TopicEditor";
 import { CreateTopicModal } from "./CreateTopicModal";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loading } from "@/components/ui/loading";
 import type { Topic, CreateTopicDto } from "@/types/topic";
 import {
@@ -40,7 +40,7 @@ export function TopicsView() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   // Cargar topics al montar
   useEffect(() => {
@@ -85,10 +85,11 @@ export function TopicsView() {
       setShowCreateModal(false);
     } catch (error) {
       console.error("Error creating topic:", error);
-      showToast(
-        error instanceof Error ? error.message : "Error al crear el topico",
-        "error"
-      );
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al crear el tópico",
+        variant: "destructive",
+      });
     } finally {
       setIsCreating(false);
     }
@@ -104,10 +105,11 @@ export function TopicsView() {
       setShowPreview(true);
     } catch (error) {
       console.error("Error loading topic:", error);
-      showToast(
-        error instanceof Error ? error.message : "Error al cargar el topico",
-        "error"
-      );
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al cargar el tópico",
+        variant: "destructive",
+      });
     } finally {
       setIsLoadingPreview(false);
     }
@@ -122,10 +124,11 @@ export function TopicsView() {
       setShowEditor(true);
     } catch (error) {
       console.error("Error loading topic for edit:", error);
-      showToast(
-        error instanceof Error ? error.message : "Error al cargar el topico",
-        "error"
-      );
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al cargar el tópico",
+        variant: "destructive",
+      });
     }
   };
 
@@ -143,7 +146,11 @@ export function TopicsView() {
     if (isNewTopic && editingTopic?.id) {
       try {
         await deleteTopic(editingTopic.id);
-        showToast("Creacion cancelada", "info");
+        toast({
+          title: "Creación cancelada",
+          description: "El tópico fue eliminado.",
+          variant: "warning",
+        });
       } catch (error) {
         console.error("Error al eliminar topic cancelado:", error);
       }
@@ -175,10 +182,18 @@ export function TopicsView() {
       await loadTopics();
       setShowDeleteConfirm(false);
       setTopicToDelete(null);
-      showToast("Topico eliminado correctamente", "success");
+      toast({
+        title: "Tópico eliminado",
+        description: "El tópico fue eliminado correctamente.",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error deleting topic:", error);
-      showToast("Error al eliminar el topico", "error");
+      toast({
+        title: "Error",
+        description: "Error al eliminar el tópico",
+        variant: "destructive",
+      });
     } finally {
       setIsDeleting(false);
     }

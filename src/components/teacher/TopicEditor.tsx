@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateTopic, updateContent } from "@/services/topics";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 import "@/styles/tiptap-editor.css";
 import {
   Bold,
@@ -72,7 +72,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const editor = useEditor({
     extensions: [
@@ -126,7 +126,11 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           }
 
           if (file.size > 5 * 1024 * 1024) {
-            showToast("El archivo es demasiado grande. Maximo 5MB para imagenes", "error");
+            toast({
+              title: "Archivo demasiado grande",
+              description: "Máximo 5MB para imágenes.",
+              variant: "destructive",
+            });
             return false;
           }
 
@@ -177,7 +181,11 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
             const file = item.getAsFile();
             if (file) {
               if (file.size > 5 * 1024 * 1024) {
-                showToast("El archivo es demasiado grande. Maximo 5MB para imagenes", "error");
+                toast({
+                  title: "Archivo demasiado grande",
+                  description: "Máximo 5MB para imágenes.",
+                  variant: "destructive",
+                });
                 return true;
               }
 
@@ -225,12 +233,20 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     if (!file || !editor) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast("El archivo es demasiado grande. Maximo 5MB para imagenes", "error");
+      toast({
+        title: "Archivo demasiado grande",
+        description: "Máximo 5MB para imágenes.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      showToast("Por favor selecciona un archivo de imagen", "error");
+      toast({
+        title: "Archivo inválido",
+        description: "Por favor selecciona un archivo de imagen.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -249,7 +265,11 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
   const handleAddImageUrl = () => {
     if (!imageUrl.trim()) {
-      showToast("Por favor ingresa una URL", "error");
+      toast({
+        title: "URL requerida",
+        description: "Por favor ingresa una URL.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -257,7 +277,11 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
       const url = new URL(imageUrl.trim());
       console.log("URL valida:", url.href);
     } catch {
-      showToast("URL invalida. Asegurate de incluir http:// o https://", "error");
+      toast({
+        title: "URL inválida",
+        description: "Asegúrate de incluir http:// o https://",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -314,17 +338,29 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
   const handleSave = async () => {
     if (!name.trim()) {
-      showToast("El título es obligatorio", "error");
+      toast({
+        title: "Título obligatorio",
+        description: "El título es obligatorio.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!editor) {
-      showToast("El editor no está disponible", "error");
+      toast({
+        title: "Editor no disponible",
+        description: "El editor no está disponible.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!topic?.content?.id || !topic?.id) {
-      showToast("No se puede guardar sin un topic valido", "error");
+      toast({
+        title: "Tópico inválido",
+        description: "No se puede guardar sin un tópico válido.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -342,14 +378,19 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
         description: description.trim(),
       });
 
-      showToast(isNewTopic ? "Topico creado exitosamente" : "Cambios guardados exitosamente", "success");
+      toast({
+        title: isNewTopic ? "Tópico creado" : "Cambios guardados",
+        description: isNewTopic ? "El tópico fue creado exitosamente." : "Cambios guardados exitosamente.",
+        variant: "success",
+      });
       await onSave();
     } catch (error) {
       console.error("Error saving content:", error);
-      showToast(
-        error instanceof Error ? error.message : "Error al guardar el contenido",
-        "error"
-      );
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al guardar el contenido",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
