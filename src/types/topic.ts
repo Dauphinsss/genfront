@@ -16,6 +16,7 @@ export interface Resource {
 export interface Content {
   id: number
   htmlContent: string
+  htmlFileUrl?: string
   description?: string
   createdAt: string
   updatedAt: string

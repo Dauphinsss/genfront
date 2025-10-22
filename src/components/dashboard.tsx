@@ -12,7 +12,7 @@ import { UsersManagement } from "@/components/admin/UsersManagement";
 import { TopicsView } from "@/components/teacher/TopicsView";
 import { ProfileView } from "@/components/profile";
 import axios from "axios";
-import CourseBase from "@/components/course_base/lesson-page";
+import CourseBaseView from "@/components/course_base/course-base-view";
 import CourseBaseEdit  from "@/components/course_base/course-base-units";
 interface DashboardProps {
   user: {
@@ -310,7 +310,7 @@ export function Dashboard({
 
           {currentView === "admin-base-course" && (
             <div className="max-w-7xl mx-auto">
-              <CourseBase />
+              <CourseBaseView />
             </div>
           )}
 

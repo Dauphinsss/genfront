@@ -6,24 +6,37 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
+import Underline from "@tiptap/extension-underline";
+import Typography from "@tiptap/extension-typography";
+import Color from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Heading from "@tiptap/extension-heading";
+import Placeholder from "@tiptap/extension-placeholder";
 import { ResizableImage } from "@/lib/tiptap-extensions/resizable-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createTopic, createContent, updateTopic, updateContent, uploadResource, deleteTopic } from "@/services/topics";
+import { updateTopic, updateContent } from "@/services/topics";
+import { useToast } from "@/hooks/use-toast";
 import "@/styles/tiptap-editor.css";
 import {
   Bold,
   Italic,
+  Underline as UnderlineIcon,
+  Strikethrough,
+  Code,
   List,
   ListOrdered,
+  Heading1,
   Heading2,
   Heading3,
+  Quote,
   ImageIcon,
   LinkIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
+  AlignJustify,
   Highlighter,
   Undo,
   Redo,
@@ -36,6 +49,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { Topic } from "@/types/topic";
+import { EditorTutorial } from "./EditorTutorial";
 
 interface TopicEditorProps {
   topic?: Topic;
@@ -48,21 +62,26 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
   const [name, setName] = useState(topic?.name || "");
   const [description, setDescription] = useState(topic?.content?.description || "");
   const [showPreview, setShowPreview] = useState(false);
-  const [wasAutoCreated, setWasAutoCreated] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: false, // Desactivar para usar custom
+      }),
+      Heading.configure({
+        levels: [1, 2, 3, 4],
+      }),
       ResizableImage.configure({
         inline: true,
         allowBase64: true,
@@ -73,7 +92,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-primary underline hover:text-primary/80',
+          class: 'text-primary underline hover:text-primary/80 cursor-pointer',
         },
       }),
       TextAlign.configure({
@@ -82,54 +101,161 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
       Highlight.configure({
         multicolor: true,
       }),
+      Placeholder.configure({
+        placeholder: 'Comienza a escribir tu contenido',
+      }),
+      Underline,
+      Typography,
+      Color,
+      TextStyle,
     ],
     content: topic?.content?.htmlContent || '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-[400px] px-4 py-3 dark:prose-invert',
-        'data-placeholder': 'Comienza a escribir tu contenido...',
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-[400px] px-8 py-6 dark:prose-invert',
       },
-    },
-    onUpdate: ({ editor }) => {
-      // Actualizar clase cuando el contenido cambia
-      const isEmpty = editor.isEmpty;
-      const proseMirrorEl = editor.view.dom;
-      if (isEmpty) {
-        proseMirrorEl.classList.add('is-empty');
-      } else {
-        proseMirrorEl.classList.remove('is-empty');
-      }
+      // Permitir drop de imágenes
+      handleDrop: (view, event, slice, moved) => {
+        setIsDragging(false);
+        
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          
+          if (!file.type.startsWith('image/')) {
+            return false;
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            toast({
+              title: "Archivo demasiado grande",
+              description: "Máximo 5MB para imágenes.",
+              variant: "destructive",
+            });
+            return false;
+          }
+
+          event.preventDefault();
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            const { schema } = view.state;
+            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+            
+            if (coordinates) {
+              const node = schema.nodes.image.create({ src: base64 });
+              const transaction = view.state.tr.insert(coordinates.pos, node);
+              view.dispatch(transaction);
+            }
+          };
+          reader.readAsDataURL(file);
+
+          return true;
+        }
+        return false;
+      },
+      handleDOMEvents: {
+        dragover: () => {
+          setIsDragging(true);
+          return false;
+        },
+        dragleave: () => {
+          setIsDragging(false);
+          return false;
+        },
+        drop: () => {
+          setIsDragging(false);
+          return false;
+        },
+      },
+      // Permitir paste de imágenes
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.startsWith('image/')) {
+            event.preventDefault();
+            
+            const file = item.getAsFile();
+            if (file) {
+              if (file.size > 5 * 1024 * 1024) {
+                toast({
+                  title: "Archivo demasiado grande",
+                  description: "Máximo 5MB para imágenes.",
+                  variant: "destructive",
+                });
+                return true;
+              }
+
+              const reader = new FileReader();
+              reader.onload = () => {
+                const base64 = reader.result as string;
+                const { schema } = view.state;
+                const node = schema.nodes.image.create({ src: base64 });
+                const transaction = view.state.tr.replaceSelectionWith(node);
+                view.dispatch(transaction);
+              };
+              reader.readAsDataURL(file);
+            }
+            return true;
+          }
+        }
+        return false;
+      },
     },
   });
 
-  // Agregar clase inicial si está vacío
+  // Efecto para cargar el contenido cuando cambia el topic
   useEffect(() => {
-    if (editor) {
-      const isEmpty = editor.isEmpty;
-      const proseMirrorEl = editor.view.dom;
-      if (isEmpty) {
-        proseMirrorEl.classList.add('is-empty');
+    if (editor && topic?.content?.htmlContent) {
+      // Solo actualizar si el contenido es diferente
+      const currentContent = editor.getHTML();
+      const newContent = topic.content.htmlContent;
+      
+      if (currentContent !== newContent) {
+        editor.commands.setContent(newContent);
       }
     }
-  }, [editor]);
+  }, [editor, topic?.content?.htmlContent]);
+
+  // Efecto para actualizar nombre y descripción cuando cambia el topic
+  useEffect(() => {
+    if (topic) {
+      setName(topic.name || "");
+      setDescription(topic.content?.description || "");
+    }
+  }, [topic]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !editor) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert("El archivo es demasiado grande. Máximo 50MB");
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Archivo demasiado grande",
+        description: "Máximo 5MB para imágenes.",
+        variant: "destructive",
+      });
       return;
     }
 
-    try {
-      const resourceUrl = await uploadFileToBackend(file);
-      
-      insertImageWithOptions(resourceUrl);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Error al subir la imagen");
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Archivo inválido",
+        description: "Por favor selecciona un archivo de imagen.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      insertImageWithOptions(base64);
+    };
+    reader.readAsDataURL(file);
   };
 
   const insertImageWithOptions = (src: string) => {
@@ -138,10 +264,42 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
   };
 
   const handleAddImageUrl = () => {
-    if (imageUrl && editor) {
-      insertImageWithOptions(imageUrl);
+    if (!imageUrl.trim()) {
+      toast({
+        title: "URL requerida",
+        description: "Por favor ingresa una URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const url = new URL(imageUrl.trim());
+      console.log("URL valida:", url.href);
+    } catch {
+      toast({
+        title: "URL inválida",
+        description: "Asegúrate de incluir http:// o https://",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editor) {
+      const cleanUrl = imageUrl.trim();
+      console.log("Insertando imagen con URL:", cleanUrl);
+      
+      editor.chain().focus().setImage({ 
+        src: cleanUrl,
+        alt: "Imagen desde URL"
+      }).run();
+      
       setImageUrl("");
       setShowImageDialog(false);
+      
+      console.log("Imagen insertada correctamente");
+    } else {
+      console.error("Editor no disponible");
     }
   };
 
@@ -149,54 +307,21 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     const file = event.target.files?.[0];
     if (!file || !editor) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert("El archivo es demasiado grande. Máximo 50MB");
-      return;
-    }
-
-    try {
-      const resourceUrl = await uploadFileToBackend(file);
-      editor.chain().focus().insertContent(`<video src="${resourceUrl}" controls style="max-width: 100%; border-radius: 0.5rem;"></video>`).run();
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      alert("Error al subir el video");
-    }
+    alert("Subir videos como recursos no está disponible. Usa una URL externa.");
   };
 
   const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !editor) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert("El archivo es demasiado grande. Máximo 50MB");
-      return;
-    }
-
-    try {
-      const resourceUrl = await uploadFileToBackend(file);
-      editor.chain().focus().insertContent(`<audio src="${resourceUrl}" controls style="width: 100%;"></audio>`).run();
-    } catch (error) {
-      console.error("Error uploading audio:", error);
-      alert("Error al subir el audio");
-    }
+    alert("Subir audio como recursos no está disponible. Usa una URL externa.");
   };
 
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !editor) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      alert("El archivo es demasiado grande. Máximo 50MB");
-      return;
-    }
-
-    try {
-      const resourceUrl = await uploadFileToBackend(file);
-      editor.chain().focus().insertContent(`<a href="${resourceUrl}" download class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>${file.name}</a>`).run();
-    } catch (error) {
-      console.error("Error uploading document:", error);
-      alert("Error al subir el documento");
-    }
+    alert("Subir documentos como recursos no está disponible. Usa una URL externa.");
   };
 
   const handleAddLink = () => {
@@ -207,105 +332,68 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     }
   };
 
-  const handleCancel = async () => {
-    // Si el tópico fue creado automáticamente al subir archivos, eliminarlo
-    if (wasAutoCreated && topic?.id && topic.id !== 0) {
-      try {
-        await deleteTopic(topic.id);
-      } catch (error) {
-        console.error("Error deleting auto-created topic:", error);
-      }
-    }
+  const handleCancel = () => {
     onCancel();
   };
 
   const handleSave = async () => {
     if (!name.trim()) {
-      alert("Error: El título es obligatorio");
+      toast({
+        title: "Título obligatorio",
+        description: "El título es obligatorio.",
+        variant: "destructive",
+      });
       return;
     }
 
+    if (!editor) {
+      toast({
+        title: "Editor no disponible",
+        description: "El editor no está disponible.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!topic?.content?.id || !topic?.id) {
+      toast({
+        title: "Tópico inválido",
+        description: "No se puede guardar sin un tópico válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const htmlContent = editor.getHTML();
+    console.log("HTML guardado:", htmlContent);
+
     setIsSaving(true);
     try {
-      if (isNewTopic) {
-        // Crear nuevo tópico
-        const newTopic = await createTopic({
-          name: name.trim(),
-          type: topic?.type || "content",
-        });
+      await updateTopic(topic.id, {
+        name: name.trim(),
+      });
 
-        // Crear el contenido
-        await createContent(newTopic.id, {
-          description: description.trim(),
-          htmlContent: editor?.getHTML() || "<p></p>",
-        });
-      } else {
-        // Actualizar tópico existente
-        if (!topic?.content?.id || !topic?.id) {
-          alert("Error: No se puede guardar sin un topic válido");
-          return;
-        }
+      await updateContent(topic.content.id, {
+        htmlContent: htmlContent,
+        description: description.trim(),
+      });
 
-        // Actualizar el nombre del tópico
-        await updateTopic(topic.id, {
-          name: name.trim(),
-        });
-
-        // Actualizar el contenido
-        await updateContent(topic.content.id, {
-          htmlContent: editor?.getHTML() || "",
-          description: description.trim(),
-        });
-      }
-
+      toast({
+        title: isNewTopic ? "Tópico creado" : "Cambios guardados",
+        description: isNewTopic ? "El tópico fue creado exitosamente." : "Cambios guardados exitosamente.",
+        variant: "success",
+      });
       await onSave();
     } catch (error) {
       console.error("Error saving content:", error);
-      alert("Error al guardar el contenido");
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al guardar el contenido",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const uploadFileToBackend = async (file: File): Promise<string> => {
-    // Si es un tópico nuevo y no tiene ID, crearlo automáticamente
-    if (isNewTopic && (!topic?.id || topic.id === 0)) {
-      if (!name.trim()) {
-        throw new Error("Debes ingresar un título antes de subir archivos");
-      }
-
-      // Crear el tópico automáticamente
-      const newTopic = await createTopic({
-        name: name.trim(),
-        type: topic?.type || "content",
-      });
-
-      const newContent = await createContent(newTopic.id, {
-        description: description.trim(),
-        htmlContent: editor?.getHTML() || "<p></p>",
-      });
-
-      // Actualizar el topic local con los IDs reales
-      if (topic) {
-        topic.id = newTopic.id;
-        topic.content!.id = newContent.id;
-        topic.content!.topicId = newTopic.id;
-      }
-
-      // Marcar que fue creado automáticamente
-      setWasAutoCreated(true);
-    }
-
-    if (!topic?.content?.id) {
-      throw new Error("No content ID available");
-    }
-
-    const response = await uploadResource(topic.content.id, file, (progress) => {
-      setUploadProgress(progress);
-    });
-
-    setUploadProgress(0);
-    return response.data.resourceUrl;
   };
 
   if (!editor) {
@@ -334,6 +422,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 placeholder="Nombre del tópico..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                autoComplete="off"
                 className="text-2xl font-bold border-0 px-4 focus-visible:ring-0 bg-transparent text-foreground"
               />
             </div>
@@ -368,28 +457,12 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Guardar
+                    Guardar y Salir
                   </>
                 )}
               </Button>
             </div>
           </div>
-
-          {/* Indicador de progreso de subida */}
-          {uploadProgress > 0 && uploadProgress < 100 && (
-            <div className="mb-4 px-6">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Subiendo archivo... {uploadProgress}%</span>
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="mb-4">
             <Input
@@ -397,6 +470,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
               placeholder="Descripción breve (opcional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              autoComplete="off"
               className="text-sm border-0 px-4 focus-visible:ring-0 bg-transparent text-muted-foreground"
             />
           </div>
@@ -404,11 +478,35 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           {/* Toolbar */}
           {!showPreview && (
             <div className="flex items-center gap-1 flex-wrap pb-2">
+              {/* Deshacer/Rehacer */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().undo().run()}
+                disabled={!editor.can().undo()}
+                title="Deshacer (Ctrl+Z)"
+              >
+                <Undo className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().redo().run()}
+                disabled={!editor.can().redo()}
+                title="Rehacer (Ctrl+Y)"
+              >
+                <Redo className="w-4 h-4" />
+              </Button>
+              
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* Formato de texto */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={editor.isActive('bold') ? 'bg-muted' : ''}
+                title="Negrita (Ctrl+B)"
               >
                 <Bold className="w-4 h-4" />
               </Button>
@@ -417,25 +515,65 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 size="sm"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 className={editor.isActive('italic') ? 'bg-muted' : ''}
+                title="Cursiva (Ctrl+I)"
               >
                 <Italic className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                className={editor.isActive('underline') ? 'bg-muted' : ''}
+                title="Subrayado (Ctrl+U)"
+              >
+                <UnderlineIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                className={editor.isActive('strike') ? 'bg-muted' : ''}
+                title="Tachado"
+              >
+                <Strikethrough className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleCode().run()}
+                className={editor.isActive('code') ? 'bg-muted' : ''}
+                title="Código"
+              >
+                <Code className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => editor.chain().focus().toggleHighlight().run()}
                 className={editor.isActive('highlight') ? 'bg-muted' : ''}
+                title="Resaltar"
               >
                 <Highlighter className="w-4 h-4" />
               </Button>
               
               <div className="w-px h-6 bg-border mx-1" />
 
+              {/* Encabezados */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
+                title="Título 1"
+              >
+                <Heading1 className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                 className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
+                title="Título 2"
               >
                 <Heading2 className="w-4 h-4" />
               </Button>
@@ -444,17 +582,20 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                 className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
+                title="Título 3"
               >
                 <Heading3 className="w-4 h-4" />
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
 
+              {/* Listas */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={editor.isActive('bulletList') ? 'bg-muted' : ''}
+                title="Lista con viñetas"
               >
                 <List className="w-4 h-4" />
               </Button>
@@ -463,17 +604,29 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 size="sm"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                 className={editor.isActive('orderedList') ? 'bg-muted' : ''}
+                title="Lista numerada"
               >
                 <ListOrdered className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                className={editor.isActive('blockquote') ? 'bg-muted' : ''}
+                title="Cita"
+              >
+                <Quote className="w-4 h-4" />
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
 
+              {/* Alineación */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign('left').run()}
                 className={editor.isActive({ textAlign: 'left' }) ? 'bg-muted' : ''}
+                title="Alinear izquierda"
               >
                 <AlignLeft className="w-4 h-4" />
               </Button>
@@ -482,6 +635,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign('center').run()}
                 className={editor.isActive({ textAlign: 'center' }) ? 'bg-muted' : ''}
+                title="Centrar"
               >
                 <AlignCenter className="w-4 h-4" />
               </Button>
@@ -490,19 +644,38 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 size="sm"
                 onClick={() => editor.chain().focus().setTextAlign('right').run()}
                 className={editor.isActive({ textAlign: 'right' }) ? 'bg-muted' : ''}
+                title="Alinear derecha"
               >
                 <AlignRight className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                className={editor.isActive({ textAlign: 'justify' }) ? 'bg-muted' : ''}
+                title="Justificar"
+              >
+                <AlignJustify className="w-4 h-4" />
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
 
+              {/* Multimedia */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowImageDialog(!showImageDialog)}
-                title="Insertar imagen"
+                title="Insertar imagen (arrastra o pega imágenes directamente)"
               >
                 <ImageIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowLinkDialog(!showLinkDialog)}
+                title="Insertar enlace"
+              >
+                <LinkIcon className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -531,16 +704,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
               >
                 <FileText className="w-4 h-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowLinkDialog(!showLinkDialog)}
-                title="Insertar enlace"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </Button>
-
-              <div className="w-px h-6 bg-border mx-1" />
               
               {/* Inputs ocultos para subir archivos */}
               <input
@@ -564,25 +727,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 onChange={handleDocumentUpload}
                 className="hidden"
               />
-
-              <div className="w-px h-6 bg-border mx-1" />
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().undo().run()}
-                disabled={!editor.can().undo()}
-              >
-                <Undo className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().redo().run()}
-                disabled={!editor.can().redo()}
-              >
-                <Redo className="w-4 h-4" />
-              </Button>
             </div>
           )}
         </div>
@@ -686,7 +830,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
       </div>
 
       {/* Área del editor */}
-      <div className="mt-6">
+      <div className="mt-6 relative">
         {showPreview ? (
           // Vista previa del contenido
           <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
@@ -701,10 +845,24 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           </div>
         ) : (
           // Editor activo
-          <div className="bg-card border border-border rounded-lg shadow-sm min-h-[500px]">
+          <div className={`bg-card border rounded-lg shadow-sm min-h-[500px] transition-all ${
+            isDragging ? 'border-primary border-2 bg-primary/5' : 'border-border'
+          }`}>
+            {isDragging && (
+              <div className="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-lg z-10 pointer-events-none">
+                <div className="bg-card border-2 border-dashed border-primary rounded-lg p-8 text-center">
+                  <ImageIcon className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <p className="text-lg font-semibold text-foreground">Suelta la imagen aquí</p>
+                  <p className="text-sm text-muted-foreground mt-2">La imagen se subirá automáticamente</p>
+                </div>
+              </div>
+            )}
             <EditorContent editor={editor} />
           </div>
         )}
+
+        {/* Tutorial flotante */}
+        <EditorTutorial />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { LoginSection } from "@/components/login-section";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "@/components/context/AuthContext";
+import { Loading } from "@/components/ui/loading";
 
 // Lazy load de componentes pesados
 const ParticleBackground = lazy(
@@ -76,14 +77,7 @@ function HomeContent() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-border border-t-foreground rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Cargando Pyson...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   if (user) {

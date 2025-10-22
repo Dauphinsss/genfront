@@ -1,7 +1,18 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Home, BookOpen, Calendar, Settings, Archive, Shield, Users, ChevronDown, ChevronRight, Edit } from "lucide-react";
+import {
+  Home,
+  BookOpen,
+  Calendar,
+  Settings,
+  Archive,
+  Shield,
+  Users,
+  ChevronDown,
+  ChevronRight,
+  Edit,
+} from "lucide-react";
 import { useAuth } from "@/components/context/AuthContext";
 
 export type DashboardView = "inicio" | "perfil" | "pasados" | string;
@@ -22,12 +33,12 @@ const PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
   manage_users: {
     icon: Users,
     label: "Gestionar Usuarios",
-    viewId: "admin-users"
+    viewId: "admin-users",
   },
   manage_courses: {
     icon: Archive,
     label: "Gestionar Cursos",
-    viewId: "admin-courses"
+    viewId: "admin-courses",
   },
 
   view_base_course: {
@@ -47,7 +58,7 @@ const TEACHER_PRIVILEGE_CONFIGS: Record<string, PrivilegeConfig> = {
   create_topics: {
     icon: BookOpen,
     label: "Crear Tópicos",
-    viewId: "teacher-topics"
+    viewId: "teacher-topics",
   },
 };
 
@@ -81,7 +92,7 @@ const STATIC_MENU_ITEMS = [
 
 const useDynamicAdminItems = () => {
   const { privileges } = useAuth();
-  
+
   return useMemo(
     () =>
       privileges
@@ -102,7 +113,7 @@ const useDynamicAdminItems = () => {
 
 const useDynamicTeacherItems = () => {
   const { privileges } = useAuth();
-  
+
   return useMemo(
     () =>
       privileges
@@ -122,16 +133,22 @@ const useDynamicTeacherItems = () => {
 };
 
 interface MenuItemProps {
-  item: typeof STATIC_MENU_ITEMS[0];
+  item: (typeof STATIC_MENU_ITEMS)[0];
   isActive: boolean;
   shouldExpand: boolean;
   onViewChange: (view: DashboardView) => void;
   onClose?: () => void;
 }
 
-const MenuItem = ({ item, isActive, shouldExpand, onViewChange, onClose }: MenuItemProps) => {
+const MenuItem = ({
+  item,
+  isActive,
+  shouldExpand,
+  onViewChange,
+  onClose,
+}: MenuItemProps) => {
   const Icon = item.icon;
-  
+
   return (
     <li key={item.id}>
       <button
@@ -145,14 +162,22 @@ const MenuItem = ({ item, isActive, shouldExpand, onViewChange, onClose }: MenuI
         className={`
           w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
           transition-all duration-200
-          ${isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}
+          ${
+            isActive
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+          }
           ${item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
           ${!shouldExpand ? "justify-center" : ""}
         `}
         title={!shouldExpand ? item.label : ""}
       >
         <Icon className="w-5 h-5 flex-shrink-0" />
-        {shouldExpand && <span className="text-sm truncate whitespace-nowrap">{item.label}</span>}
+        {shouldExpand && (
+          <span className="text-sm truncate whitespace-nowrap">
+            {item.label}
+          </span>
+        )}
       </button>
     </li>
   );
@@ -204,7 +229,11 @@ const TeacherSection = ({
             w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
             transition-all duration-200
             ${isMobile ? "text-neutral-300" : "text-muted-foreground"}
-            ${shouldExpand ? "hover:bg-secondary cursor-pointer" : "cursor-default"}
+            ${
+              shouldExpand
+                ? "hover:bg-secondary cursor-pointer"
+                : "cursor-default"
+            }
             ${!shouldExpand ? "justify-center" : ""}
           `}
         >
@@ -251,7 +280,9 @@ const TeacherSection = ({
                     `}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate whitespace-nowrap">{item.label}</span>
+                    <span className="truncate whitespace-nowrap">
+                      {item.label}
+                    </span>
                   </button>
                 </li>
               );
@@ -333,7 +364,9 @@ const AdminSection = ({
                     `}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate whitespace-nowrap">{item.label}</span>
+                    <span className="truncate whitespace-nowrap">
+                      {item.label}
+                    </span>
                   </button>
                 </li>
               );
@@ -354,7 +387,7 @@ export function Sidebar({
   const [isHovered, setIsHovered] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
-  
+
   const dynamicTeacherItems = useDynamicTeacherItems();
   const dynamicAdminItems = useDynamicAdminItems();
   const shouldExpand = !isCollapsed || isHovered;
@@ -414,7 +447,7 @@ export function Sidebar({
               ${shouldExpand ? "opacity-100" : "opacity-0"}
             `}
           >
-            <p className="whitespace-nowrap">Pyson Learning Platform</p>
+            <p className="whitespace-nowrap">Plataforma de Aprendizaje Pyson</p>
             <p className="text-[10px] whitespace-nowrap">Versión 1.0.0</p>
             {dynamicAdminItems.length > 0 && (
               <div className="pt-2 mt-2 border-t border-border/50">
@@ -429,7 +462,8 @@ export function Sidebar({
       </div>
     </aside>
   );
-}export function MobileSidebar({
+}
+export function MobileSidebar({
   isOpen,
   onClose,
   currentView,
@@ -515,7 +549,7 @@ export function Sidebar({
 
           <div className="p-4 border-t border-border">
             <div className="text-xs text-muted-foreground space-y-1">
-              <p>Pyson Learning Platform</p>
+              <p>Plataforma de Aprendizaje Pyson</p>
               <p className="text-[10px]">Versión 1.0.0</p>
             </div>
           </div>
