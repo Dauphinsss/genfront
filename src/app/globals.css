@@ -124,6 +124,9 @@
   .animate-spin-slow {
     animation: spin 12s linear infinite;
   }
+  .animate-desktop-float {
+    animation: desktop-float 4s ease-in-out infinite;
+  }
 }
 
 @keyframes fade-in-up {
@@ -163,6 +166,26 @@
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+@keyframes desktop-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes loading-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 

@@ -6,6 +6,7 @@ import { CourseProvider } from "@/lib/course-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { DesktopOnlyScreen } from "@/components/desktop-only-screen";
 import { useEffect, useState } from "react";
+import { Loading } from "@/components/ui/loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +36,11 @@ export default function RootLayout({
     const checkDevice = () => {
       const width = window.innerWidth;
       const userAgent = navigator.userAgent.toLowerCase();
-      const uaData = (navigator as Navigator & {
-        userAgentData?: { mobile?: boolean };
-      }).userAgentData;
+      const uaData = (
+        navigator as Navigator & {
+          userAgentData?: { mobile?: boolean };
+        }
+      ).userAgentData;
 
       const matchesMobileUA =
         /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
@@ -73,12 +76,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {isDesktop === null ? (
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-border border-t-foreground rounded-full animate-spin mx-auto"></div>
-              <p className="text-muted-foreground">Cargando...</p>
-            </div>
-          </div>
+          <Loading fullScreen />
         ) : isDesktop === false ? (
           <DesktopOnlyScreen />
         ) : (
