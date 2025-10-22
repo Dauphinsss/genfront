@@ -207,7 +207,7 @@ export function TopicsView() {
         isLoading={isCreating}
       />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header con botón de crear */}
         <div className="flex items-center justify-between mb-8">
           <div>

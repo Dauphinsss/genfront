@@ -35,7 +35,7 @@ export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
             {topic.name}
           </h1>
-          
+
           {topic.content?.description && (
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
               {topic.content.description}
@@ -44,17 +44,17 @@ export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
 
           <div className="mt-6 pt-6 border-t border-border">
             <time className="text-sm text-muted-foreground">
-              {new Date(topic.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+              {new Date(topic.createdAt).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </time>
           </div>
         </header>
 
         {/* Contenido HTML completo */}
-        <div 
+        <div
           className="prose prose-base sm:prose-lg lg:prose-xl max-w-none dark:prose-invert
                      prose-headings:scroll-mt-20 
                      prose-h1:text-3xl prose-h1:md:text-4xl prose-h1:font-bold prose-h1:mb-6 prose-h1:mt-12
@@ -68,7 +68,10 @@ export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
                      prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-muted/30
                      prose-ul:my-4 prose-ol:my-4
                      prose-li:my-2"
-          dangerouslySetInnerHTML={{ __html: topic.content?.htmlContent || "<p>Sin contenido disponible</p>" }}
+          dangerouslySetInnerHTML={{
+            __html:
+              topic.content?.htmlContent || "<p>Sin contenido disponible</p>",
+          }}
         />
       </article>
 
@@ -76,13 +79,9 @@ export function TopicPreview({ topic, onClose }: TopicPreviewProps) {
       <footer className="max-w-7xl mx-auto px-6 py-8 mt-12 border-t border-border">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Pyson Learning Platform
+            © {new Date().getFullYear()} Plataforma de Aprendizaje Pyson
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-          >
+          <Button variant="outline" size="sm" onClick={onClose}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver
           </Button>
