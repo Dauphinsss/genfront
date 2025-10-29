@@ -53,18 +53,10 @@ export const getCourseBaseById = async (courseId: number): Promise<CourseBase> =
   return response.data;
 };
 
-// Determinar qué curso se puede editar
-export const getEditableCourse = async (): Promise<EditableCourseResponse> => {
-  const response = await axios.get(`${API_BASE_URL}/courses/editable`, {
-    headers: getAuthHeaders(),
-  });
-  return response.data;
-};
-
-// Crear una copia completa del curso
-export const cloneCourse = async (courseId: number): Promise<CloneCourseResponse> => {
+// Clonar el curso activo a inactivo
+export const cloneCourse = async (): Promise<CloneCourseResponse> => {
   const response = await axios.post(
-    `${API_BASE_URL}/courses/${courseId}/clone`,
+    `${API_BASE_URL}/courses/clone`,
     {},
     {
       headers: getAuthHeaders(),
@@ -73,16 +65,16 @@ export const cloneCourse = async (courseId: number): Promise<CloneCourseResponse
   return response.data;
 };
 
-// Activar un curso y desactivar todos los demás
-export const activateCourse = async (courseId: number): Promise<CourseBase> => {
+// Activar el curso inactivo
+export const activateCourse = async (): Promise<CourseBase> => {
   const response = await axios.patch(
-    `${API_BASE_URL}/courses/${courseId}/activate`,
+    `${API_BASE_URL}/courses/activate`,
     {},
     {
       headers: getAuthHeaders(),
     }
   );
-  return response.data.course;
+  return response.data;
 };
 
 // Actualizar el título del curso

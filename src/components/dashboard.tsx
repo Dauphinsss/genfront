@@ -12,8 +12,8 @@ import { UsersManagement } from "@/components/admin/UsersManagement";
 import { TopicsView } from "@/components/teacher/TopicsView";
 import { ProfileView } from "@/components/profile";
 import axios from "axios";
+import CourseBaseAdminPanel from "@/components/course_base/CourseBaseAdminPanel";
 import CourseBaseView from "@/components/course_base/course-base-view";
-import CourseBaseEdit  from "@/components/course_base/course-base-units";
 interface DashboardProps {
   user: {
     name: string;
@@ -316,7 +316,7 @@ export function Dashboard({
 
           {currentView === "admin-base-course-edit" && (
             <div className="max-w-7xl mx-auto">
-              <CourseBaseEdit />
+              <CourseBaseAdminPanel />
             </div>
           )}
 

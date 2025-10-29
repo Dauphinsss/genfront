@@ -18,7 +18,6 @@ import {
   ChevronRight,
   ArrowLeft,
   BookOpen,
-  Copy,
   CheckCircle,
   AlertCircle,
   Pencil,
@@ -39,15 +38,12 @@ import {
   type Lesson
 } from "@/services/lessons"
 import {
-  getEditableCourse,
-  cloneCourse,
-  activateCourse,
   updateCourseBase,
-  type CourseBase,
-  type EditableCourseResponse
+  getCourseBaseById
 } from "@/services/courseBase"
 import { ManageLessonTopics } from "./manage-lesson-topics"
 import { Loading } from "@/components/ui/loading";
+import type { CourseBase } from "@/services/courseBase";
 
 type ViewMode = 'units' | 'lessons' | 'topics'
 
@@ -57,14 +53,18 @@ interface ViewState {
   selectedLesson?: Lesson
 }
 
-export default function CourseBaseEdit() {
+interface CourseBaseEditProps {
+  courseId: number;
+  status: string;
+  onBack: (wasUpdated?: boolean) => void;
+}
+
+export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps) {
+  const [wasUpdated, setWasUpdated] = useState(false);
   const { toast } = useToast()
   
-  const [editableData, setEditableData] = useState<EditableCourseResponse | null>(null)
   const [currentCourse, setCurrentCourse] = useState<CourseBase | null>(null)
   const [loadingSystem, setLoadingSystem] = useState(true)
-  const [cloningCourse, setCloningCourse] = useState(false)
-  const [activatingCourse, setActivatingCourse] = useState(false)
   const [units, setUnits] = useState<Unit[]>([])
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [viewState, setViewState] = useState<ViewState>({ mode: 'units' })
@@ -86,17 +86,35 @@ export default function CourseBaseEdit() {
     open: false,
     lessonId: null
   })
-  // Dialogo de confirmación para activar curso
-  const [activateDialogOpen, setActivateDialogOpen] = useState(false)
-  const [pendingActivate, setPendingActivate] = useState(false)
 
-  // Modales de agregar
   const [addUnitDialog, setAddUnitDialog] = useState(false)
   const [addLessonDialog, setAddLessonDialog] = useState(false)
 
   useEffect(() => {
-    loadEditableData()
-  }, [])
+    const loadCourseData = async () => {
+      try {
+        setLoadingSystem(true)
+        const course = await getCourseBaseById(courseId)
+        setCurrentCourse(course)
+      } catch (error: unknown) {
+        console.error('Error al cargar curso base:', error)
+        let status = 'desconocido';
+        if (typeof error === 'object' && error !== null && 'response' in error) {
+          const err = error as { response?: { status?: string } };
+          status = err.response?.status ?? 'desconocido';
+          console.error('[DEBUG] Axios error.response:', err.response);
+        }
+        toast({
+          title: "Error",
+          description: `No se pudo cargar el curso base. Código: ${status}`,
+          variant: "destructive",
+        })
+      } finally {
+        setLoadingSystem(false)
+      }
+    };
+    loadCourseData();
+  }, [courseId, toast]);
 
   useEffect(() => {
     if (currentCourse?.units) {
@@ -113,74 +131,40 @@ export default function CourseBaseEdit() {
         setLessons([])
       }
     } else if (viewState.mode === 'units') {
-      // Limpiar lecciones cuando volvemos a la vista de unidades
       setLessons([])
     }
   }, [viewState.mode, viewState.selectedUnit, units])
 
-  const loadEditableData = async () => {
+  const loadCourseData = async () => {
     try {
       setLoadingSystem(true)
-      const data = await getEditableCourse()
-      setEditableData(data)
-      
-      if (data.editableCourse) {
-        setCurrentCourse(data.editableCourse)
-      }
+      const course = await getCourseBaseById(courseId)
+      setCurrentCourse(course)
     } catch (error: unknown) {
-      console.error('Error al cargar datos editables:', error)
+      console.error('Error al cargar curso base:', error)
+      let status = 'desconocido';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { status?: string } };
+        status = err.response?.status ?? 'desconocido';
+        console.error('[DEBUG] Axios error.response:', err.response);
+      }
+      toast({
+        title: "Error",
+        description: `No se pudo cargar el curso base. Código: ${status}`,
+        variant: "destructive",
+      })
     } finally {
       setLoadingSystem(false)
     }
-  };
-
-  const handleCloneCourse = async () => {
-    if (!editableData?.activeCourseId) return
-    
-    try {
-      setCloningCourse(true)
-      await cloneCourse(editableData.activeCourseId)
-      await loadEditableData()
-    } catch (error: unknown) {
-      console.error('Error al clonar curso:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo crear la copia del curso",
-        variant: "destructive",
-      })
-    } finally {
-      setCloningCourse(false)
-    }
-  };
-
-  const handleActivateCourse = async () => {
-    if (!currentCourse?.id) return
-    setPendingActivate(true)
-    try {
-      setActivatingCourse(true)
-      await activateCourse(currentCourse.id)
-      await loadEditableData()
-      setActivateDialogOpen(false)
-    } catch (error: unknown) {
-      console.error('Error al activar curso:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo activar el curso",
-        variant: "destructive",
-      })
-    } finally {
-      setActivatingCourse(false)
-      setPendingActivate(false)
-    }
-  };
+  }
 
   const handleUpdateCourseTitle = async () => {
     if (!currentCourse?.id || !courseTitleValue.trim()) return
-    
     try {
       await updateCourseBase(currentCourse.id, { title: courseTitleValue.trim() })
       setEditingCourseTitle(false)
-      await loadEditableData()
+      await loadCourseData()
+      setWasUpdated(true)
     } catch (error: unknown) {
       console.error('Error al actualizar título del curso:', error)
       toast({
@@ -189,7 +173,7 @@ export default function CourseBaseEdit() {
         variant: "destructive",
       })
     }
-  };
+  }
 
   const startEditingCourseTitle = () => {
     if (currentCourse) {
@@ -289,11 +273,8 @@ export default function CourseBaseEdit() {
         index: lessons.length + 1,
         unitId: viewState.selectedUnit.id
       })
-      
-      // Actualizar el estado de lecciones
+
       setLessons([...lessons, newLesson])
-      
-      // También actualizar el array de units para incluir la nueva lección
       setUnits(units.map(u => {
         if (u.id === viewState.selectedUnit?.id) {
           return {
@@ -335,11 +316,8 @@ export default function CourseBaseEdit() {
     }
     try {
       const updatedLesson = await updateLesson(id, { title: editLessonTitle.trim() })
-      
-      // Actualizar estado de lecciones
+
       setLessons(lessons.map(l => l.id === id ? updatedLesson : l))
-      
-      // Actualizar en units también
       setUnits(units.map(u => {
         if (u.id === viewState.selectedUnit?.id && u.lessons) {
           return {
@@ -365,11 +343,8 @@ export default function CourseBaseEdit() {
   const removeLesson = async (id: number) => {
     try {
       await deleteLesson(id)
-      
-      // Actualizar estado de lecciones
+
       setLessons(lessons.filter(l => l.id !== id))
-      
-      // Actualizar en units también
       setUnits(units.map(u => {
         if (u.id === viewState.selectedUnit?.id && u.lessons) {
           return {
@@ -408,111 +383,50 @@ export default function CourseBaseEdit() {
     setViewState({ mode: 'lessons', selectedUnit: viewState.selectedUnit })
   }
 
+  if (loadingSystem) {
+    return <Loading />;
+  }
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Estado del Sistema */}
-      {loadingSystem ? (
+      <Button
+        variant="default"
+        size="lg"
+        onClick={() => {
+          if (viewState.mode === 'units') {
+            onBack(wasUpdated);
+          } else if (viewState.mode === 'lessons') {
+            goBackToUnits();
+          } else {
+            goBackToLessons();
+          }
+        }}
+        className="mb-4"
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Volver
+      </Button>
+      {!currentCourse ? (
         <Card>
           <CardContent className="pt-6">
-            <Loading size="sm" />
-          </CardContent>
-        </Card>
-      ) : !editableData ? (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-destructive">Error al cargar el sistema</p>
+            <p className="text-center text-destructive">Error al cargar el curso base</p>
           </CardContent>
         </Card>
       ) : (
         <>
-          {/* CASO C: Hay curso activo PERO NO existe copia */}
-          {editableData.hasActiveCourse && !editableData.editableCourse && (
-            <Card className="mb-4 border border-amber-400/60 bg-amber-50/60 dark:bg-amber-950/30 shadow-sm rounded-xl">
+          {currentCourse.status !== 'activo' && currentCourse.status !== 'inactivo' ? (
+            <Card className="mb-4 border border-gray-400/60 bg-gray-50/60 dark:bg-gray-950/30 shadow-sm rounded-xl">
               <CardContent className="flex items-center gap-3 py-3 px-4">
-                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-200" />
+                <AlertCircle className="h-5 w-5 text-gray-600 dark:text-gray-200" />
                 <div className="flex-1">
-                  <div className="font-semibold text-amber-900 dark:text-amber-100 text-base">Curso Activo en Uso</div>
-                  <div className="text-xs text-amber-800 dark:text-amber-200">{editableData.message}</div>
-                </div>
-                <Button 
-                  onClick={handleCloneCourse}
-                  disabled={cloningCourse}
-                  size="sm"
-                  className="ml-2"
-                >
-                  <Copy className="h-4 w-4 mr-1" />
-                  {cloningCourse ? 'Creando Copia...' : 'Crear Copia'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* CASO B: Hay curso activo Y existe copia editable */}
-          {editableData.hasActiveCourse && editableData.editableCourse && (
-            <Card className="mb-4 border border-sky-400/60 bg-sky-50/60 dark:bg-sky-950/30 shadow-sm rounded-xl">
-              <CardContent className="flex items-center gap-3 py-3 px-4">
-                <AlertCircle className="h-5 w-5 text-sky-600 dark:text-sky-100" />
-                <div className="flex-1">
-                  <div className="font-semibold text-sky-900 dark:text-sky-100 text-base">Editando Versión Temporal</div>
-                  <div className="text-xs text-sky-800 dark:text-sky-200">{editableData.message}</div>
-                </div>
-                <Button 
-                  onClick={() => setActivateDialogOpen(true)}
-                  disabled={activatingCourse}
-                  size="sm"
-                  className="ml-2"
-                >
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  {activatingCourse ? 'Activando...' : 'Activar'}
-                </Button>
-                {/* Dialogo de confirmación para activar curso */}
-                <Dialog open={activateDialogOpen} onOpenChange={setActivateDialogOpen}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>¿Activar esta versión del curso?</DialogTitle>
-                      <DialogDescription>
-                        Esto desactivará la versión actual y todos los cursos de profesores comenzarán a usar esta nueva versión.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setActivateDialogOpen(false)}
-                        disabled={pendingActivate}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        variant="default"
-                        onClick={handleActivateCourse}
-                        disabled={pendingActivate}
-                      >
-                        {pendingActivate ? 'Activando...' : 'Activar'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* CASO A: No hay curso activo - Edición directa */}
-          {!editableData.hasActiveCourse && editableData.editableCourse && (
-            <Card className="mb-4 border border-emerald-400/60 bg-emerald-50/60 dark:bg-emerald-950/30 shadow-sm rounded-xl">
-              <CardContent className="flex items-center gap-3 py-3 px-4">
-                <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-100" />
-                <div className="flex-1">
-                  <div className="font-semibold text-emerald-900 dark:text-emerald-100 text-base">Edición Directa Habilitada</div>
-                  <div className="text-xs text-emerald-800 dark:text-emerald-200">{editableData.message}</div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-100 text-base">Curso Histórico</div>
+                  <div className="text-xs text-gray-800 dark:text-gray-200">No se puede editar un curso histórico.</div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          ) : null}
 
-          {/* Solo mostrar la UI de edición si hay un curso editable */}
-          {currentCourse && (
+          {(currentCourse.status === 'activo' || currentCourse.status === 'inactivo') && (
             <>
-              {/* Título del Curso - Card grande tipo UsersManagement */}
               <Card className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm backdrop-blur mb-8 animate-in fade-in slide-in-from-bottom-2">
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                 <CardHeader className="space-y-4">
@@ -579,32 +493,39 @@ export default function CourseBaseEdit() {
 
               {/* Breadcrumb Navigation */}
               <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
-        <button
-          onClick={() => setViewState({ mode: 'units' })}
-          className="hover:text-foreground"
-        >
-          Unidades
-        </button>
-        {viewState.selectedUnit && (
-          <>
-            <ChevronRight className="h-4 w-4" />
-            <button
-              onClick={() => setViewState({ mode: 'lessons', selectedUnit: viewState.selectedUnit })}
-              className="hover:text-foreground"
-            >
-              {viewState.selectedUnit.title}
-            </button>
-          </>
-        )}
-        {viewState.selectedLesson && (
-          <>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">{viewState.selectedLesson.title}</span>
-          </>
-        )}
-      </div>
+                <button
+                  onClick={() => onBack(wasUpdated)}
+                  className="hover:text-foreground"
+                >
+                  Cursos
+                </button>
+                <ChevronRight className="h-4 w-4" />
+                <button
+                  onClick={() => setViewState({ mode: 'units' })}
+                  className="hover:text-foreground"
+                  disabled={viewState.mode === 'units'}
+                >
+                  Unidades
+                </button>
+                {viewState.selectedUnit && (
+                  <>
+                    <ChevronRight className="h-4 w-4" />
+                    <button
+                      onClick={() => setViewState({ mode: 'lessons', selectedUnit: viewState.selectedUnit })}
+                      className="hover:text-foreground"
+                    >
+                      {viewState.selectedUnit.title}
+                    </button>
+                  </>
+                )}
+                {viewState.selectedLesson && (
+                  <>
+                    <ChevronRight className="h-4 w-4" />
+                    <span className="text-foreground">{viewState.selectedLesson.title}</span>
+                  </>
+                )}
+              </div>
 
-      {/* Units View */}
       {viewState.mode === 'units' && (
         <div className="space-y-6">
           <div className="flex justify-between items-start">
@@ -773,17 +694,8 @@ export default function CourseBaseEdit() {
         <div className="space-y-6">
           <div className="flex justify-between items-start">
             <div>
-              <Button 
-                variant="default" 
-                size="lg"
-                onClick={goBackToUnits} 
-                className="mb-4"
-              >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Volver
-              </Button>
               <h2 className="text-2xl font-bold text-foreground">
-                📚 Lecciones de: {viewState.selectedUnit.title}
+                Lecciones de: {viewState.selectedUnit.title}
               </h2>
               <p className="text-muted-foreground mt-2">
                 Toca una lección para gestionar sus topics
@@ -945,15 +857,6 @@ export default function CourseBaseEdit() {
       {/* Topics View */}
       {viewState.mode === 'topics' && viewState.selectedLesson && (
         <div className="space-y-6">
-          <Button 
-            variant="default" 
-            size="lg"
-            onClick={goBackToLessons} 
-            className="mb-4"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Volver
-          </Button>
           <ManageLessonTopics 
             lesson={viewState.selectedLesson} 
             onBack={goBackToLessons}

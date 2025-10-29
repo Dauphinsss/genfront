@@ -1,8 +1,14 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import {
+  getAllUsers,
+  getAllPrivileges,
+  assignPrivilege,
+  removePrivilege,
+  type User,
+  type Privilege 
+} from "@/services/users";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,21 +29,7 @@ import {
   Loader2,
   Shield,
 } from "lucide-react";
-
-interface Privilege {
-  id: number;
-  name: string;
-  description?: string;
-  category?: string;
-}
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  avatar?: string;
-  privileges: Privilege[];
-}
+import { Loading } from "@/components/ui/loading";
 
 export function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -51,20 +43,13 @@ export function UsersManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("pyson_token");
-    if (!token) return;
-
     Promise.all([
-      axios.get("http://localhost:4000/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-      axios.get("http://localhost:4000/privileges", {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+      getAllUsers(),
+      getAllPrivileges(),
     ])
-      .then(([usersRes, privRes]) => {
-        setUsers(usersRes.data);
-        setAllPrivileges(privRes.data);
+      .then(([users, privileges]) => {
+        setUsers(users);
+        setAllPrivileges(privileges);
       })
       .catch((err) => console.error("Error cargando datos:", err))
       .finally(() => setLoading(false));
@@ -85,23 +70,13 @@ export function UsersManagement() {
     privilegeId: number,
     has: boolean
   ) => {
-    const token = localStorage.getItem("pyson_token");
     setUpdatingPrivilege(privilegeId);
-
     try {
       if (has) {
-        await axios.delete("http://localhost:4000/privileges/remove", {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { userId, privilegeId },
-        });
+        await removePrivilege(userId, privilegeId);
       } else {
-        await axios.post(
-          "http://localhost:4000/privileges/assign",
-          { userId, privilegeId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await assignPrivilege(userId, privilegeId);
       }
-
       setUsers((prev) =>
         prev.map((u) =>
           u.id === userId
@@ -117,7 +92,6 @@ export function UsersManagement() {
             : u
         )
       );
-
       if (selectedUser?.id === userId) {
         setSelectedUser((prev) =>
           prev
@@ -147,11 +121,7 @@ export function UsersManagement() {
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <Loading />;
   }
 
   return (

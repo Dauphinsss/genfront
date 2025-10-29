@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, ChevronUp, ChevronDown, Loader2, BookOpen, FileText } from "lucide-react"
+import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, FileText } from "lucide-react"
 import { TopicPreview } from "@/components/teacher"
 import { useToast } from "@/hooks/use-toast"
 import { getAllTopics, getTopicById } from "@/services/topics"
@@ -31,12 +31,10 @@ interface ManageLessonTopicsProps {
 }
 
 export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
-  // Estado para el preview de tópico
   const [previewTopic, setPreviewTopic] = useState<null | LessonTopic>(null);
   const [previewTopicData, setPreviewTopicData] = useState<Topic | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  // Cargar datos completos del tópico al abrir el preview
   useEffect(() => {
     if (previewTopic) {
       setPreviewLoading(true);
@@ -66,11 +64,9 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
         getAllTopics()
       ])
 
-      // Ordenar topics asociados por el campo 'order'
       const sorted = lessonTopicsData.sort((a, b) => (a.order || 0) - (b.order || 0))
       setAssociatedTopics(sorted)
 
-      // El backend ya devuelve solo los disponibles, no necesitamos filtrar
       setAvailableTopics(allTopics)
     } catch (error: unknown) {
       console.error("Error loading topics:", error)
@@ -146,13 +142,11 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
       const current = associatedTopics[index]
       const above = associatedTopics[index - 1]
 
-      // Intercambiar órdenes
       await Promise.all([
         updateTopicOrder(lesson.id, current.topicId, above.order || 0),
         updateTopicOrder(lesson.id, above.topicId, current.order || 0)
       ])
 
-      // Actualizar estado local
       const newTopics = [...associatedTopics]
       newTopics[index] = { ...current, order: above.order || 0 }
       newTopics[index - 1] = { ...above, order: current.order || 0 }
@@ -177,13 +171,11 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
       const current = associatedTopics[index]
       const below = associatedTopics[index + 1]
 
-      // Intercambiar órdenes
       await Promise.all([
         updateTopicOrder(lesson.id, current.topicId, below.order || 0),
         updateTopicOrder(lesson.id, below.topicId, current.order || 0)
       ])
 
-      // Actualizar estado local
       const newTopics = [...associatedTopics]
       newTopics[index] = { ...current, order: below.order || 0 }
       newTopics[index + 1] = { ...below, order: current.order || 0 }
@@ -201,17 +193,11 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
   }
 
   if (loading) {
-    return (
-      <div className="text-center py-12">
-        <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-        <Loading size="sm" />
-      </div>
-    )
+    return <Loading size="sm" />;
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Columna izquierda: Tópicos asociados */}
   <Card className="border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -235,7 +221,7 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                 <div
                   key={lessonTopic.id}
                   className={
-                    `group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ` +
+                    `group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 mt-1 ` +
                     `hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/60 cursor-pointer`
                   }
                   style={{ animationDelay: `${index * 40}ms` }}
@@ -300,11 +286,9 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
         </CardContent>
       </Card>
 
-      {/* Dialog para TopicPreview */}
       <Dialog open={!!previewTopic} onOpenChange={open => { if (!open) setPreviewTopic(null) }}>
   <DialogContent className="w-full max-w-2xl md:max-w-4xl p-0 bg-background rounded-2xl shadow-xl overflow-hidden flex flex-col" style={{ maxHeight: '90vh' }}>
     <DialogTitle className="sr-only">Vista previa de tópico</DialogTitle>
-    {/* Elimina grow y overflow-y-auto para que el Dialog se adapte al contenido */}
     <div>
       {previewLoading && (
         <Loading size="sm" />
@@ -323,7 +307,6 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
   </DialogContent>
       </Dialog>
 
-      {/* Columna derecha: Catálogo de tópicos disponibles */}
       <Card className="border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -347,7 +330,7 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                 <div
                   key={topic.id}
                   className={
-                    `group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ` +
+                    `group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 mt-1 ` +
                     `hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/60`
                   }
                   style={{ animationDelay: `${index * 40}ms` }}
@@ -391,7 +374,6 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
           )}
         </CardContent>
       </Card>
-    {/* Dialog de confirmación para desasociar tópico */}
     <Dialog open={showDissociateDialog} onOpenChange={setShowDissociateDialog}>
       <DialogContent>
         <DialogHeader>
