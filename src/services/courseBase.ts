@@ -37,7 +37,6 @@ export interface CloneCourseResponse {
   clonedCourse: CourseBase;
 }
 
-// Obtener el curso activo con toda su estructura
 export const getActiveCourseBase = async (): Promise<CourseBase> => {
   const response = await axios.get(`${API_BASE_URL}/courses/active/full`, {
     headers: getAuthHeaders(),
@@ -45,7 +44,6 @@ export const getActiveCourseBase = async (): Promise<CourseBase> => {
   return response.data;
 };
 
-// Obtener un curso específico por ID con toda su estructura
 export const getCourseBaseById = async (courseId: number): Promise<CourseBase> => {
   const response = await axios.get(`${API_BASE_URL}/courses/${courseId}/full`, {
     headers: getAuthHeaders(),
@@ -53,7 +51,6 @@ export const getCourseBaseById = async (courseId: number): Promise<CourseBase> =
   return response.data;
 };
 
-// Clonar el curso activo a inactivo
 export const cloneCourse = async (): Promise<CloneCourseResponse> => {
   const response = await axios.post(
     `${API_BASE_URL}/courses/clone`,
@@ -65,7 +62,6 @@ export const cloneCourse = async (): Promise<CloneCourseResponse> => {
   return response.data;
 };
 
-// Activar el curso inactivo
 export const activateCourse = async (): Promise<CourseBase> => {
   const response = await axios.patch(
     `${API_BASE_URL}/courses/activate`,
@@ -77,7 +73,6 @@ export const activateCourse = async (): Promise<CourseBase> => {
   return response.data;
 };
 
-// Actualizar el título del curso
 export const updateCourseBase = async (
   courseId: number,
   data: { title: string }
@@ -88,7 +83,6 @@ export const updateCourseBase = async (
   return response.data;
 };
 
-// Lista todos los cursos base
 export const getAllCourseBases = async (): Promise<CourseBase[]> => {
   const response = await axios.get(`${API_BASE_URL}/courses`, {
     headers: getAuthHeaders(),
@@ -96,7 +90,6 @@ export const getAllCourseBases = async (): Promise<CourseBase[]> => {
   return response.data;
 };
 
-// Crear un nuevo curso base
 export const createCourseBase = async (data: {
   title: string;
   status?: 'activo' | 'inactivo';

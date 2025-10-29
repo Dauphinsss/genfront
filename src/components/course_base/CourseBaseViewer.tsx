@@ -226,7 +226,7 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
           </div>
         )}
         {selectedTopic ? (
-          <Card className="mb-6 border border-border/60 bg-card/80 shadow-sm rounded-2xl animate-in fade-in slide-in-from-bottom-2">
+          <Card variant="glass" className="mb-6 animate-in fade-in slide-in-from-bottom-2">
             <CardContent className="py-6">
               {isMobile && (
                 <h3 className="text-xl font-bold mb-4 text-foreground">{selectedTopic.topic.name}</h3>
@@ -244,7 +244,7 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
             </CardContent>
           </Card>
         ) : (
-          <Card className="mb-6 border border-border/60 bg-card/80 shadow-sm rounded-2xl animate-in fade-in slide-in-from-bottom-2">
+          <Card variant="glass" className="mb-6 animate-in fade-in slide-in-from-bottom-2">
             <CardContent className="py-16 flex items-center justify-center">
               <span className="text-muted-foreground text-lg">Selecciona un tópico para ver su contenido.</span>
             </CardContent>

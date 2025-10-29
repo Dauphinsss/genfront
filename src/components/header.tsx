@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, User, LogOut, Sun, Moon } from "lucide-react";
+import { useAuthenticatedImage } from "@/lib/image-utils";
 
 interface HeaderProps {
   user?: {
@@ -35,6 +36,8 @@ export function Header({
   isDark,
   onMenuToggle,
 }: HeaderProps) {
+  const { imageSrc } = useAuthenticatedImage(user?.avatar);
+
   if (!user) {
     return (
       <header className="w-full bg-background/80 backdrop-blur-md border-b border-border">
@@ -104,7 +107,7 @@ export function Header({
                 >
                   <Avatar className="w-8 h-8">
                     <AvatarImage
-                      src={user.avatar || "/placeholder.svg"}
+                      src={imageSrc}
                       alt={user.name}
                     />
                     <AvatarFallback>

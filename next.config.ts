@@ -16,10 +16,12 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   experimental: {
-    // Optimización automática de imports para reducir bundle size
     optimizePackageImports: [
       "@radix-ui/react-icons",
       "lucide-react",

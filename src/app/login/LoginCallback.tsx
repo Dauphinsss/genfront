@@ -18,11 +18,9 @@ export default function LoginCallback() {
         return;
       }
 
-      // Guardamos el token en localStorage
       localStorage.setItem("pyson_token", token);
 
       try {
-        // Llamamos al backend con axios
         const { data: user } = await axios.get(
           "http://localhost:4000/auth/me",
           {
@@ -32,7 +30,6 @@ export default function LoginCallback() {
           }
         );
 
-        // Guardamos usuario en localStorage
         localStorage.setItem("pyson_user", JSON.stringify(user));
  
         const { data: privileges } = await axios.get(
@@ -49,7 +46,7 @@ export default function LoginCallback() {
       } catch (err) {
         console.error("Error en login:", err);
       } finally {
-        router.push("/"); // Redirigimos siempre al home
+        router.push("/");
       }
     };
 

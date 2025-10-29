@@ -1,5 +1,4 @@
 "use client";
-// cspell:ignore gsap círculo rodea queda centro
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
@@ -7,7 +6,6 @@ export default function TextCircleFollower() {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // El círculo rodea al mouse, el mouse queda en el centro
     const moveCircle = (e: MouseEvent) => {
       const el = wrapperRef.current;
       if (!el) return;

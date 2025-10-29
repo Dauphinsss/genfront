@@ -14,7 +14,7 @@ interface TopicPreviewProps {
 export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header fijo con botón volver */}
+      {}
       <div className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <Button
@@ -29,9 +29,9 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
         </div>
       </div>
 
-      {/* Contenido completo - estilo página */}
+      {}
       <article className="max-w-7xl mx-auto px-6 py-8 md:py-12">
-        {/* Título principal */}
+        {}
         <header className="mb-8 md:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
             {topic.name}
@@ -54,7 +54,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
           </div>
         </header>
 
-        {/* Contenido HTML completo */}
+        {}
         <div
           className="prose prose-base sm:prose-lg lg:prose-xl max-w-none dark:prose-invert
                      prose-headings:scroll-mt-20 
@@ -76,7 +76,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
         />
       </article>
 
-      {/* Footer solo si no se oculta */}
+      {}
       {!hideFooter && (
         <footer className="max-w-7xl mx-auto px-6 py-8 mt-12 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

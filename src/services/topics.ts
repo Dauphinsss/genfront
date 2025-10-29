@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
   };
 };
 
-{ /* Topic Section */}
+{ }
 
 export const createTopic = async (data: CreateTopicDto): Promise<Topic> => {
   const response = await axios.post(`${API_BASE_URL}/topics`, data, {
@@ -54,7 +54,7 @@ export const deleteTopic = async (id: number): Promise<void> => {
   });
 };
 
-{ /* Content Section */}
+{ }
 
 export const createContent = async (topicId: number, data: CreateContentDto): Promise<Topic> => {
   const response = await axios.post(`${API_BASE_URL}/content/topic/${topicId}`, data, {
@@ -82,7 +82,7 @@ export const deleteContent = async (contentId: number): Promise<void> => {
   });
 };
 
-{/* Resource Section - Used for upload files into GCS */}
+{}
 
 export const uploadResource = async (
   contentId: number, 

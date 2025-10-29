@@ -1,5 +1,3 @@
-// Optimización: Pre-cargar solo los iconos más usados
-// Esto reduce el tamaño del bundle inicial
 export {
   Home,
   Menu,

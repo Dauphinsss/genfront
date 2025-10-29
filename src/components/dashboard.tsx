@@ -112,16 +112,13 @@ export function Dashboard({
   const [enrolledCourse, setEnrolledCourse] = useState<
     (typeof mockCourses)[0] | null
   >(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Inicia colapsado
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Función para manejar el toggle del menú
   const handleMenuToggle = () => {
-    // En móvil: abrir/cerrar sidebar móvil
     if (window.innerWidth < 768) {
       setIsMobileSidebarOpen(!isMobileSidebarOpen);
     } else {
-      // En desktop: toggle pin del sidebar
       setIsSidebarCollapsed(!isSidebarCollapsed);
     }
   };
@@ -193,14 +190,14 @@ export function Dashboard({
         onMenuToggle={handleMenuToggle}
       />
 
-      {/* Desktop Sidebar */}
+      {}
       <Sidebar
         currentView={currentView}
         onViewChange={setCurrentView}
         isCollapsed={isSidebarCollapsed}
       />
 
-      {/* Mobile Sidebar */}
+      {}
       <MobileSidebar
         isOpen={isMobileSidebarOpen}
         onClose={() => setIsMobileSidebarOpen(false)}

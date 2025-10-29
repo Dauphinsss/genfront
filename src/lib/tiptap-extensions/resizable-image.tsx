@@ -3,7 +3,6 @@ import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import { NodeViewProps } from '@tiptap/core';
 import { useRef, useState } from 'react';
 
-// Componente React para la imagen redimensionable
 function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -20,7 +19,6 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
     console.log("Imagen cargada correctamente:", node.attrs.src?.substring(0, 100));
     setIsLoading(false);
     setError(false);
-    // Si no hay width definido, usar el ancho natural
     if (!node.attrs.width && imgRef.current) {
       const naturalWidth = imgRef.current.naturalWidth;
       const maxWidth = 600;
@@ -131,7 +129,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         position: 'relative',
       }}
     >
-      {/* Barra de herramientas FIJA y flotante - solo cuando está seleccionada */}
+      {}
       {selected && !isLoading && !error && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-2 bg-background/95 dark:bg-background/90 backdrop-blur-md border border-border shadow-lg rounded-lg px-3 py-2">
@@ -184,7 +182,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         </div>
       )}
 
-        {/* Loading Spinner */}
+        {}
       {isLoading && (
         <div
           className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg"
@@ -219,7 +217,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         </div>
       )}
 
-      {/* Error State */}
+      {}
       {error && (
         <div
           className="flex items-center justify-center bg-destructive/10 border-2 border-dashed border-destructive/50 rounded-lg"
@@ -256,8 +254,8 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         </div>
       )}
 
-      {/* Imagen */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {}
+      {}
       <img
         ref={imgRef}
         src={node.attrs.src}
@@ -281,7 +279,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         draggable={false}
       />
 
-      {/* Handle de redimensionado - relativo a la imagen */}
+      {}
       {selected && !isLoading && !error && (
         <div
           className="absolute -bottom-2 -right-2 w-6 h-6 bg-background dark:bg-background border-2 border-primary rounded-full cursor-nwse-resize shadow-lg hover:scale-110 transition-transform z-10"

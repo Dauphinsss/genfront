@@ -38,7 +38,6 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
 
     try {
       await onSubmit({ name: name.trim(), type, description: description.trim() });
-      // Resetear form
       setName("");
       setDescription("");
       onClose();
@@ -69,7 +68,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {/* Título */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="name">
               Título <span className="text-destructive">*</span>
@@ -86,7 +85,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
             />
           </div>
 
-          {/* Descripción */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="description">
               Descripción <span className="text-muted-foreground text-xs">(opcional)</span>
@@ -104,7 +103,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
             />
           </div>
 
-          {/* Tipo (por ahora solo content) */}
+          {}
           <div className="space-y-2">
             <Label>Tipo de Tópico</Label>
             <div className="flex gap-3">
@@ -130,7 +129,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
             </div>
           </div>
 
-          {/* Error */}
+          {}
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-start gap-2">
               <X className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -138,7 +137,7 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit, isLoading: externa
             </div>
           )}
 
-          {/* Botones */}
+          {}
           <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"

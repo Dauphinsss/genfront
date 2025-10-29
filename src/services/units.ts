@@ -20,7 +20,6 @@ export interface Unit {
   lessons?: Lesson[];
 }
 
-// Crear unidad
 export const createUnit = async (data: { title: string; courseBaseId: number; index: number }): Promise<Unit> => {
   const response = await axios.post(`${API_BASE_URL}/units`, data, {
     headers: getAuthHeaders(),
@@ -28,7 +27,6 @@ export const createUnit = async (data: { title: string; courseBaseId: number; in
   return response.data;
 };
 
-// Obtener unidades de un curso
 export const getUnitsByCourseId = async (courseId: number): Promise<Unit[]> => {
   const response = await axios.get(`${API_BASE_URL}/courses/${courseId}/units`, {
     headers: getAuthHeaders(),
@@ -36,7 +34,6 @@ export const getUnitsByCourseId = async (courseId: number): Promise<Unit[]> => {
   return response.data;
 };
 
-// Actualizar unidad
 export const updateUnit = async (id: number, data: { title: string }): Promise<Unit> => {
   const response = await axios.patch(`${API_BASE_URL}/units/${id}`, data, {
     headers: getAuthHeaders(),
@@ -44,7 +41,6 @@ export const updateUnit = async (id: number, data: { title: string }): Promise<U
   return response.data;
 };
 
-// Eliminar unidad
 export const deleteUnit = async (id: number): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/units/${id}`, {
     headers: getAuthHeaders(),

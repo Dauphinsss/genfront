@@ -143,7 +143,7 @@ export default function CourseBaseAdminPanel() {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Volver
         </Button>
-        <Card className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm backdrop-blur">
+        <Card variant="glass" className="relative overflow-hidden">
           <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 animate-pulse" />
           <CardHeader className="space-y-4">
             <div className="flex items-center gap-3">
@@ -164,7 +164,8 @@ export default function CourseBaseAdminPanel() {
             historicMode.courses.map((course) => (
               <Card
                 key={course.id}
-                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl cursor-pointer w-full max-w-xs"
+                variant="interactive"
+                className="group relative overflow-hidden w-full max-w-xs"
                 onClick={async () => {
                   setLoading(true);
                   try {
@@ -210,7 +211,7 @@ export default function CourseBaseAdminPanel() {
   return (
     loading ? <Loading /> : (
       <div className="space-y-8 max-w-6xl mx-auto">
-        <Card className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm backdrop-blur">
+        <Card variant="glass" className="relative overflow-hidden">
           <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 animate-pulse" />
           <CardHeader className="space-y-4">
             <div className="flex items-center gap-3">

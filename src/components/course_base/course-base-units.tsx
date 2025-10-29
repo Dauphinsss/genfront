@@ -427,7 +427,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
 
           {(currentCourse.status === 'activo' || currentCourse.status === 'inactivo') && (
             <>
-              <Card className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm backdrop-blur mb-8 animate-in fade-in slide-in-from-bottom-2">
+              <Card variant="glass" className="relative overflow-hidden mb-8 animate-in fade-in slide-in-from-bottom-2">
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                 <CardHeader className="space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
@@ -491,7 +491,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                 </CardContent>
               </Card>
 
-              {/* Breadcrumb Navigation */}
+              {}
               <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
                 <button
                   onClick={() => onBack(wasUpdated)}
@@ -580,7 +580,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                   <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in slide-in-from-bottom-2 relative">
                     {editId === unit.id ? (
                       <div className="flex flex-col">
-                        {/* Header */}
+                        {}
                         <div className="px-4 pt-4 pb-3 border-b border-border">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <Edit className="w-4 h-4" />
@@ -588,7 +588,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           </div>
                         </div>
 
-                        {/* Input Section */}
+                        {}
                         <div className="px-4 py-6">
                           <Input
                             value={editTitle}
@@ -600,7 +600,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           />
                         </div>
 
-                        {/* Actions Section */}
+                        {}
                         <div className="px-4 pb-4">
                           <div className="flex gap-2 mb-4">
                             <Button 
@@ -628,7 +628,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             </Button>
                           </div>
 
-                          {/* Danger Zone */}
+                          {}
                           <div className="pt-4 border-t border-border">
                             <p className="text-xs text-muted-foreground mb-2">Zona de peligro</p>
                             <Button
@@ -648,7 +648,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                       </div>
                     ) : (
                       <div className="flex flex-col items-center w-full">
-                        {/* Icono grande */}
+                        {}
                         <div className="relative flex-shrink-0 mb-2">
                           <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center">
                             <BookOpen className="w-8 h-8 text-primary" />
@@ -657,7 +657,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             {unit.index}
                           </div>
                         </div>
-                        {/* Info */}
+                        {}
                         <div className="flex-1 min-w-0 w-full text-center space-y-1">
                           <h3 className="truncate text-base font-semibold text-foreground">
                             {unit.title}
@@ -666,7 +666,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             {unit.lessons?.length || 0} lecciones
                           </p>
                         </div>
-                        {/* Botón de edición */}
+                        {}
                         <Button
                           size="sm"
                           variant="ghost"
@@ -689,7 +689,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </div>
       )}
 
-      {/* Lessons View */}
+      {}
       {viewState.mode === 'lessons' && viewState.selectedUnit && (
         <div className="space-y-6">
           <div className="flex justify-between items-start">
@@ -743,7 +743,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                   <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in slide-in-from-bottom-2 relative">
                     {editLessonId === lesson.id ? (
                       <div className="flex flex-col">
-                        {/* Header */}
+                        {}
                         <div className="px-4 pt-4 pb-3 border-b border-border">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <Edit className="w-4 h-4" />
@@ -751,7 +751,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           </div>
                         </div>
 
-                        {/* Input Section */}
+                        {}
                         <div className="px-4 py-6">
                           <Input
                             value={editLessonTitle}
@@ -765,7 +765,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           />
                         </div>
 
-                        {/* Actions Section */}
+                        {}
                         <div className="px-4 pb-4">
                           <div className="flex gap-2 mb-4">
                             <Button 
@@ -793,7 +793,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             </Button>
                           </div>
 
-                          {/* Danger Zone */}
+                          {}
                           <div className="pt-4 border-t border-border">
                             <p className="text-xs text-muted-foreground mb-2">Zona de peligro</p>
                             <Button
@@ -813,7 +813,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                       </div>
                     ) : (
                       <div className="flex flex-col items-center w-full">
-                        {/* Icono grande */}
+                        {}
                         <div className="relative flex-shrink-0 mb-2">
                           <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center">
                             <span className="text-3xl">📖</span>
@@ -822,7 +822,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             {lesson.index}
                           </div>
                         </div>
-                        {/* Info */}
+                        {}
                         <div className="flex-1 min-w-0 w-full text-center space-y-1">
                           <h3 className="truncate text-base font-semibold text-foreground">
                             {lesson.title}
@@ -831,7 +831,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             Lección #{lesson.index}
                           </p>
                         </div>
-                        {/* Botón de edición */}
+                        {}
                         <Button
                           size="sm"
                           variant="ghost"
@@ -854,7 +854,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </div>
       )}
 
-      {/* Topics View */}
+      {}
       {viewState.mode === 'topics' && viewState.selectedLesson && (
         <div className="space-y-6">
           <ManageLessonTopics 
@@ -868,7 +868,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </>
       )}
 
-      {/* Diálogo de confirmación para eliminar unidad */}
+      {}
       <Dialog open={deleteUnitDialog.open} onOpenChange={(open) => setDeleteUnitDialog({ open, unitId: null })}>
         <DialogContent>
           <DialogHeader>
@@ -895,7 +895,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {/* Diálogo de confirmación para eliminar lección */}
+      {}
       <Dialog open={deleteLessonDialog.open} onOpenChange={(open) => setDeleteLessonDialog({ open, lessonId: null })}>
         <DialogContent>
           <DialogHeader>
@@ -922,7 +922,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {/* Modal para agregar unidad */}
+      {}
       <Dialog open={addUnitDialog} onOpenChange={setAddUnitDialog}>
         <DialogContent>
           <DialogHeader>
@@ -961,7 +961,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {/* Modal para agregar lección */}
+      {}
       <Dialog open={addLessonDialog} onOpenChange={setAddLessonDialog}>
         <DialogContent>
           <DialogHeader>

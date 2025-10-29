@@ -42,7 +42,6 @@ export function TopicsView() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const { toast } = useToast();
 
-  // Cargar topics al montar
   useEffect(() => {
     loadTopics();
   }, []);
@@ -50,7 +49,7 @@ export function TopicsView() {
   const loadTopics = async () => {
     try {
       setIsLoading(true);
-      const data = await getAllTopics("content"); // Solo mostrar tipo content
+      const data = await getAllTopics("content");
       setTopics(data);
     } catch (error) {
       console.error("Error loading topics:", error);
@@ -233,7 +232,7 @@ export function TopicsView() {
       />
 
       <div className="max-w-6xl mx-auto">
-        {/* Header con botón de crear */}
+        {}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -252,14 +251,13 @@ export function TopicsView() {
           </Button>
         </div>
 
-        {/* Loading state */}
+        {}
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : topics.length === 0 ? (
-          // Estado vacío
-          <Card className="border border-border/50 shadow-sm">
+          <Card variant="flat">
             <CardContent className="flex flex-col items-center justify-center py-16 px-4">
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                 <BookOpen className="w-10 h-10 text-primary" />
@@ -285,7 +283,6 @@ export function TopicsView() {
             </CardContent>
           </Card>
         ) : (
-          // Grid de cards de tópicos
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {topics.map((topic) => (
               <Card
@@ -346,7 +343,7 @@ export function TopicsView() {
         )}
       </div>
 
-      {/* Modal de confirmación personalizado */}
+      {}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
           <div className="bg-card border border-border rounded-lg shadow-lg max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">

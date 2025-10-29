@@ -23,9 +23,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail, Pencil, User, Copy, Check, LogOut } from "lucide-react";
+import { Mail, Pencil, User, Copy, Check, LogOut, X } from "lucide-react";
 import { updateProfile } from "@/services/profile";
 import { cn } from "@/lib/utils";
+import { useAuthenticatedImage } from "@/lib/image-utils";
 
 interface ProfileViewProps {
   user: {
@@ -70,6 +71,8 @@ export function ProfileView({
     typeof window !== "undefined"
       ? localStorage.getItem("pyson_token") || ""
       : "";
+
+  const { imageSrc: authenticatedAvatarSrc } = useAuthenticatedImage(currentUser.avatar);
 
   useEffect(() => {
     setCurrentUser(user);
@@ -237,12 +240,11 @@ export function ProfileView({
     }
   };
 
-  const avatarSrc = avatarPreview ?? (currentUser.avatar || "/placeholder.svg");
+  const avatarSrc = avatarPreview ?? authenticatedAvatarSrc;
 
   return (
     <section className="space-y-8 max-w-6xl mx-auto ">
-      <Card className="relative overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
-        <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10" />
+      <Card className="relative overflow-hidden">
         <CardContent className="relative z-10 p-6 md:p-8">
           <div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-10">
             <div className="flex flex-col items-center gap-4 md:items-start">
@@ -275,7 +277,7 @@ export function ProfileView({
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
-                    <Pencil className="mr-2 h-3.5 w-3.5" />
+                    <Pencil className="mr-2 h-4 w-4" />
                     Cambiar avatar
                   </Button>
                 </div>
@@ -319,7 +321,7 @@ export function ProfileView({
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <Card className="border-border/60 bg-card/70 shadow-sm backdrop-blur-sm">
+        <Card variant="glass">
           <CardHeader className="space-y-1">
             <CardTitle>Informacion personal</CardTitle>
             <CardDescription>
@@ -330,9 +332,9 @@ export function ProfileView({
             <div className="space-y-2">
               <Label
                 htmlFor="name"
-                className="flex items-center gap-2 text-xs sm:text-sm"
+                className="flex items-center gap-2 text-sm font-medium"
               >
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 Nombre completo
               </Label>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -341,12 +343,12 @@ export function ProfileView({
                     id="name"
                     value={displayName}
                     onChange={(event) => setDisplayName(event.target.value)}
-                    className="h-10 sm:flex-1"
+                    className="h-10 flex-1"
                     placeholder="Tu nombre completo"
                     autoFocus
                   />
                 ) : (
-                  <div className="flex-1 rounded-lg border border-border/60 bg-muted/40 px-3 py-2.5 text-sm font-medium">
+                  <div className="flex-1 rounded-lg border border-border/60 bg-muted/40 px-3 h-10 flex items-center text-sm font-medium">
                     {displayName}
                   </div>
                 )}
@@ -359,16 +361,11 @@ export function ProfileView({
                       setIsEditing(true);
                     }
                   }}
-                  variant={isEditing ? "secondary" : "outline"}
+                  variant="outline"
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-10 w-10 shrink-0"
                 >
-                  <Pencil
-                    className={cn(
-                      "h-4 w-4 transition-transform",
-                      isEditing ? "rotate-12" : ""
-                    )}
-                  />
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -376,22 +373,22 @@ export function ProfileView({
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="flex items-center gap-2 text-xs sm:text-sm"
+                className="flex items-center gap-2 text-sm font-medium"
               >
-                <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                <Mail className="h-4 w-4 text-muted-foreground" />
                 Correo electronico
               </Label>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="flex-1 truncate rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5 text-xs sm:text-sm font-mono text-muted-foreground">
+                <div className="flex-1 rounded-lg border border-border/60 bg-muted/30 px-3 h-10 flex items-center text-sm font-mono text-muted-foreground truncate">
                   {currentUser.email}
                 </div>
                 <Button
                   onClick={handleCopyEmail}
-                  variant="ghost"
+                  variant="outline"
                   size="icon"
                   className={cn(
-                    "h-10 w-10 transition-colors",
-                    copiedEmail && "bg-emerald-500/10 text-emerald-600"
+                    "h-10 w-10 shrink-0 transition-colors",
+                    copiedEmail && "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                   )}
                 >
                   {copiedEmail ? (
@@ -428,6 +425,7 @@ export function ProfileView({
                   className="flex-1"
                   disabled={saving}
                 >
+                  <X className="mr-2 h-4 w-4" />
                   Cancelar
                 </Button>
               </div>
@@ -435,7 +433,7 @@ export function ProfileView({
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card/70 shadow-sm backdrop-blur-sm">
+        <Card variant="glass">
           <CardHeader className="space-y-1">
             <CardTitle>Cuenta y acceso</CardTitle>
             <CardDescription>

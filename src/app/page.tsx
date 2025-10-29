@@ -7,7 +7,6 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "@/components/context/AuthContext";
 import { Loading } from "@/components/ui/loading";
 
-// Lazy load de componentes pesados
 const ParticleBackground = lazy(
   () => import("@/components/particleBackground")
 );

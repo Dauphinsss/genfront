@@ -77,7 +77,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false, // Desactivar para usar custom
+        heading: false,
       }),
       Heading.configure({
         levels: [1, 2, 3, 4],
@@ -114,7 +114,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none min-h-[400px] px-8 py-6 dark:prose-invert',
       },
-      // Permitir drop de imágenes
       handleDrop: (view, event, slice, moved) => {
         setIsDragging(false);
         
@@ -168,7 +167,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           return false;
         },
       },
-      // Permitir paste de imágenes
       handlePaste: (view, event) => {
         const items = event.clipboardData?.items;
         if (!items) return false;
@@ -207,10 +205,8 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     },
   });
 
-  // Efecto para cargar el contenido cuando cambia el topic
   useEffect(() => {
     if (editor && topic?.content?.htmlContent) {
-      // Solo actualizar si el contenido es diferente
       const currentContent = editor.getHTML();
       const newContent = topic.content.htmlContent;
       
@@ -220,7 +216,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     }
   }, [editor, topic?.content?.htmlContent]);
 
-  // Efecto para actualizar nombre y descripción cuando cambia el topic
   useEffect(() => {
     if (topic) {
       setName(topic.name || "");
@@ -400,7 +395,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
     return <div className="flex items-center justify-center min-h-[400px]">Cargando editor...</div>;
   }
 
-  // Permitir edición si es nuevo o si tiene content.id
   if (!isNewTopic && !topic?.content?.id) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -412,7 +406,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header del editor */}
+      {}
       <div className="border-b border-border bg-card mb-6 rounded-lg">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-4">
@@ -475,10 +469,10 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
             />
           </div>
 
-          {/* Toolbar */}
+          {}
           {!showPreview && (
             <div className="flex items-center gap-1 flex-wrap pb-2">
-              {/* Deshacer/Rehacer */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -500,7 +494,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
               
               <div className="w-px h-6 bg-border mx-1" />
 
-              {/* Formato de texto */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -558,7 +552,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
               
               <div className="w-px h-6 bg-border mx-1" />
 
-              {/* Encabezados */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -589,7 +583,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
               <div className="w-px h-6 bg-border mx-1" />
 
-              {/* Listas */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -620,7 +614,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
               <div className="w-px h-6 bg-border mx-1" />
 
-              {/* Alineación */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -660,7 +654,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
 
               <div className="w-px h-6 bg-border mx-1" />
 
-              {/* Multimedia */}
+              {}
               <Button
                 variant="ghost"
                 size="sm"
@@ -705,7 +699,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                 <FileText className="w-4 h-4" />
               </Button>
               
-              {/* Inputs ocultos para subir archivos */}
+              {}
               <input
                 ref={videoInputRef}
                 type="file"
@@ -731,13 +725,13 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           )}
         </div>
 
-        {/* Diálogos inline para imagen y link */}
+        {}
         {showImageDialog && (
           <div className="border-t border-border bg-muted/30 px-6 py-3 space-y-3">
             <div className="max-w-7xl mx-auto">
-              {/* Opciones de imagen: URL o Archivo */}
+              {}
               <div className="flex items-center gap-4 mb-3">
-                {/* URL de imagen */}
+                {}
                 <div className="flex-1 flex items-end gap-2">
                   <div className="flex-1">
                     <Label className="text-xs mb-1 block">URL de la imagen</Label>
@@ -758,12 +752,12 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
                   </Button>
                 </div>
 
-                {/* Divisor "O" */}
+                {}
                 <div className="flex items-center justify-center px-3 text-muted-foreground font-semibold">
                   Ó
                 </div>
 
-                {/* Subir archivo */}
+                {}
                 <div className="flex items-end gap-2">
                   <div className="min-w-[200px]">
                     <Label className="text-xs mb-1 block">Subir desde dispositivo</Label>
@@ -791,48 +785,9 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-          </div>
-        )}
-
-        {showLinkDialog && (
-          <div className="border-t border-border bg-muted/30 px-6 py-3">
-            <div className="max-w-7xl mx-auto flex items-end gap-4">
-              <div className="flex-1">
-                <Label className="text-xs mb-1 block">URL del enlace</Label>
-                <Input
-                  type="text"
-                  placeholder="https://ejemplo.com"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" onClick={handleAddLink}>
-                  Insertar
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => setShowLinkDialog(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Área del editor */}
+                accept="image}
       <div className="mt-6 relative">
         {showPreview ? (
-          // Vista previa del contenido
           <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
             <h1 className="text-3xl font-bold mb-4 text-foreground">{name || "Sin título"}</h1>
             {description && (
@@ -844,7 +799,6 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
             />
           </div>
         ) : (
-          // Editor activo
           <div className={`bg-card border rounded-lg shadow-sm min-h-[500px] transition-all ${
             isDragging ? 'border-primary border-2 bg-primary/5' : 'border-border'
           }`}>
@@ -861,7 +815,7 @@ export function TopicEditor({ topic, isNewTopic = false, onSave, onCancel }: Top
           </div>
         )}
 
-        {/* Tutorial flotante */}
+        {}
         <EditorTutorial />
       </div>
     </div>
