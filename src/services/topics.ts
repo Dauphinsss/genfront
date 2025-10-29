@@ -27,7 +27,7 @@ export const createTopic = async (data: CreateTopicDto): Promise<Topic> => {
 };
 
 export const getAllTopics = async (type?: TopicType): Promise<Topic[]> => {
-  const url = type ? `${API_BASE_URL}/topics?type=${type}` : `${API_BASE_URL}/topics`;
+  const url = type ? `${API_BASE_URL}/topics?type=${type}` : `${API_BASE_URL}/topics/catalog/available`;
   const response = await axios.get(url, {
     headers: getAuthHeaders(),
   });

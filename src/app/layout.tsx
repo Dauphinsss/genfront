@@ -2,11 +2,11 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CourseProvider } from "@/lib/course-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { DesktopOnlyScreen } from "@/components/desktop-only-screen";
 import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
+import { Toaster } from "@/components/ui/toaster"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,7 +81,8 @@ export default function RootLayout({
           <DesktopOnlyScreen />
         ) : (
           <ToastProvider>
-            <CourseProvider>{children}</CourseProvider>
+              {children}
+              <Toaster />
           </ToastProvider>
         )}
       </body>

@@ -257,6 +257,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
       )}
 
       {/* Imagen */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
         src={node.attrs.src}
