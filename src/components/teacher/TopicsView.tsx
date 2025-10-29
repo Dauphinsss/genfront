@@ -74,8 +74,9 @@ export function TopicsView() {
 
       await createContent(newTopic.id, {
         description: data.description || "",
-        htmlContent: "",
-      });
+        jsonFileUrl: JSON.stringify({ left: [], right: [] }),
+      }); 
+
 
       const fullTopic = await getTopicById(newTopic.id);
       setEditingTopic(fullTopic);

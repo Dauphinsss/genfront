@@ -15,8 +15,7 @@ export interface Resource {
 
 export interface Content {
   id: number
-  htmlContent: string
-  htmlFileUrl?: string
+  jsonFileUrl: string
   description?: string
   createdAt: string
   updatedAt: string
@@ -39,12 +38,12 @@ export interface CreateTopicDto {
 }
 
 export interface CreateContentDto {
-  htmlContent?: string
+  jsonFileUrl: string
   description?: string
 }
 
 export interface UpdateContentDto {
-  htmlContent?: string
+  jsonFileUrl?: string
   description?: string
 }
 

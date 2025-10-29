@@ -71,7 +71,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
                      prose-li:my-2"
           dangerouslySetInnerHTML={{
             __html:
-              topic.content?.htmlContent || "<p>Sin contenido disponible</p>",
+              topic.content?.jsonFileUrl || "<p>Sin contenido disponible</p>",
           }}
         />
       </article>
