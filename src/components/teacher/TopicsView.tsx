@@ -13,7 +13,7 @@ import {
   Edit,
 } from "lucide-react";
 import { TopicPreview } from "./TopicPreview";
-import { TopicEditor } from "./TopicEditor";
+import { TopicEditorNew } from "./TopicEditorNew";
 import { CreateTopicModal } from "./CreateTopicModal";
 import { useToast } from "@/hooks/use-toast";
 import { Loading } from "@/components/ui/loading";
@@ -22,7 +22,6 @@ import {
   getAllTopics,
   deleteTopic,
   createTopic,
-  createContent,
   getTopicById,
 } from "@/services/topics";
 
@@ -34,6 +33,7 @@ export function TopicsView() {
   const [previewTopic, setPreviewTopic] = useState<Topic | undefined>();
   const [editingTopic, setEditingTopic] = useState<Topic | undefined>();
   const [isNewTopic, setIsNewTopic] = useState(false);
+  const [initialDescription, setInitialDescription] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
@@ -72,14 +72,10 @@ export function TopicsView() {
         type: data.type,
       });
 
-      await createContent(newTopic.id, {
-        description: data.description || "",
-        jsonFileUrl: JSON.stringify({ left: [], right: [] }),
-      }); 
-
-
+      // Guardar descripcion para pasar al editor
       const fullTopic = await getTopicById(newTopic.id);
       setEditingTopic(fullTopic);
+      setInitialDescription(data.description || '');
       setIsNewTopic(true);
       setShowEditor(true);
       setShowCreateModal(false);
@@ -206,9 +202,10 @@ export function TopicsView() {
 
   if (showEditor && editingTopic) {
     return (
-      <TopicEditor
+      <TopicEditorNew
         topic={editingTopic}
         isNewTopic={isNewTopic}
+        initialDescription={initialDescription}
         onSave={handleSaveFromEditor}
         onCancel={handleCancelEditor}
       />
