@@ -110,15 +110,7 @@ export const uploadResource = async (
   return response.data;
 };
 
-export const uploadJsonResource = async (
-  contentId: number,
-  obj: unknown,
-  filename = "content.json"
-): Promise<UploadResourceResponse> => {
-  const blob = new Blob([JSON.stringify(obj)], { type: "application/json" });
-  const file = new File([blob], filename, { type: "application/json" });
-  return uploadResource(contentId, file);
-};
+
 
 
 export const getResourcesByContentId = async (contentId: number) => {

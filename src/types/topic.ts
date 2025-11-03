@@ -2,6 +2,9 @@ export type TopicType = "content" | "evaluation"
 
 export type ResourceType = "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" | "OTHER"
 
+// BlockNote JSON structure type
+export type BlockNoteContent = Record<string, unknown>[]
+
 export interface Resource {
   id: number
   filename: string
@@ -15,7 +18,7 @@ export interface Resource {
 
 export interface Content {
   id: number
-  jsonFileUrl: string
+  blocksJson?: BlockNoteContent
   description?: string
   createdAt: string
   updatedAt: string
@@ -38,12 +41,12 @@ export interface CreateTopicDto {
 }
 
 export interface CreateContentDto {
-  jsonFileUrl: string
+  blocksJson: BlockNoteContent
   description?: string
 }
 
 export interface UpdateContentDto {
-  jsonFileUrl?: string
+  blocksJson?: BlockNoteContent
   description?: string
 }
 
