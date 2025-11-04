@@ -8,6 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getLessonTopics } from "@/services/lessons";
 import { getTopicById } from "@/services/topics";
 import type { LessonTopic } from "@/services/lessons";
+import { BlockNoteEditorComponent } from "@/components/teacher/BlockNoteEditor";
+import '@blocknote/core/fonts/inter.css';
+import '@blocknote/mantine/style.css';
 
 export type Lesson = {
   id: number;
@@ -47,7 +50,7 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
   const [lessonTopics, setLessonTopics] = useState<LessonTopic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<LessonTopic | null>(null);
   const [topicsLoading, setTopicsLoading] = useState(false);
-  const [topicContent, setTopicContent] = useState<{ content?: { htmlContent?: string } } | null>(null);
+  const [topicContent, setTopicContent] = useState<{ content?: { blocksJson?: Record<string, unknown>[] } } | null>(null);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
 
@@ -235,12 +238,14 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
                 <div className="text-muted-foreground">Cargando contenido…</div>
               ) : topicError ? (
                 <div className="text-destructive">{topicError}</div>
-              ) : topicContent ? (
-                <div
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: topicContent.content?.htmlContent || "<p>Sin contenido disponible</p>" }}
+              ) : topicContent?.content?.blocksJson ? (
+                <BlockNoteEditorComponent
+                  initialContent={topicContent.content.blocksJson}
+                  editable={false}
                 />
-              ) : null}
+              ) : (
+                <div className="text-muted-foreground">Sin contenido disponible</div>
+              )}
             </CardContent>
           </Card>
         ) : (

@@ -189,3 +189,94 @@
   }
 }
 
+/* Estilos para BlockNote en modo claro/oscuro */
+.blocknote-editor-themed .bn-container {
+  background-color: transparent !important;
+}
+
+.blocknote-editor-themed .bn-editor {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Modo claro - fondo blanco con texto negro */
+.blocknote-editor-themed[data-theme="light"] .bn-container,
+.blocknote-editor-themed[data-theme="light"] .bn-editor,
+.blocknote-editor-themed[data-theme="light"] .ProseMirror {
+  background-color: white !important;
+}
+
+.blocknote-editor-themed[data-theme="light"] .bn-block-content,
+.blocknote-editor-themed[data-theme="light"] .bn-inline-content,
+.blocknote-editor-themed[data-theme="light"] .ProseMirror,
+.blocknote-editor-themed[data-theme="light"] .bn-block {
+  color: #000000 !important;
+}
+
+/* Modo oscuro - fondo gris oscuro con texto blanco */
+.dark .blocknote-editor-themed,
+.dark .blocknote-editor-themed .bn-container,
+.dark .blocknote-editor-themed .bn-editor,
+.dark .blocknote-editor-themed .ProseMirror,
+.blocknote-editor-themed[data-theme="dark"],
+.blocknote-editor-themed[data-theme="dark"] .bn-container,
+.blocknote-editor-themed[data-theme="dark"] .bn-editor,
+.blocknote-editor-themed[data-theme="dark"] .ProseMirror {
+  background-color: #1a1a1a !important;
+}
+
+.dark .blocknote-editor-themed .bn-block-content,
+.dark .blocknote-editor-themed .bn-inline-content,
+.dark .blocknote-editor-themed .ProseMirror,
+.dark .blocknote-editor-themed .bn-block,
+.blocknote-editor-themed[data-theme="dark"] .bn-block-content,
+.blocknote-editor-themed[data-theme="dark"] .bn-inline-content,
+.blocknote-editor-themed[data-theme="dark"] .ProseMirror,
+.blocknote-editor-themed[data-theme="dark"] .bn-block {
+  color: #e5e5e5 !important;
+}
+
+/* Placeholder con mejor contraste */
+.dark .blocknote-editor-themed .bn-block-content[data-is-empty-and-focused="true"]::before,
+.blocknote-editor-themed[data-theme="dark"] .bn-block-content[data-is-empty-and-focused="true"]::before {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-style: italic;
+}
+
+.blocknote-editor-themed[data-theme="light"] .bn-block-content[data-is-empty-and-focused="true"]::before {
+  color: rgba(0, 0, 0, 0.4) !important;
+  font-style: italic;
+}
+
+/* Mejorar espaciado del editor */
+.blocknote-editor-themed .bn-editor {
+  padding: 0.5rem 0;
+}
+
+.blocknote-editor-themed .bn-block {
+  margin: 0.25rem 0;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.blocknote-editor-themed .bn-block-content {
+  padding-left: 0.5rem;
+}
+
+/* Respetar formato de letra de BlockNote - solo ajustar color base */
+.dark .blocknote-editor-themed p,
+.dark .blocknote-editor-themed span,
+.blocknote-editor-themed[data-theme="dark"] p,
+.blocknote-editor-themed[data-theme="dark"] span {
+  color: #e5e5e5;
+}
+
+/* Títulos en modo oscuro mantienen su peso y tamaño */
+.dark .blocknote-editor-themed h1,
+.dark .blocknote-editor-themed h2,
+.dark .blocknote-editor-themed h3,
+.blocknote-editor-themed[data-theme="dark"] h1,
+.blocknote-editor-themed[data-theme="dark"] h2,
+.blocknote-editor-themed[data-theme="dark"] h3 {
+  color: #ffffff;
+}
