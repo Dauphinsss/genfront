@@ -414,7 +414,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
       ) : (
         <>
           {currentCourse.status !== 'activo' && currentCourse.status !== 'inactivo' ? (
-            <Card className="mb-4 border border-gray-400/60 bg-gray-50/60 dark:bg-gray-950/30 shadow-sm rounded-xl">
+            <Card className="mb-4 border border-gray-400/60 bg-gray-50/60 dark:bg-gray-950/30 shadow-sm rounded-xl animate-in fade-in-50">
               <CardContent className="flex items-center gap-3 py-3 px-4">
                 <AlertCircle className="h-5 w-5 text-gray-600 dark:text-gray-200" />
                 <div className="flex-1">
@@ -427,71 +427,75 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
 
           {(currentCourse.status === 'activo' || currentCourse.status === 'inactivo') && (
             <>
-              <Card variant="glass" className="relative overflow-hidden mb-8 animate-in fade-in slide-in-from-bottom-2">
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
-                <CardHeader className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary">
-                        <BookOpen className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl md:text-3xl">Editar Curso Base</CardTitle>
-                        <CardDescription>
-                          Cambia el nombre del curso base y su estado.
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <span className={`rounded-full border border-border/70 px-3 py-1 text-xs uppercase tracking-wide ${currentCourse.status === 'activo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {currentCourse.status === 'activo' ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="py-6">
+              <div className="flex items-center justify-between animate-in fade-in-50">
+                <div>
+                  <h1 className="text-2xl font-semibold text-foreground">Editar Curso Base</h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Gestiona las unidades y lecciones del curso
+                  </p>
+                </div>
+                <span className={`rounded-full border border-border/70 px-3 py-1 text-xs uppercase tracking-wide ${currentCourse.status === 'activo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {currentCourse.status === 'activo' ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+
+              <Card variant="glass" className="relative overflow-hidden animate-in fade-in-50 slide-in-from-bottom-2">
+                <CardContent className="py-2">
                   {editingCourseTitle ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={courseTitleValue}
-                        onChange={(e) => setCourseTitleValue(e.target.value)}
-                        className="text-3xl font-bold h-14"
-                        placeholder="Título del curso"
-                        autoFocus
-                      />
-                      <Button
-                        size="icon"
-                        variant="default"
-                        onClick={handleUpdateCourseTitle}
-                        disabled={!courseTitleValue.trim()}
-                      >
-                        <Check className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={cancelEditingCourseTitle}
-                      >
-                        <X className="h-5 w-5" />
-                      </Button>
+                    <div className="space-y-2">
+                      <label className="text-lg font-medium text-muted-foreground flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Título del Curso
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={courseTitleValue}
+                          onChange={(e) => setCourseTitleValue(e.target.value)}
+                          className="text-2xl font-bold h-12"
+                          placeholder="Título del curso"
+                          autoFocus
+                        />
+                        <Button
+                          size="icon"
+                          variant="default"
+                          onClick={handleUpdateCourseTitle}
+                          disabled={!courseTitleValue.trim()}
+                        >
+                          <Check className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={cancelEditingCourseTitle}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-3xl font-bold">
-                        {currentCourse.title}
-                      </h1>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={startEditingCourseTitle}
-                        className="h-8 w-8"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                    <div className="space-y-2">
+                      <label className="text-lg font-medium text-muted-foreground flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Título del Curso
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold">
+                          {currentCourse.title}
+                        </h2>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={startEditingCourseTitle}
+                          className="h-8 w-8"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
-              </Card>
+              </Card>  
 
-              {}
               <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
                 <button
                   onClick={() => onBack(wasUpdated)}
@@ -544,12 +548,12 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {loading ? (
               <Loading size="sm" />
             ) : units.length === 0 ? (
-              <Card className="border-dashed col-span-full">
-                <CardContent className="flex flex-col items-center justify-center py-12">
+              <Card variant="dashed" className="border-dashed col-span-full">
+                <CardContent className="flex flex-col items-center justify-center py-12 animate-in fade-in-50">
                   <BookOpen className="w-16 h-16 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground text-center mb-4">
                     No hay unidades. Agrega la primera unidad para comenzar.
@@ -564,31 +568,21 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
               units.map((unit, index) => (
                 <Card
                   key={unit.id}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 ${
+                  variant="interactive"
+                  className={`group transition-all duration-200 ${
                     editId === unit.id
                       ? ''
-                      : 'cursor-pointer hover:translate-y-[-4px] hover:shadow-xl'
+                      : 'cursor-pointer hover:shadow-lg'
                   }`}
-                  style={{ animationDelay: `${index * 40}ms` }}
                   onClick={() => {
                     if (editId !== unit.id) {
                       goToLessons(unit)
                     }
                   }}
                 >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in slide-in-from-bottom-2 relative">
+                  <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in-50 relative" style={{ animationDelay: `${index * 30}ms` }}>
                     {editId === unit.id ? (
-                      <div className="flex flex-col">
-                        {}
-                        <div className="px-4 pt-4 pb-3 border-b border-border">
-                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <Edit className="w-4 h-4" />
-                            <span>Editando unidad</span>
-                          </div>
-                        </div>
-
-                        {}
+                      <div className="flex flex-col w-full">
                         <div className="px-4 py-6">
                           <Input
                             value={editTitle}
@@ -600,7 +594,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           />
                         </div>
 
-                        {}
                         <div className="px-4 pb-4">
                           <div className="flex gap-2 mb-4">
                             <Button 
@@ -628,7 +621,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             </Button>
                           </div>
 
-                          {}
                           <div className="pt-4 border-t border-border">
                             <p className="text-xs text-muted-foreground mb-2">Zona de peligro</p>
                             <Button
@@ -648,25 +640,26 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                       </div>
                     ) : (
                       <div className="flex flex-col items-center w-full">
-                        {}
                         <div className="relative flex-shrink-0 mb-2">
-                          <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center">
+                          <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                             <BookOpen className="w-8 h-8 text-primary" />
                           </div>
                           <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-semibold shadow-md">
                             {unit.index}
                           </div>
                         </div>
-                        {}
                         <div className="flex-1 min-w-0 w-full text-center space-y-1">
                           <h3 className="truncate text-base font-semibold text-foreground">
                             {unit.title}
                           </h3>
                           <p className="text-xs text-muted-foreground">
-                            {unit.lessons?.length || 0} lecciones
+                            {unit.lessons?.length === 0
+                            ? "No hay lecciones" 
+                            : unit.lessons?.length === 1
+                            ? "1 lección"
+                            : `${unit.lessons?.length} lecciones`}
                           </p>
                         </div>
-                        {}
                         <Button
                           size="sm"
                           variant="ghost"
@@ -689,7 +682,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </div>
       )}
 
-      {}
       {viewState.mode === 'lessons' && viewState.selectedUnit && (
         <div className="space-y-6">
           <div className="flex justify-between items-start">
@@ -707,12 +699,12 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {loading ? (
               <Loading size="sm" />
             ) : lessons.length === 0 ? (
-              <Card className="border-dashed col-span-full">
-                <CardContent className="flex flex-col items-center justify-center py-12">
+              <Card variant="dashed" className="border-dashed col-span-full">
+                <CardContent className="flex flex-col items-center justify-center py-12 animate-in fade-in-50">
                   <BookOpen className="w-16 h-16 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground text-center mb-4">
                     No hay lecciones. Agrega la primera lección para comenzar.
@@ -727,31 +719,22 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
               lessons.map((lesson, index) => (
                 <Card
                   key={lesson.id}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 ${
+                  variant="interactive"
+                  className={`group transition-all duration-200 ${
                     editLessonId === lesson.id
                       ? ''
-                      : 'cursor-pointer hover:translate-y-[-4px] hover:shadow-xl'
+                      : 'cursor-pointer hover:shadow-lg'
                   }`}
-                  style={{ animationDelay: `${index * 40}ms` }}
                   onClick={() => {
                     if (editLessonId !== lesson.id) {
                       goToTopics(lesson)
                     }
                   }}
                 >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in slide-in-from-bottom-2 relative">
+                  <CardContent className="flex items-start gap-4 p-5 md:flex-col md:items-center md:text-center animate-in fade-in-50 relative" style={{ animationDelay: `${index * 30}ms` }}>
                     {editLessonId === lesson.id ? (
-                      <div className="flex flex-col">
-                        {}
-                        <div className="px-4 pt-4 pb-3 border-b border-border">
-                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <Edit className="w-4 h-4" />
-                            <span>Editando lección</span>
-                          </div>
-                        </div>
+                      <div className="flex flex-col w-full">
 
-                        {}
                         <div className="px-4 py-6">
                           <Input
                             value={editLessonTitle}
@@ -765,7 +748,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                           />
                         </div>
 
-                        {}
                         <div className="px-4 pb-4">
                           <div className="flex gap-2 mb-4">
                             <Button 
@@ -793,7 +775,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             </Button>
                           </div>
 
-                          {}
                           <div className="pt-4 border-t border-border">
                             <p className="text-xs text-muted-foreground mb-2">Zona de peligro</p>
                             <Button
@@ -813,16 +794,14 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                       </div>
                     ) : (
                       <div className="flex flex-col items-center w-full">
-                        {}
                         <div className="relative flex-shrink-0 mb-2">
-                          <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center">
+                          <div className="h-16 w-16 rounded-full border-2 border-border bg-primary/10 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                             <span className="text-3xl">📖</span>
                           </div>
                           <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-semibold shadow-md">
                             {lesson.index}
                           </div>
                         </div>
-                        {}
                         <div className="flex-1 min-w-0 w-full text-center space-y-1">
                           <h3 className="truncate text-base font-semibold text-foreground">
                             {lesson.title}
@@ -831,7 +810,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
                             Lección #{lesson.index}
                           </p>
                         </div>
-                        {}
                         <Button
                           size="sm"
                           variant="ghost"
@@ -854,7 +832,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </div>
       )}
 
-      {}
       {viewState.mode === 'topics' && viewState.selectedLesson && (
         <div className="space-y-6">
           <ManageLessonTopics 
@@ -868,7 +845,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </>
       )}
 
-      {}
       <Dialog open={deleteUnitDialog.open} onOpenChange={(open) => setDeleteUnitDialog({ open, unitId: null })}>
         <DialogContent>
           <DialogHeader>
@@ -895,7 +871,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {}
       <Dialog open={deleteLessonDialog.open} onOpenChange={(open) => setDeleteLessonDialog({ open, lessonId: null })}>
         <DialogContent>
           <DialogHeader>
@@ -922,7 +897,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {}
       <Dialog open={addUnitDialog} onOpenChange={setAddUnitDialog}>
         <DialogContent>
           <DialogHeader>
@@ -961,7 +935,6 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
         </DialogContent>
       </Dialog>
 
-      {}
       <Dialog open={addLessonDialog} onOpenChange={setAddLessonDialog}>
         <DialogContent>
           <DialogHeader>

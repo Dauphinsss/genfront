@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/ui/loading";
 import { ArrowLeft, BookOpen, Copy, History } from "lucide-react";
 import CourseBaseEdit from "./course-base-units";
@@ -143,29 +144,30 @@ export default function CourseBaseAdminPanel() {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Volver
         </Button>
-        <Card variant="glass" className="relative overflow-hidden">
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 animate-pulse" />
-          <CardHeader className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <History className="h-5 w-5" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl md:text-3xl">Cursos Históricos</CardTitle>
-                <CardDescription>Selecciona un curso histórico para visualizarlo</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-        <div className="flex flex-wrap justify-center gap-6">
-          {historicMode.courses.length === 0 ? (
-            <Card className="w-full max-w-xs"><CardContent className="py-8 text-center">No hay cursos históricos.</CardContent></Card>
-          ) : (
-            historicMode.courses.map((course) => (
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">
+              Cursos Históricos
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Selecciona un curso histórico para visualizarlo
+            </p>
+          </div>
+        </div>
+        
+        {historicMode.courses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in-50">
+            <History className="h-10 w-10 text-muted-foreground/60 mb-3" />
+            <p className="text-sm text-muted-foreground">No hay cursos históricos</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {historicMode.courses.map((course, index) => (
               <Card
                 key={course.id}
                 variant="interactive"
-                className="group relative overflow-hidden w-full max-w-xs"
+                className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
                 onClick={async () => {
                   setLoading(true);
                   try {
@@ -185,16 +187,29 @@ export default function CourseBaseAdminPanel() {
                   }
                 }}
               >
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <CardContent className="flex flex-col items-center gap-4 p-6 animate-in fade-in slide-in-from-bottom-2">
-                  <History className="w-10 h-10 text-primary mb-2" />
-                  <div className="text-center font-semibold text-foreground text-lg">{course.title}</div>
-                  <span className="mt-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Histórico</span>
+                <CardContent 
+                  className="flex flex-col items-center text-center p-5 gap-3 animate-in fade-in-50" 
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div className="relative">
+                    <div className="flex h-18 w-18 items-center justify-center rounded-full bg-primary/10 transition-transform duration-200 group-hover:scale-105">
+                      <History className="h-9 w-9 text-primary" />
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-1.5">
+                    <h3 className="text-lg font-medium text-foreground truncate">
+                      {course.title}
+                    </h3>
+                    <Badge variant="outline" className="border-primary/30 text-xs text-primary">
+                      Histórico
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -208,95 +223,181 @@ export default function CourseBaseAdminPanel() {
     }} />;
   }
 
-  return (
-    loading ? <Loading /> : (
-      <div className="space-y-8 max-w-6xl mx-auto">
-        <Card variant="glass" className="relative overflow-hidden">
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 animate-pulse" />
-          <CardHeader className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl md:text-3xl">Gestión de Curso Base</CardTitle>
-                <CardDescription>Administra el curso base activo, inactivo e históricos</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+  const coursesToRender = [];
+  if (historicCourses.length > 0) {
+    coursesToRender.push({ type: 'historic', data: null });
+  }
+  if (activeCourse) {
+    coursesToRender.push({ type: 'active', data: activeCourse });
+  }
+  if (inactiveCourse) {
+    coursesToRender.push({ type: 'inactive', data: inactiveCourse });
+  }
 
-        <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-stretch w-full">
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Gestión de Curso Base
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Administra el curso base activo, inactivo e históricos
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-stretch w-full">
+        <Button
+          variant="default"
+          className="rounded-xl px-8 py-3 font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
+          onClick={handleClone}
+          disabled={actionLoading || !!inactiveCourse}
+        >
+          <Copy className="h-4 w-4 mr-2" />
+          Crear copia del curso
+        </Button>
+        {inactiveCourse && (
           <Button
             variant="default"
+            size="lg"
             className="rounded-xl px-8 py-3 font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
-            onClick={handleClone}
-            disabled={actionLoading || !!inactiveCourse}
+            onClick={handleActivate}
+            disabled={actionLoading}
           >
-            Crear copia del curso
+            <BookOpen className="h-4 w-4 mr-2" />
+            Activar curso inactivo
           </Button>
-          {inactiveCourse && (
-            <Button
-              variant="default"
-              size="lg"
-              className="rounded-xl px-8 py-3 font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
-              onClick={handleActivate}
-              disabled={actionLoading}
-            >
-              Activar curso inactivo
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-6">
-          {historicCourses.length > 0 && (
-            <Card
-              key="historic"
-              className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl cursor-pointer w-full max-w-xs"
-              onClick={handleViewHistorics}
-            >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <CardContent className="flex flex-col items-center gap-4 p-6 animate-in fade-in slide-in-from-bottom-2">
-                <History className="w-10 h-10 text-primary mb-2" />
-                <div className="text-center font-semibold text-foreground text-lg">Cursos Históricos</div>
-                <span className="mt-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Históricos</span>
-              </CardContent>
-            </Card>
-          )}
-          {activeCourse && (
-            <Card
-              key="active"
-              className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl cursor-pointer w-full max-w-xs"
-              onClick={() => handleEdit(activeCourse)}
-            >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <CardContent className="flex flex-col items-center gap-4 p-6 animate-in fade-in slide-in-from-bottom-2">
-                <BookOpen className="w-10 h-10 text-primary mb-2" />
-                <div className="text-center font-semibold text-foreground text-lg">{activeCourse.title}</div>
-                <span className="mt-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Curso activo</span>
-              </CardContent>
-            </Card>
-          )}
-          {inactiveCourse && (
-            <Card
-              key="inactive"
-              className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-sm transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl cursor-pointer w-full max-w-xs"
-              onClick={() => handleEdit(inactiveCourse)}
-            >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <CardContent className="flex flex-col items-center gap-4 p-6 animate-in fade-in slide-in-from-bottom-2">
-                <Copy className="w-10 h-10 text-muted-foreground mb-2" />
-                <div className="text-center font-semibold text-foreground text-lg">{inactiveCourse.title}</div>
-                <span className="mt-2 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">Curso inactivo</span>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {error && (
-          <Card className="w-full mb-4"><CardContent className="text-destructive">{error}</CardContent></Card>
         )}
       </div>
-    )
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {coursesToRender.map((item, index) => {
+          if (item.type === 'historic') {
+            return (
+              <Card
+                key="historic"
+                variant="interactive"
+                className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
+                onClick={handleViewHistorics}
+              >
+                <CardContent 
+                  className="flex flex-col items-center text-center p-5 gap-3 animate-in fade-in-50" 
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div className="relative">
+                    <div className="flex h-18 w-18 items-center justify-center rounded-full bg-primary/10 transition-transform duration-200 group-hover:scale-105">
+                      <History className="h-9 w-9 text-primary" />
+                    </div>
+                    {historicCourses.length > 0 && (
+                      <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                        {historicCourses.length}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-full space-y-1.5">
+                    <h3 className="text-sm font-medium text-foreground truncate">
+                      Cursos Históricos
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Ver historial completo
+                    </p>
+                    <Badge variant="outline" className="border-primary/30 text-xs text-primary">
+                      {historicCourses.length} curso{historicCourses.length === 1 ? '' : 's'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          if (item.type === 'active' && item.data) {
+            return (
+              <Card
+                key="active"
+                variant="interactive"
+                className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
+                onClick={() => handleEdit(item.data!)}
+              >
+                <CardContent 
+                  className="flex flex-col items-center text-center p-5 gap-3 animate-in fade-in-50" 
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div className="relative">
+                    <div className="flex h-18 w-18 items-center justify-center rounded-full bg-primary/10 transition-transform duration-200 group-hover:scale-105">
+                      <BookOpen className="h-9 w-9 text-primary" />
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-1.5">
+                    <h3 className="text-sm font-medium text-foreground truncate">
+                      {item.data.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Curso actual en uso
+                    </p>
+                    <Badge variant="outline" className="border-primary/30 text-xs text-primary">
+                      Activo
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          if (item.type === 'inactive' && item.data) {
+            return (
+              <Card
+                key="inactive"
+                variant="interactive"
+                className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
+                onClick={() => handleEdit(item.data!)}
+              >
+                <CardContent 
+                  className="flex flex-col items-center text-center p-5 gap-3 animate-in fade-in-50" 
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div className="relative">
+                    <div className="flex h-18 w-18 items-center justify-center rounded-full bg-muted/50 transition-transform duration-200 group-hover:scale-105">
+                      <Copy className="h-9 w-9 text-muted-foreground" />
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-1.5">
+                    <h3 className="text-sm font-medium text-foreground truncate">
+                      {item.data.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      En edición o revisión
+                    </p>
+                    <Badge variant="outline" className="border-primary/30 text-xs text-primary">
+                      Inactivo
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          return null;
+        })}
+      </div>
+
+      {coursesToRender.length === 0 && !error && (
+        <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in-50">
+          <BookOpen className="h-10 w-10 text-muted-foreground/60 mb-3" />
+          <p className="text-sm text-muted-foreground">No hay cursos disponibles</p>
+        </div>
+      )}
+
+      {error && (
+        <Card className="w-full border-destructive/50 bg-destructive/10">
+          <CardContent className="py-4 text-destructive text-center">
+            {error}
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
