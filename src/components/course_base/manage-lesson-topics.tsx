@@ -54,7 +54,6 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
   const [associatedTopics, setAssociatedTopics] = useState<LessonTopic[]>([])
   const [availableTopics, setAvailableTopics] = useState<Topic[]>([])
   const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState(false)
 
   const loadData = useCallback(async () => {
     try {
@@ -67,7 +66,9 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
       const sorted = lessonTopicsData.sort((a, b) => (a.order || 0) - (b.order || 0))
       setAssociatedTopics(sorted)
 
-      setAvailableTopics(allTopics)
+      const associatedIds = new Set(lessonTopicsData.map(lt => lt.topicId))
+      const available = allTopics.filter(topic => !associatedIds.has(topic.id))
+      setAvailableTopics(available)
     } catch (error: unknown) {
       console.error("Error loading topics:", error)
     } finally {
@@ -80,24 +81,39 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
   }, [loadData])
 
   const handleAssociateTopic = async (topicId: number) => {
-    try {
-      setProcessing(true)
-      const nextOrder = associatedTopics.length > 0 
-        ? Math.max(...associatedTopics.map(t => t.order || 0)) + 1 
-        : 0
+    const topicToAdd = availableTopics.find(t => t.id === topicId);
+    if (!topicToAdd) return;
 
-      await associateTopicToLesson(lesson.id, topicId, nextOrder)
-      
-      await loadData()
+    const nextOrder = associatedTopics.length > 0 
+      ? Math.max(...associatedTopics.map(t => t.order || 0)) + 1 
+      : 0;
+
+    const tempLessonTopic: LessonTopic = {
+      id: Date.now(),
+      lessonId: lesson.id,
+      topicId: topicToAdd.id,
+      order: nextOrder,
+      topic: topicToAdd,
+      createdAt: new Date().toISOString()
+    };
+
+    const previousAssociated = [...associatedTopics];
+    const previousAvailable = [...availableTopics];
+
+    setAssociatedTopics(prev => [...prev, tempLessonTopic].sort((a, b) => (a.order || 0) - (b.order || 0)));
+    setAvailableTopics(prev => prev.filter(t => t.id !== topicId));
+
+    try {
+      await associateTopicToLesson(lesson.id, topicId, nextOrder);
     } catch (error: unknown) {
-      console.error("Error associating topic:", error)
+      console.error("Error associating topic:", error);
+      setAssociatedTopics(previousAssociated);
+      setAvailableTopics(previousAvailable);
       toast({
         title: "Error",
-        description: "No se pudo asociar el tópico",
+        description: "No se pudo asociar el tópico. Se revirtió el cambio.",
         variant: "destructive",
-      })
-    } finally {
-      setProcessing(false)
+      });
     }
   }
 
@@ -111,21 +127,29 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
 
   const confirmDissociate = async () => {
     if (topicToDissociate === null) return;
+
+    const topicToRemove = associatedTopics.find(t => t.topicId === topicToDissociate);
+    if (!topicToRemove) return;
+
+    const previousAssociated = [...associatedTopics];
+    const previousAvailable = [...availableTopics];
+
+    setAssociatedTopics(prev => prev.filter(t => t.topicId !== topicToDissociate));
+    setAvailableTopics(prev => [...prev, topicToRemove.topic as Topic].sort((a, b) => a.name.localeCompare(b.name)));
+    setShowDissociateDialog(false);
+    setTopicToDissociate(null);
+
     try {
-      setProcessing(true);
       await dissociateTopicFromLesson(lesson.id, topicToDissociate);
-      await loadData();
-      setShowDissociateDialog(false);
-      setTopicToDissociate(null);
     } catch (error: unknown) {
       console.error("Error dissociating topic:", error);
+      setAssociatedTopics(previousAssociated);
+      setAvailableTopics(previousAvailable);
       toast({
         title: "Error",
-        description: "No se pudo desasociar el tópico",
+        description: "No se pudo desasociar el tópico. Se revirtió el cambio.",
         variant: "destructive",
       });
-    } finally {
-      setProcessing(false);
     }
   };
 
@@ -135,60 +159,58 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
   };
 
   const handleMoveUp = async (index: number) => {
-    if (index === 0) return
+    if (index === 0) return;
+
+    const current = associatedTopics[index];
+    const above = associatedTopics[index - 1];
+    const previousTopics = [...associatedTopics];
+
+    const newTopics = [...associatedTopics];
+    newTopics[index] = { ...current, order: above.order || 0 };
+    newTopics[index - 1] = { ...above, order: current.order || 0 };
+    setAssociatedTopics(newTopics.sort((a, b) => (a.order || 0) - (b.order || 0)));
 
     try {
-      setProcessing(true)
-      const current = associatedTopics[index]
-      const above = associatedTopics[index - 1]
-
       await Promise.all([
         updateTopicOrder(lesson.id, current.topicId, above.order || 0),
         updateTopicOrder(lesson.id, above.topicId, current.order || 0)
-      ])
-
-      const newTopics = [...associatedTopics]
-      newTopics[index] = { ...current, order: above.order || 0 }
-      newTopics[index - 1] = { ...above, order: current.order || 0 }
-      setAssociatedTopics(newTopics.sort((a, b) => (a.order || 0) - (b.order || 0)))
+      ]);
     } catch (error: unknown) {
-      console.error("Error reordering:", error)
+      console.error("Error reordering:", error);
+      setAssociatedTopics(previousTopics);
       toast({
         title: "Error",
-        description: "No se pudo reordenar los tópicos",
+        description: "No se pudo reordenar los tópicos. Se revirtió el cambio.",
         variant: "destructive",
-      })
-    } finally {
-      setProcessing(false)
+      });
     }
   }
 
   const handleMoveDown = async (index: number) => {
-    if (index === associatedTopics.length - 1) return
+    if (index === associatedTopics.length - 1) return;
+
+    const current = associatedTopics[index];
+    const below = associatedTopics[index + 1];
+    const previousTopics = [...associatedTopics];
+
+    const newTopics = [...associatedTopics];
+    newTopics[index] = { ...current, order: below.order || 0 };
+    newTopics[index + 1] = { ...below, order: current.order || 0 };
+    setAssociatedTopics(newTopics.sort((a, b) => (a.order || 0) - (b.order || 0)));
 
     try {
-      setProcessing(true)
-      const current = associatedTopics[index]
-      const below = associatedTopics[index + 1]
-
       await Promise.all([
         updateTopicOrder(lesson.id, current.topicId, below.order || 0),
         updateTopicOrder(lesson.id, below.topicId, current.order || 0)
-      ])
-
-      const newTopics = [...associatedTopics]
-      newTopics[index] = { ...current, order: below.order || 0 }
-      newTopics[index + 1] = { ...below, order: current.order || 0 }
-      setAssociatedTopics(newTopics.sort((a, b) => (a.order || 0) - (b.order || 0)))
+      ]);
     } catch (error: unknown) {
-      console.error("Error reordering:", error)
+      console.error("Error reordering:", error);
+      setAssociatedTopics(previousTopics);
       toast({
         title: "Error",
-        description: "No se pudo reordenar los tópicos",
+        description: "No se pudo reordenar los tópicos. Se revirtió el cambio.",
         variant: "destructive",
-      })
-    } finally {
-      setProcessing(false)
+      });
     }
   }
 
@@ -248,7 +270,7 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                           size="icon"
                           className="h-8 w-8"
                           onClick={() => handleMoveUp(index)}
-                          disabled={index === 0 || processing}
+                          disabled={index === 0}
                           tabIndex={-1}
                           title="Mover arriba"
                         >
@@ -259,7 +281,7 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                           size="icon"
                           className="h-8 w-8"
                           onClick={() => handleMoveDown(index)}
-                          disabled={index === associatedTopics.length - 1 || processing}
+                          disabled={index === associatedTopics.length - 1}
                           tabIndex={-1}
                           title="Mover abajo"
                         >
@@ -270,7 +292,6 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                           size="icon"
                           className="h-8 w-8 text-destructive hover:bg-destructive/10"
                           onClick={() => handleDissociateTopic(lessonTopic.topicId)}
-                          disabled={processing}
                           title="Desasociar tópico"
                           tabIndex={-1}
                         >
@@ -320,15 +341,12 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                             {topic.content.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-2">
-                        </div>
                       </div>
                       <Button
                         variant="default"
                         size="sm"
                         className="shrink-0"
                         onClick={() => handleAssociateTopic(topic.id)}
-                        disabled={processing}
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Agregar
@@ -374,11 +392,11 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={cancelDissociate} disabled={processing}>
+            <Button variant="outline" onClick={cancelDissociate}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDissociate} disabled={processing}>
-              {processing ? "Desasociando..." : "Desasociar"}
+            <Button variant="destructive" onClick={confirmDissociate}>
+              Desasociar
             </Button>
           </DialogFooter>
         </DialogContent>
