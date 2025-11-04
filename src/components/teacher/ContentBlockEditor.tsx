@@ -208,7 +208,7 @@ function ImageEditor({
   );
 }
 
-function VideoEditor({ disabled }: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
+function VideoEditor({}: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
   return (
     <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg bg-muted/20">
       <span className="text-sm text-muted-foreground">Editor de video (pendiente)</span>
@@ -216,7 +216,7 @@ function VideoEditor({ disabled }: { block: ContentBlock; onChange: (block: Cont
   );
 }
 
-function AudioEditor({ disabled }: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
+function AudioEditor({}: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
   return (
     <div className="flex items-center justify-center h-32 border-2 border-dashed rounded-lg bg-muted/20">
       <span className="text-sm text-muted-foreground">Editor de audio (pendiente)</span>
@@ -224,7 +224,7 @@ function AudioEditor({ disabled }: { block: ContentBlock; onChange: (block: Cont
   );
 }
 
-function DocumentEditor({ disabled }: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
+function DocumentEditor({}: { block: ContentBlock; onChange: (block: ContentBlock) => void; disabled: boolean }) {
   return (
     <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-lg bg-muted/20">
       <span className="text-sm text-muted-foreground">Editor de documentos (pendiente)</span>

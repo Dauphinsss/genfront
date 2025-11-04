@@ -222,7 +222,7 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                   <Card
                     key={lessonTopic.id}
                     variant="interactive"
-                    className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
+                    className="group"
                     onClick={() => setPreviewTopic(lessonTopic)}
                     tabIndex={0}
                     role="button"
@@ -303,12 +303,12 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                 <p className="text-xs mt-1">Todos los tópicos ya están asociados.</p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+              <div className="space-y-2">
                 {availableTopics.map((topic, index) => (
                   <Card
                     key={topic.id}
                     variant="interactive"
-                    className="group transition-all duration-200 hover:shadow-lg"
+                    className="group"
                   >
                     <CardContent className="flex items-center gap-3 p-4 animate-in fade-in-50" style={{ animationDelay: `${index * 30}ms` }}>
                       <div className="flex-1 min-w-0">
@@ -321,14 +321,6 @@ export function ManageLessonTopics({ lesson }: ManageLessonTopicsProps) {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                            {topic.type}
-                          </span>
-                          {topic.content?.resources && topic.content.resources.length > 0 && (
-                            <span className="text-xs text-muted-foreground">
-                              {topic.content.resources.length} recurso{topic.content.resources.length !== 1 ? 's' : ''}
-                            </span>
-                          )}
                         </div>
                       </div>
                       <Button

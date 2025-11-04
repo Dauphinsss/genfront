@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const filesToProcess = [
   'src/components/admin/UsersManagement.tsx',
@@ -59,7 +59,7 @@ function removeComments(content) {
     return '';
   });
 
-  result = result.replace(/\{\/\*[\s\S]*?\*\/\}/g, (match) => {
+  result = result.replace(/\{\/\*[\s\S]*?\*\/\}/g, () => {
     commentsRemoved++;
     return '';
   });
