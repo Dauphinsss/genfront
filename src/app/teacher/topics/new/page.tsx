@@ -27,7 +27,7 @@ export default function NewTopicPage() {
   const [isDark, setIsDark] = useState(false);
 
   // Detectar de dónde viene el usuario
-  const returnUrl = searchParams.get('return') || '/teacher/topics';
+  const returnUrl = searchParams.get("return") || "/teacher/topics";
 
   useEffect(() => {
     // Check initial theme
@@ -138,11 +138,7 @@ export default function NewTopicPage() {
         >
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-        >
+        <Button variant="ghost" size="sm" onClick={handleCancel}>
           Cancelar
         </Button>
         <Button

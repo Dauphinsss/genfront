@@ -353,7 +353,7 @@ export function TopicEditorResizable({
       {/* Mensaje de recordatorio inferior */}
       <div className="fixed bottom-0 left-0 right-0   py-3 px-4 z-40">
         <p className="text-center text-xs text-muted-foreground">
-        Recuerda siempre guardar los cambios antes de salir
+          Recuerda siempre guardar los cambios antes de salir
         </p>
       </div>
     </div>

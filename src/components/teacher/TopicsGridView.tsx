@@ -22,10 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loading } from "@/components/ui/loading";
 import type { Topic } from "@/types/topic";
 import type { ContentDocument } from "@/types/content-blocks";
-import {
-  getAllTopics,
-  deleteTopic,
-} from "@/services/topics";
+import { getAllTopics, deleteTopic } from "@/services/topics";
 
 export function TopicsGridView() {
   const router = useRouter();
@@ -37,7 +34,8 @@ export function TopicsGridView() {
   const { toast } = useToast();
 
   // Detectar si estamos en el dashboard o en la página standalone
-  const isInDashboard = typeof window !== 'undefined' && window.location.pathname === '/';
+  const isInDashboard =
+    typeof window !== "undefined" && window.location.pathname === "/";
 
   const loadTopics = useCallback(async () => {
     try {
@@ -61,7 +59,9 @@ export function TopicsGridView() {
   }, [loadTopics]);
 
   const handleCreateNew = () => {
-    const returnUrl = isInDashboard ? '/?view=teacher-topics' : '/teacher/topics';
+    const returnUrl = isInDashboard
+      ? "/?view=teacher-topics"
+      : "/teacher/topics";
     router.push(`/teacher/topics/new?return=${encodeURIComponent(returnUrl)}`);
   };
 
@@ -210,7 +210,7 @@ export function TopicsGridView() {
                 {/* Preview del layout */}
                 <div className="aspect-video bg-muted/50 border-b border-border relative overflow-hidden">
                   {renderTopicPreview(topic)}
-                  
+
                   {/* Overlay con acciones */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
                     <Button
@@ -231,7 +231,7 @@ export function TopicsGridView() {
                     <h3 className="font-semibold text-foreground text-lg line-clamp-2 flex-1 pr-2">
                       {topic.name}
                     </h3>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -268,11 +268,14 @@ export function TopicsGridView() {
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {topic.createdAt
-                        ? new Date(topic.createdAt).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })
+                        ? new Date(topic.createdAt).toLocaleDateString(
+                            "es-ES",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
                         : "Hoy"}
                     </div>
                     <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md font-medium">
