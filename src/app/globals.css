@@ -189,94 +189,89 @@
   }
 }
 
-/* Estilos para BlockNote en modo claro/oscuro */
-.blocknote-editor-themed .bn-container {
-  background-color: transparent !important;
+/* Estilos para el editor de texto personalizado */
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 0.875rem;
 }
 
-.blocknote-editor-themed .bn-editor {
-  background-color: transparent !important;
-  color: inherit !important;
+.prose h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 2.25rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 
-/* Modo claro - fondo blanco con texto negro */
-.blocknote-editor-themed[data-theme="light"] .bn-container,
-.blocknote-editor-themed[data-theme="light"] .bn-editor,
-.blocknote-editor-themed[data-theme="light"] .ProseMirror {
-  background-color: white !important;
+.prose h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin-top: 0;
+  margin-bottom: 0.625rem;
 }
 
-.blocknote-editor-themed[data-theme="light"] .bn-block-content,
-.blocknote-editor-themed[data-theme="light"] .bn-inline-content,
-.blocknote-editor-themed[data-theme="light"] .ProseMirror,
-.blocknote-editor-themed[data-theme="light"] .bn-block {
-  color: #000000 !important;
+.prose p {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 
-/* Modo oscuro - fondo gris oscuro con texto blanco */
-.dark .blocknote-editor-themed,
-.dark .blocknote-editor-themed .bn-container,
-.dark .blocknote-editor-themed .bn-editor,
-.dark .blocknote-editor-themed .ProseMirror,
-.blocknote-editor-themed[data-theme="dark"],
-.blocknote-editor-themed[data-theme="dark"] .bn-container,
-.blocknote-editor-themed[data-theme="dark"] .bn-editor,
-.blocknote-editor-themed[data-theme="dark"] .ProseMirror {
-  background-color: #1a1a1a !important;
+.prose ul {
+  list-style-type: disc;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.625rem;
 }
 
-.dark .blocknote-editor-themed .bn-block-content,
-.dark .blocknote-editor-themed .bn-inline-content,
-.dark .blocknote-editor-themed .ProseMirror,
-.dark .blocknote-editor-themed .bn-block,
-.blocknote-editor-themed[data-theme="dark"] .bn-block-content,
-.blocknote-editor-themed[data-theme="dark"] .bn-inline-content,
-.blocknote-editor-themed[data-theme="dark"] .ProseMirror,
-.blocknote-editor-themed[data-theme="dark"] .bn-block {
-  color: #e5e5e5 !important;
+.prose ol {
+  list-style-type: decimal;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.625rem;
 }
 
-/* Placeholder con mejor contraste */
-.dark .blocknote-editor-themed .bn-block-content[data-is-empty-and-focused="true"]::before,
-.blocknote-editor-themed[data-theme="dark"] .bn-block-content[data-is-empty-and-focused="true"]::before {
-  color: rgba(255, 255, 255, 0.4) !important;
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose blockquote {
   font-style: italic;
+  border-left: 4px solid hsl(var(--border));
+  padding-left: 1rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--muted-foreground));
 }
 
-.blocknote-editor-themed[data-theme="light"] .bn-block-content[data-is-empty-and-focused="true"]::before {
-  color: rgba(0, 0, 0, 0.4) !important;
-  font-style: italic;
+.prose pre {
+  background-color: hsl(var(--muted));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
 }
 
-/* Mejorar espaciado del editor */
-.blocknote-editor-themed .bn-editor {
-  padding: 0.5rem 0;
+.prose hr {
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.blocknote-editor-themed .bn-block {
-  margin: 0.25rem 0;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+/* Modo oscuro */
+.dark .prose blockquote {
+  color: hsl(var(--muted-foreground));
+  border-left-color: hsl(var(--border));
 }
 
-.blocknote-editor-themed .bn-block-content {
-  padding-left: 0.5rem;
+.dark .prose pre {
+  background-color: hsl(var(--muted));
 }
 
-/* Respetar formato de letra de BlockNote - solo ajustar color base */
-.dark .blocknote-editor-themed p,
-.dark .blocknote-editor-themed span,
-.blocknote-editor-themed[data-theme="dark"] p,
-.blocknote-editor-themed[data-theme="dark"] span {
-  color: #e5e5e5;
-}
-
-/* Títulos en modo oscuro mantienen su peso y tamaño */
-.dark .blocknote-editor-themed h1,
-.dark .blocknote-editor-themed h2,
-.dark .blocknote-editor-themed h3,
-.blocknote-editor-themed[data-theme="dark"] h1,
-.blocknote-editor-themed[data-theme="dark"] h2,
-.blocknote-editor-themed[data-theme="dark"] h3 {
-  color: #ffffff;
-}

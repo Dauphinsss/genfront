@@ -2,11 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { ContentDocument, ContentBlock, TextBlockData, MediaBlockData } from '@/types/content-blocks';
-import { useCreateBlockNote } from '@blocknote/react';
-import { BlockNoteView } from '@blocknote/mantine';
-import { useTheme } from 'next-themes';
-import '@blocknote/core/fonts/inter.css';
-import '@blocknote/mantine/style.css';
+import { CustomRichTextEditor } from '@/components/teacher/CustomRichTextEditor';
 
 interface ContentPreviewProps {
   document: ContentDocument;
@@ -14,7 +10,7 @@ interface ContentPreviewProps {
 
 export function ContentPreview({ document }: ContentPreviewProps) {
   return (
-    <div 
+    <div
       className="grid gap-2"
       style={{
         gridTemplateColumns: `repeat(${document.layout.columns}, 1fr)`,
@@ -28,6 +24,7 @@ export function ContentPreview({ document }: ContentPreviewProps) {
         return (
           <div
             key={area.id}
+            className="border-2 border-dashed border-primary/30 rounded-lg p-1"
             style={{
               gridColumn: area.gridColumn,
               gridRow: area.gridRow
@@ -59,24 +56,9 @@ function BlockPreview({ block }: { block: ContentBlock }) {
 }
 
 function TextBlockPreview({ block }: { block: ContentBlock }) {
-  const { theme } = useTheme();
   const data = block.data as TextBlockData;
-  
-  let initialContent;
-  if (data.content && typeof data.content === 'string') {
-    try {
-      const parsed = JSON.parse(data.content);
-      initialContent = Array.isArray(parsed) && parsed.length > 0 ? parsed : undefined;
-    } catch {
-      initialContent = undefined;
-    }
-  }
 
-  const editor = useCreateBlockNote({
-    initialContent,
-  });
-
-  if (!initialContent) {
+  if (!data.content) {
     return (
       <Card className="p-4 bg-muted/30">
         <p className="text-sm text-muted-foreground italic">Sin contenido de texto</p>
@@ -84,17 +66,12 @@ function TextBlockPreview({ block }: { block: ContentBlock }) {
     );
   }
 
-  const editorTheme = theme === 'dark' ? 'dark' : 'light';
-
   return (
     <Card className="p-0 overflow-hidden">
-      <div className="blocknote-editor-themed" data-theme={editorTheme}>
-        <BlockNoteView 
-          editor={editor} 
-          editable={false}
-          theme={editorTheme}
-        />
-      </div>
+      <CustomRichTextEditor
+        initialContent={data.content}
+        editable={false}
+      />
     </Card>
   );
 }

@@ -9,7 +9,7 @@ import { Header } from "./header";
 import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
 import { UsersManagement } from "@/components/admin/UsersManagement";
-import { TopicsView } from "@/components/teacher/TopicsView";
+import { TopicsGridView } from "@/components/teacher/TopicsGridView";
 import { ProfileView } from "@/components/profile";
 import axios from "axios";
 import CourseBaseAdminPanel from "@/components/course_base/CourseBaseAdminPanel";
@@ -295,7 +295,7 @@ export function Dashboard({
 
           {currentView === "teacher-topics" && (
             <div className="max-w-7xl mx-auto">
-              <TopicsView />
+              <TopicsGridView />
             </div>
           )}
 

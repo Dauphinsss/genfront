@@ -387,7 +387,7 @@ export default function CourseBaseEdit({ courseId, onBack }: CourseBaseEditProps
     return <Loading />;
   }
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <Button
         variant="default"
         size="lg"

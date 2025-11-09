@@ -5,12 +5,17 @@ export type BlockType =
   | 'audio'     
   | 'document'; 
 
-export type TemplateType = 
+export type TemplateType =
   | 'single'
   | 'two-col'
   | 'two-row'
   | 'triple'
   | 'quad'
+  | 'sidebar-left'
+  | 'sidebar-right'
+  | 'header-content'
+  | 'focus-left'
+  | 'focus-right'
   | 'custom';
 
 export interface ContentBlock {

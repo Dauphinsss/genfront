@@ -43,7 +43,9 @@ export function Header({
       <header className="w-full bg-background/80 backdrop-blur-md border-b border-border">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="text-2xl font-bold text-foreground">Pyson</div>
+            <Link href="/" className="text-2xl font-bold text-foreground hover:text-foreground/80 transition-colors">
+              Pyson
+            </Link>
 
             <Button
               variant="ghost"

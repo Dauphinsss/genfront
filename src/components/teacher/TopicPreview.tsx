@@ -19,7 +19,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-6 py-4">
           <Button
             variant="ghost"
             size="sm"
@@ -33,7 +33,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
       </div>
 
       {/* Content */}
-      <article className="max-w-7xl mx-auto px-6 py-8 md:py-12">
+      <article className="max-w-6xl mx-auto px-6 py-8 md:py-12">
         {/* Topic Header */}
         <header className="mb-8 md:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
@@ -69,7 +69,7 @@ export function TopicPreview({ topic, onClose, hideFooter }: TopicPreviewProps) 
 
       {/* Footer */}
       {!hideFooter && (
-        <footer className="max-w-7xl mx-auto px-6 py-8 mt-12 border-t border-border">
+        <footer className="max-w-6xl mx-auto px-6 py-8 mt-12 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Plataforma de Aprendizaje Pyson

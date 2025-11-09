@@ -1,11 +1,11 @@
 import axios from 'axios';
-import type { 
-  Topic, 
-  CreateTopicDto, 
-  CreateContentDto, 
+import type {
+  Topic,
+  CreateTopicDto,
+  CreateContentDto,
   UpdateContentDto,
   UploadResourceResponse,
-  TopicType 
+  TopicType
 } from '@/types/topic';
 
 const API_BASE_URL = 'http://localhost:4000';
@@ -16,6 +16,21 @@ const getAuthHeaders = () => {
     Authorization: `Bearer ${token}`,
   };
 };
+
+// Interceptor para manejar errores de autenticación
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado o inválido - limpiar y redirigir
+      localStorage.removeItem('pyson_token');
+      localStorage.removeItem('pyson_user');
+      localStorage.removeItem('pyson_privileges');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
 
 { }
 

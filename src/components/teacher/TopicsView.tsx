@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,19 +14,18 @@ import {
   Edit,
 } from "lucide-react";
 import { TopicPreview } from "./TopicPreview";
-import { TopicEditorNew } from "./TopicEditorNew";
-import { CreateTopicModal } from "./CreateTopicModal";
+import { TopicEditorResizable } from "./TopicEditorResizable";
 import { useToast } from "@/hooks/use-toast";
 import { Loading } from "@/components/ui/loading";
-import type { Topic, CreateTopicDto } from "@/types/topic";
+import type { Topic } from "@/types/topic";
 import {
   getAllTopics,
   deleteTopic,
-  createTopic,
   getTopicById,
 } from "@/services/topics";
 
 export function TopicsView() {
+  const router = useRouter();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
@@ -33,12 +33,9 @@ export function TopicsView() {
   const [previewTopic, setPreviewTopic] = useState<Topic | undefined>();
   const [editingTopic, setEditingTopic] = useState<Topic | undefined>();
   const [isNewTopic, setIsNewTopic] = useState(false);
-  const [initialDescription, setInitialDescription] = useState<string>('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const { toast } = useToast();
 
@@ -59,36 +56,7 @@ export function TopicsView() {
   };
 
   const handleCreateNew = () => {
-    setShowCreateModal(true);
-  };
-
-  const handleCreateSubmit = async (
-    data: CreateTopicDto & { description?: string }
-  ) => {
-    setIsCreating(true);
-    try {
-      const newTopic = await createTopic({
-        name: data.name,
-        type: data.type,
-      });
-
-      // Guardar descripcion para pasar al editor
-      const fullTopic = await getTopicById(newTopic.id);
-      setEditingTopic(fullTopic);
-      setInitialDescription(data.description || '');
-      setIsNewTopic(true);
-      setShowEditor(true);
-      setShowCreateModal(false);
-    } catch (error) {
-      console.error("Error creating topic:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Error al crear el tópico",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCreating(false);
-    }
+    router.push('/teacher/topics/new');
   };
 
   const handleView = async (topic: Topic) => {
@@ -138,20 +106,6 @@ export function TopicsView() {
 
   const handleCancelEditor = async () => {
     console.log("Cancelado desde editor");
-
-    if (isNewTopic && editingTopic?.id) {
-      try {
-        await deleteTopic(editingTopic.id);
-        toast({
-          title: "Creación cancelada",
-          description: "El tópico fue eliminado.",
-          variant: "warning",
-        });
-      } catch (error) {
-        console.error("Error al eliminar topic cancelado:", error);
-      }
-    }
-
     setShowEditor(false);
     setEditingTopic(undefined);
     setIsNewTopic(false);
@@ -202,10 +156,10 @@ export function TopicsView() {
 
   if (showEditor && editingTopic) {
     return (
-      <TopicEditorNew
+      <TopicEditorResizable
         topic={editingTopic}
         isNewTopic={isNewTopic}
-        initialDescription={initialDescription}
+        initialDescription=""
         onSave={handleSaveFromEditor}
         onCancel={handleCancelEditor}
       />
@@ -222,13 +176,6 @@ export function TopicsView() {
 
   return (
     <>
-      <CreateTopicModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={handleCreateSubmit}
-        isLoading={isCreating}
-      />
-
       <div className="max-w-6xl mx-auto">
         {}
         <div className="flex items-center justify-between mb-8">
