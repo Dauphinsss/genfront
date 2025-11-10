@@ -158,45 +158,45 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
     <Card
       className={[
         inDialog ? "w-full" : "w-full md:w-60 lg:w-72",
-        "max-h-[80vh] border border-border/50 bg-background shadow-lg rounded-lg flex flex-col",
+        "max-h-full border border-border/50 bg-background shadow-lg rounded-lg flex flex-col",
       ].join(' ')}
     >
-      <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="p-6 border-b border-border flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-primary-foreground" />
+      <CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center gap-2 flex-shrink-0">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-4 h-4 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xl font-semibold text-foreground truncate">{course.title}</div>
+            <div className="text-sm font-semibold text-foreground truncate">{course.title}</div>
           </div>
         </div>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border flex-shrink-0">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={goToPreviousLesson} 
             disabled={currentUnitIndex === 0 && currentLessonIndex === 0}
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
           </Button>
           <div className="flex-1 px-2 min-w-0 text-center">
-            <div className="text-xs text-muted-foreground font-medium mb-1 truncate">{currentUnit?.title}</div>
-            <div className="text-sm text-foreground truncate font-semibold">{currentLesson?.title}</div>
+            <div className="text-xs text-muted-foreground font-medium truncate">{currentUnit?.title}</div>
+            <div className="text-xs text-foreground truncate font-semibold">{currentLesson?.title}</div>
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={goToNextLesson} 
             disabled={!course.units || currentUnitIndex === course.units.length - 1 && currentLesson && currentLessonIndex === (currentUnit?.lessons?.length ?? 0) - 1}
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </Button>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-4" style={{ maxHeight: 'calc(80vh - 144px)' }}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-foreground">Tópicos de la lección</h2>
+        <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
+          <div className="flex items-center justify-between mb-2 flex-shrink-0">
+            <h2 className="text-xs font-semibold text-foreground">Tópicos de la lección</h2>
             {lessonTopics.length > 0 && (
               <Badge variant="outline" className="border-primary/30 text-xs text-primary">
                 {lessonTopics.length}
@@ -212,11 +212,11 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
               No hay tópicos asociados
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-1.5">
               {lessonTopics.map((topic, index) => (
                 <li
                   key={topic.id}
-                  className={`group p-3 rounded-lg cursor-pointer transition-all duration-200 animate-in fade-in-50 ${
+                  className={`group p-2 rounded-lg cursor-pointer transition-all duration-200 animate-in fade-in-50 ${
                     selectedTopic?.id === topic.id 
                       ? "bg-primary/10 border border-primary/20" 
                       : "hover:bg-muted/50 border border-transparent hover:border-border"
@@ -224,11 +224,11 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
                   style={{ animationDelay: `${index * 30}ms` }}
                   onClick={() => setSelectedTopic(topic)}
                 >
-                  <span className="font-medium text-sm text-foreground block truncate">
+                  <span className="font-medium text-xs text-foreground block truncate">
                     {topic.topic.name}
                   </span>
                   {topic.topic.content?.description && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                       {topic.topic.content.description}
                     </p>
                   )}
@@ -249,9 +249,9 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
   );
 
   return (
-    <div className={`flex flex-col ${!isMobile ? 'lg:flex-row' : ''} bg-background text-foreground min-h-screen lg:h-screen max-w-6xl mx-auto`}>
+    <div className={`flex flex-col ${!isMobile ? 'lg:flex-row' : ''} bg-background text-foreground h-screen max-w-[1920px] max-h-[800px] mx-auto overflow-hidden`}>
       {isMobile && (
-        <div className="w-full sticky top-0 z-20 bg-background border-b border-border px-4 py-3">
+        <div className="w-full sticky top-0 z-20 bg-background border-b border-border px-4 py-3 flex-shrink-0">
           <button
             className="w-full text-lg font-semibold truncate text-left focus:outline-none hover:text-primary transition-colors"
             onClick={() => setShowSidebarMobile(true)}
@@ -261,42 +261,41 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
           </button>
         </div>
       )}
-      <main className="flex-1 flex flex-col p-4 sm:p-8 transition-all duration-200 w-full">
+      <main className="flex-1 flex flex-col px-4 pt-2 pb-0 transition-all duration-200 w-full min-h-0 overflow-hidden">
         {!isMobile && (
-          <div className="mb-6 animate-in fade-in-50">
-            <div className="text-sm font-medium text-muted-foreground mb-1">{currentUnit?.title}</div>
-            <h1 className="text-2xl font-semibold text-foreground">{currentLesson?.title}</h1>
+          <div className="mb-2 animate-in fade-in-50 flex-shrink-0">
+            <div className="text-xs font-medium text-muted-foreground mb-0.5">{currentUnit?.title}</div>
+            <h1 className="text-xl font-semibold text-foreground">{currentLesson?.title}</h1>
           </div>
         )}
         {selectedTopic ? (
-          <Card 
-            variant="glass" 
-            className="mb-6 animate-in fade-in-50 slide-in-from-bottom-2"
-          >
-            <CardContent className="py-6">
-              {isMobile && (
-                <h3 className="text-lg font-semibold mb-4 text-foreground">{selectedTopic.topic.name}</h3>
-              )}
-              {topicLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : topicError ? (
-                <div className="text-destructive text-center py-8">{topicError}</div>
-              ) : (() => {
-                // Verificar la estructura del contenido
-                const contentData = topicContent?.content?.blocksJson;
-                
-                // Verificar si blocksJson tiene la estructura de ContentDocument
-                if (contentData && typeof contentData === 'object' && !Array.isArray(contentData) && 'blocks' in contentData) {
-                  return <ContentPreview document={contentData as ContentDocument} />;
-                }
-                
-                return <div className="text-muted-foreground text-center py-8">Sin contenido disponible</div>;
-              })()
+          <div className="flex-1 min-h-0 overflow-hidden animate-in fade-in-50 slide-in-from-bottom-2">
+            {isMobile && (
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{selectedTopic.topic.name}</h3>
+            )}
+            {topicLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : topicError ? (
+              <div className="text-destructive text-center py-8">{topicError}</div>
+            ) : (() => {
+              // Verificar la estructura del contenido
+              const contentData = topicContent?.content?.blocksJson;
+              
+              // Verificar si blocksJson tiene la estructura de ContentDocument
+              if (contentData && typeof contentData === 'object' && !Array.isArray(contentData) && 'blocks' in contentData) {
+                return (
+                  <div className="h-full w-full">
+                    <ContentPreview document={contentData as ContentDocument} />
+                  </div>
+                );
               }
-            </CardContent>
-          </Card>
+              
+              return <div className="text-muted-foreground text-center py-8">Sin contenido disponible</div>;
+            })()
+            }
+          </div>
         ) : (
           <Card 
             variant="dashed" 
@@ -329,7 +328,7 @@ export default function CourseBaseViewer({ course, initialUnitIndex = 0, initial
         )}
       </main>
       {!isMobile && (
-        <div className="hidden lg:flex flex-col h-full min-w-0 lg:min-w-[288px] lg:max-w-[288px] w-full p-4">
+        <div className="hidden lg:flex flex-col h-full min-w-0 lg:min-w-[280px] lg:max-w-[280px] w-full py-2 pr-3 flex-shrink-0">
           <Sidebar />
         </div>
       )}

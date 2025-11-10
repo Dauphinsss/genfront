@@ -102,13 +102,13 @@ export default function NewTopicPage() {
     }
   };
 
-  const handleSaveFromEditor = () => {
+  const handleSaveFromEditor = async (): Promise<void> => {
     toast({
       title: "Tópico creado",
       description: "El tópico fue creado correctamente",
       variant: "success",
     });
-    router.push(returnUrl);
+    await Promise.resolve(router.push(returnUrl));
   };
 
   const handleCancel = () => {

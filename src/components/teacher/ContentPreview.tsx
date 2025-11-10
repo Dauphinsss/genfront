@@ -10,7 +10,7 @@ interface ContentPreviewProps {
 export function ContentPreview({ document }: ContentPreviewProps) {
   return (
     <div
-      className="grid gap-4 w-full h-full p-4"
+      className="grid gap-3 w-full h-full"
       style={{
         gridTemplateColumns: `repeat(${document.layout.columns}, 1fr)`,
         gridTemplateRows: `repeat(${document.layout.rows}, minmax(0, 1fr))`,
