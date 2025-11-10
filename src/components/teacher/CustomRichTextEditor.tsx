@@ -43,70 +43,16 @@ export function CustomRichTextEditor({
   });
   const [slashSearch, setSlashSearch] = useState("");
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const previousContentRef = useRef<string>("");
-  const isCheckingRef = useRef(false);
 
   useEffect(() => {
     if (editorRef.current && initialContent && !editorRef.current.innerHTML) {
       editorRef.current.innerHTML = initialContent;
-      previousContentRef.current = initialContent;
     }
   }, [initialContent]);
 
-  // Verificar overflow con un pequeño delay para permitir que el DOM se actualice
-  const checkAndHandleOverflow = () => {
-    if (!editorRef.current || isCheckingRef.current) return;
-
-    isCheckingRef.current = true;
-
-    // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
-    requestAnimationFrame(() => {
-      if (!editorRef.current) {
-        isCheckingRef.current = false;
-        return;
-      }
-
-      // Agregar un pequeño margen de tolerancia (2px) para evitar falsos positivos
-      const isOverflow =
-        editorRef.current.scrollHeight > editorRef.current.clientHeight + 2;
-
-      if (isOverflow && previousContentRef.current) {
-        // Restaurar el contenido anterior
-        editorRef.current.innerHTML = previousContentRef.current;
-        setIsOverflowing(true);
-
-        // Restaurar la posición del cursor al final
-        const selection = window.getSelection();
-        if (selection && editorRef.current.lastChild) {
-          const range = document.createRange();
-          range.selectNodeContents(editorRef.current);
-          range.collapse(false);
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
-
-        // Mostrar feedback visual temporal
-        setTimeout(() => setIsOverflowing(false), 1500);
-      } else if (!isOverflow) {
-        // Guardar el contenido actual como válido solo si no hay overflow
-        previousContentRef.current = editorRef.current.innerHTML;
-        setIsOverflowing(false);
-      }
-
-      isCheckingRef.current = false;
-    });
-  };
-
   const handleChange = () => {
     if (!editorRef.current || !onChange) return;
-
-    checkAndHandleOverflow();
-
-    // Llamar a onChange solo si no hay overflow
-    if (!isOverflowing && editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+    onChange(editorRef.current.innerHTML);
   };
 
   const insertElement = (tagName: string) => {
@@ -362,50 +308,27 @@ export function CustomRichTextEditor({
   if (!editable) {
     return (
       <div
-        className="prose prose-sm dark:prose-invert max-w-none p-4"
+        className="prose prose-sm dark:prose-invert max-w-none p-4 dark:text-white text-black overflow-y-auto h-full"
         dangerouslySetInnerHTML={{ __html: initialContent }}
       />
     );
   }
 
-  // Prevenir entrada si hay overflow
-  const handleBeforeInput = (e: React.FormEvent<HTMLDivElement>) => {
-    if (!editorRef.current) return;
-
-    // Verificar si ya hay overflow
-    const hasOverflow =
-      editorRef.current.scrollHeight > editorRef.current.clientHeight + 2;
-
-    if (hasOverflow) {
-      e.preventDefault();
-      setIsOverflowing(true);
-      setTimeout(() => setIsOverflowing(false), 1500);
-    }
-  };
-
   return (
     <div className="overflow-visible bg-background relative h-full flex flex-col">
-      {/* Indicador de límite alcanzado */}
-      {isOverflowing && (
-        <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-md shadow-lg z-50 animate-pulse">
-          Límite de espacio alcanzado
-        </div>
-      )}
-
       {/* Editor */}
       <div
         ref={editorRef}
         contentEditable={editable}
-        onBeforeInput={handleBeforeInput}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         className={cn(
-          "flex-1 p-4 outline-none overflow-hidden",
+          "flex-1 p-4 outline-none overflow-y-auto",
           "prose prose-sm dark:prose-invert max-w-none",
+          "dark:text-white text-black",
           "focus:outline-none",
-          isOverflowing && "ring-2 ring-destructive",
           !editorRef.current?.innerHTML &&
             !isFocused &&
             "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground"

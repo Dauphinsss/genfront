@@ -20,6 +20,16 @@ export default function EditTopicPage() {
     // Check initial theme
     const theme = document.documentElement.classList.contains("dark");
     setIsDark(theme);
+
+    // Prevent body scroll when editor is mounted
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // Re-enable scrolling when editor unmounts
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
   }, []);
 
   useEffect(() => {

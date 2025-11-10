@@ -2,11 +2,13 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { ContentDocument } from "@/types/content-blocks"
 
 export interface Topic {
   id: string
   title: string
   description: string
+  content?: ContentDocument
 }
 
 export interface Lesson {

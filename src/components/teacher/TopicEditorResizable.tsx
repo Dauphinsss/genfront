@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateContent, updateTopic, createContent } from "@/services/topics";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Info, LayoutGrid, Moon, Sun } from "lucide-react";
+import { Loader2, Info, LayoutGrid, Moon, Sun, Eye, Edit } from "lucide-react";
 import type { Topic, BlockNoteContent } from "@/types/topic";
 import {
   ContentBlock,
@@ -14,6 +14,7 @@ import {
 } from "@/types/content-blocks";
 import { ContentBlockEditor } from "./ContentBlockEditor";
 import { TemplateSelector } from "./TemplateSelector";
+import { ContentPreview } from "./ContentPreview";
 import { createDocumentFromTemplate } from "@/lib/templates";
 import {
   Dialog,
@@ -57,6 +58,7 @@ export function TopicEditorResizable({
   const [showTemplateSelector, setShowTemplateSelector] = useState(
     !initialTemplate
   );
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   useEffect(() => {
     if (!topic) {
@@ -223,40 +225,46 @@ export function TopicEditorResizable({
               onSelect={handleTemplateSelect}
             />
           ) : document ? (
-            <div
-              className="grid gap-3 h-full"
-              style={{
-                gridTemplateColumns: `repeat(${document.layout.columns}, 1fr)`,
-                gridTemplateRows: `repeat(${document.layout.rows}, 1fr)`,
-              }}
-            >
-              {document.layout.areas.map((area) => {
-                const block = document.blocks.find(
-                  (b) => b.id === area.blockId
-                );
-                if (!block) return null;
+            isPreviewMode ? (
+              <div className="h-full overflow-y-auto">
+                <ContentPreview document={document} />
+              </div>
+            ) : (
+              <div
+                className="grid gap-3 h-full"
+                style={{
+                  gridTemplateColumns: `repeat(${document.layout.columns}, 1fr)`,
+                  gridTemplateRows: `repeat(${document.layout.rows}, 1fr)`,
+                }}
+              >
+                {document.layout.areas.map((area) => {
+                  const block = document.blocks.find(
+                    (b) => b.id === area.blockId
+                  );
+                  if (!block) return null;
 
-                return (
-                  <div
-                    key={area.id}
-                    className="border border-border rounded-lg overflow-hidden bg-card relative group shadow-sm flex flex-col"
-                    style={{
-                      gridColumn: area.gridColumn,
-                      gridRow: area.gridRow,
-                    }}
-                  >
-                    <div className="flex-1 overflow-hidden">
-                      <ContentBlockEditor
-                        block={block}
-                        onChange={(updatedBlock) =>
-                          handleBlockChange(block.id, updatedBlock)
-                        }
-                      />
+                  return (
+                    <div
+                      key={area.id}
+                      className="border border-border rounded-lg overflow-hidden relative group shadow-sm flex flex-col dark:bg-[#1e1e1e] bg-white"
+                      style={{
+                        gridColumn: area.gridColumn,
+                        gridRow: area.gridRow,
+                      }}
+                    >
+                      <div className="flex-1 overflow-hidden">
+                        <ContentBlockEditor
+                          block={block}
+                          onChange={(updatedBlock) =>
+                            handleBlockChange(block.id, updatedBlock)
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )
           ) : null}
         </div>
       </div>
@@ -310,6 +318,20 @@ export function TopicEditorResizable({
               <Sun className="w-4 h-4" />
             ) : (
               <Moon className="w-4 h-4" />
+            )}
+          </Button>
+        )}
+        {!showTemplateSelector && document && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsPreviewMode(!isPreviewMode)}
+            title={isPreviewMode ? "Modo edición" : "Vista de estudiante"}
+          >
+            {isPreviewMode ? (
+              <Edit className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
             )}
           </Button>
         )}

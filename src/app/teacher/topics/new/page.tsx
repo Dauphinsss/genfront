@@ -33,7 +33,19 @@ export default function NewTopicPage() {
     // Check initial theme
     const theme = document.documentElement.classList.contains("dark");
     setIsDark(theme);
-  }, []);
+
+    // Prevent body scroll
+    if (step === "editor") {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      // Re-enable scrolling when component unmounts
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [step]);
 
   const handleToggleTheme = () => {
     const newTheme = !isDark;

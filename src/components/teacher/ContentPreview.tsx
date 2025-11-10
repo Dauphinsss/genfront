@@ -1,6 +1,5 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { ContentDocument, ContentBlock, TextBlockData, MediaBlockData } from '@/types/content-blocks';
 import { CustomRichTextEditor } from '@/components/teacher/CustomRichTextEditor';
 
@@ -11,10 +10,10 @@ interface ContentPreviewProps {
 export function ContentPreview({ document }: ContentPreviewProps) {
   return (
     <div
-      className="grid gap-2"
+      className="grid gap-4 w-full h-full p-4"
       style={{
         gridTemplateColumns: `repeat(${document.layout.columns}, 1fr)`,
-        gridTemplateRows: `repeat(${document.layout.rows}, minmax(200px, auto))`
+        gridTemplateRows: `repeat(${document.layout.rows}, minmax(0, 1fr))`,
       }}
     >
       {document.layout.areas.map((area) => {
@@ -24,10 +23,10 @@ export function ContentPreview({ document }: ContentPreviewProps) {
         return (
           <div
             key={area.id}
-            className="border-2 border-dashed border-primary/30 rounded-lg p-1"
+            className="rounded-lg overflow-hidden shadow-sm dark:bg-[#1e1e1e] bg-white min-h-0"
             style={{
               gridColumn: area.gridColumn,
-              gridRow: area.gridRow
+              gridRow: area.gridRow,
             }}
           >
             <BlockPreview block={block} />
@@ -60,19 +59,19 @@ function TextBlockPreview({ block }: { block: ContentBlock }) {
 
   if (!data.content) {
     return (
-      <Card className="p-4 bg-muted/30">
+      <div className="p-8 flex items-center justify-center min-h-[200px] h-full">
         <p className="text-sm text-muted-foreground italic">Sin contenido de texto</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-0 overflow-hidden">
+    <div className="h-full overflow-hidden">
       <CustomRichTextEditor
         initialContent={data.content}
         editable={false}
       />
-    </Card>
+    </div>
   );
 }
 
@@ -81,26 +80,26 @@ function ImageBlockPreview({ block }: { block: ContentBlock }) {
   
   if (!data.url) {
     return (
-      <Card className="p-8 bg-muted/30 flex items-center justify-center min-h-[200px]">
+      <div className="p-8 flex items-center justify-center min-h-[200px] h-full">
         <p className="text-sm text-muted-foreground italic">Sin imagen</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-0 overflow-hidden">
+    <div className="h-full flex flex-col">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img 
         src={data.url} 
         alt={data.caption || 'Imagen'} 
-        className="w-full h-full object-cover"
+        className="flex-1 w-full h-full object-cover"
       />
       {data.caption && (
-        <div className="p-3 bg-muted/50">
+        <div className="p-3 bg-muted/50 border-t border-border">
           <p className="text-sm text-muted-foreground">{data.caption}</p>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -109,27 +108,27 @@ function VideoBlockPreview({ block }: { block: ContentBlock }) {
   
   if (!data.url) {
     return (
-      <Card className="p-8 bg-muted/30 flex items-center justify-center min-h-[200px]">
+      <div className="p-8 flex items-center justify-center min-h-[200px] h-full">
         <p className="text-sm text-muted-foreground italic">Sin video</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-0 overflow-hidden">
+    <div className="h-full flex flex-col">
       <video 
         src={data.url} 
         controls 
-        className="w-full h-full"
+        className="flex-1 w-full h-full"
       >
         Tu navegador no soporta el elemento de video.
       </video>
       {data.caption && (
-        <div className="p-3 bg-muted/50">
+        <div className="p-3 bg-muted/50 border-t border-border">
           <p className="text-sm text-muted-foreground">{data.caption}</p>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -138,14 +137,14 @@ function AudioBlockPreview({ block }: { block: ContentBlock }) {
   
   if (!data.url) {
     return (
-      <Card className="p-8 bg-muted/30 flex items-center justify-center min-h-[200px]">
+      <div className="p-8 flex items-center justify-center min-h-[200px] h-full">
         <p className="text-sm text-muted-foreground italic">Sin audio</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
+    <div className="p-6 flex flex-col justify-center h-full">
       <audio 
         src={data.url} 
         controls 
@@ -156,7 +155,7 @@ function AudioBlockPreview({ block }: { block: ContentBlock }) {
       {data.caption && (
         <p className="text-sm text-muted-foreground mt-3">{data.caption}</p>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -165,15 +164,15 @@ function DocumentBlockPreview({ block }: { block: ContentBlock }) {
   
   if (!data.url) {
     return (
-      <Card className="p-8 bg-muted/30 flex items-center justify-center min-h-[200px]">
+      <div className="p-8 flex items-center justify-center min-h-[200px] h-full">
         <p className="text-sm text-muted-foreground italic">Sin documento</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 flex items-center justify-center h-full">
+      <div className="flex items-center justify-between w-full">
         <div className="flex-1">
           <p className="font-medium text-sm">{data.filename || 'Documento'}</p>
           {data.caption && (
@@ -189,6 +188,6 @@ function DocumentBlockPreview({ block }: { block: ContentBlock }) {
           Ver
         </a>
       </div>
-    </Card>
+    </div>
   );
 }
