@@ -50,6 +50,32 @@ export function CustomRichTextEditor({
     }
   }, [initialContent]);
 
+  // Efecto para aplicar estilos a todos los elementos <pre> en el editor
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const applyCodeStyles = () => {
+      const preElements = editorRef.current?.querySelectorAll('pre');
+      preElements?.forEach((pre) => {
+        if (!pre.classList.contains('editor-code-block')) {
+          pre.classList.add('editor-code-block');
+        }
+      });
+    };
+
+    // Aplicar estilos inicialmente
+    applyCodeStyles();
+
+    // Observar cambios en el DOM para aplicar estilos a nuevos elementos
+    const observer = new MutationObserver(applyCodeStyles);
+    observer.observe(editorRef.current, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleChange = () => {
     if (!editorRef.current || !onChange) return;
     onChange(editorRef.current.innerHTML);
@@ -66,17 +92,30 @@ export function CustomRichTextEditor({
 
     // Crear el nuevo elemento
     const element = document.createElement(tagName);
-    element.textContent = "\u00A0"; // Non-breaking space para hacer el elemento editable
+    
+    // Agregar clase especial para código para asegurar estilos
+    if (tagName === 'pre') {
+      element.className = 'editor-code-block';
+    }
+    
+    // Insertar contenido inicial vacío
+    element.innerHTML = '<br>'; // Usar br en lugar de nbsp para evitar espacios
 
     // Insertar el elemento
     range.deleteContents();
     range.insertNode(element);
 
+    // Agregar un párrafo después del elemento para poder continuar escribiendo fácilmente
+    const nextElement = document.createElement('p');
+    nextElement.innerHTML = '<br>';
+    element.after(nextElement);
+
     // Colocar el cursor dentro del nuevo elemento
-    range.selectNodeContents(element);
-    range.collapse(false);
+    const newRange = document.createRange();
+    newRange.setStart(element, 0);
+    newRange.collapse(true);
     selection.removeAllRanges();
-    selection.addRange(range);
+    selection.addRange(newRange);
 
     editorRef.current.focus();
     handleChange();
@@ -88,7 +127,7 @@ export function CustomRichTextEditor({
     const listTag = ordered ? "ol" : "ul";
     const list = document.createElement(listTag);
     const listItem = document.createElement("li");
-    listItem.textContent = "\u00A0";
+    listItem.innerHTML = '<br>'; // Usar br en lugar de nbsp
     list.appendChild(listItem);
 
     const selection = window.getSelection();
@@ -97,11 +136,17 @@ export function CustomRichTextEditor({
       range.deleteContents();
       range.insertNode(list);
 
+      // Agregar un párrafo después de la lista
+      const nextElement = document.createElement('p');
+      nextElement.innerHTML = '<br>';
+      list.after(nextElement);
+
       // Colocar cursor dentro del li
-      range.selectNodeContents(listItem);
-      range.collapse(false);
+      const newRange = document.createRange();
+      newRange.setStart(listItem, 0);
+      newRange.collapse(true);
       selection.removeAllRanges();
-      selection.addRange(range);
+      selection.addRange(newRange);
     }
 
     editorRef.current.focus();
@@ -112,7 +157,8 @@ export function CustomRichTextEditor({
     if (!editorRef.current) return;
 
     const hr = document.createElement("hr");
-    const br = document.createElement("br");
+    const nextP = document.createElement("p");
+    nextP.innerHTML = '<br>';
 
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
@@ -120,14 +166,15 @@ export function CustomRichTextEditor({
       range.deleteContents();
       range.insertNode(hr);
 
-      // Insertar un br después del hr para poder continuar escribiendo
-      hr.after(br);
+      // Insertar un párrafo después del hr para poder continuar escribiendo
+      hr.after(nextP);
 
-      // Colocar cursor después del hr
-      range.setStartAfter(hr);
-      range.collapse(true);
+      // Colocar cursor en el párrafo siguiente
+      const newRange = document.createRange();
+      newRange.setStart(nextP, 0);
+      newRange.collapse(true);
       selection.removeAllRanges();
-      selection.addRange(range);
+      selection.addRange(newRange);
     }
 
     editorRef.current.focus();
@@ -258,11 +305,22 @@ export function CustomRichTextEditor({
         // Eliminar el contenido seleccionado (el "/" y el texto de búsqueda)
         deleteRange.deleteContents();
 
-        // Actualizar el rango y la selección
-        range.setStart(textNode, slashIndex);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        // Si el nodo de texto queda vacío y es el único hijo, limpiar su padre
+        if (textNode.textContent === '' && textNode.parentElement) {
+          const parent = textNode.parentElement;
+          if (parent.childNodes.length === 1) {
+            parent.innerHTML = '';
+          }
+        }
+
+        // Actualizar el rango y la selección al principio del nodo
+        const newRange = document.createRange();
+        if (textNode.parentElement) {
+          newRange.setStart(textNode.parentElement, 0);
+          newRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
       }
     }
 
@@ -276,7 +334,35 @@ export function CustomRichTextEditor({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!showSlashMenu) return;
+    if (!showSlashMenu) {
+      // Manejar Enter para crear nuevos párrafos correctamente
+      if (e.key === 'Enter' && !e.shiftKey) {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const currentNode = range.startContainer;
+          const parentElement = currentNode.nodeType === Node.TEXT_NODE 
+            ? currentNode.parentElement 
+            : currentNode as HTMLElement;
+
+          // Si estamos en un blockquote, pre o heading, salir de él con Enter
+          if (parentElement && ['BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3'].includes(parentElement.tagName)) {
+            e.preventDefault();
+            const newP = document.createElement('p');
+            newP.innerHTML = '<br>';
+            parentElement.after(newP);
+            
+            const newRange = document.createRange();
+            newRange.setStart(newP, 0);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            handleChange();
+          }
+        }
+      }
+      return;
+    }
 
     switch (e.key) {
       case "ArrowDown":
