@@ -16,6 +16,7 @@ import CourseBaseAdminPanel from "@/components/course_base/CourseBaseAdminPanel"
 import CourseBaseView from "@/components/course_base/course-base-view";
 interface DashboardProps {
   user: {
+    id: number;
     name: string;
     email: string;
     avatar: string;
@@ -131,7 +132,10 @@ export function Dashboard({
     email: string;
     avatar: string;
   }) => {
-    setCurrentUser(updatedUser);
+    setCurrentUser({
+      ...currentUser,
+      ...updatedUser,
+    });
   };
 
   const handleJoinCourse = async () => {
