@@ -13,9 +13,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, User, LogOut, Sun, Moon } from "lucide-react";
 import { useAuthenticatedImage } from "@/lib/image-utils";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface HeaderProps {
   user?: {
+    id: number;
     name: string;
     email: string;
     avatar: string;
@@ -86,7 +88,9 @@ export function Header({
             </Link>
           </div>
 
-          <div className="flex items-center ">
+          <div className="flex items-center gap-1">
+            <NotificationBell userId={user.id} />
+
             <Button
               variant="ghost"
               size="sm"
