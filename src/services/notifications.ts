@@ -1,4 +1,6 @@
-import api from './api';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:4000';
 
 export interface Notification {
   id: number;
@@ -10,27 +12,54 @@ export interface Notification {
   createdAt: string;
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('pyson_token');
+  console.log('[Notifications Service] Token found:', token ? 'Yes' : 'No');
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};
+
 export const getUnreadNotifications = async (userId: number): Promise<Notification[]> => {
-  const response = await api.get(`/notifications/user/${userId}/unread`);
+  const response = await axios.get(
+    `${API_URL}/notifications/user/${userId}/unread`,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const getAllNotifications = async (userId: number): Promise<Notification[]> => {
-  const response = await api.get(`/notifications/user/${userId}`);
+  const response = await axios.get(
+    `${API_URL}/notifications/user/${userId}`,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const markAsRead = async (notificationId: number): Promise<Notification> => {
-  const response = await api.patch(`/notifications/${notificationId}/read`);
+  const response = await axios.patch(
+    `${API_URL}/notifications/${notificationId}/read`,
+    {},
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const markAllAsRead = async (userId: number): Promise<{ count: number }> => {
-  const response = await api.patch(`/notifications/user/${userId}/read-all`);
+  const response = await axios.patch(
+    `${API_URL}/notifications/user/${userId}/read-all`,
+    {},
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const getUnreadCount = async (userId: number): Promise<number> => {
-  const response = await api.get(`/notifications/user/${userId}/unread-count`);
+  const response = await axios.get(
+    `${API_URL}/notifications/user/${userId}/unread-count`,
+    getAuthHeaders()
+  );
   return response.data.count;
 };

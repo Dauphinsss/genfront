@@ -14,17 +14,28 @@ interface NotificationBellProps {
 export function NotificationBell({ userId }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchUnreadCount = async () => {
     try {
+      console.log('[NotificationBell] Fetching unread count for user:', userId);
       const count = await getUnreadCount(userId);
+      console.log('[NotificationBell] Unread count:', count);
       setUnreadCount(count);
+      setError(null);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      console.error('[NotificationBell] Error fetching unread count:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
     }
   };
 
   useEffect(() => {
+    if (!userId) {
+      console.warn('[NotificationBell] No userId provided');
+      return;
+    }
+
+    console.log('[NotificationBell] Initializing with userId:', userId);
     fetchUnreadCount();
 
     // Poll every 30 seconds for new notifications
@@ -41,6 +52,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     }
   };
 
+  if (error) {
+    console.error('[NotificationBell] Rendering with error:', error);
+  }
+
   return (
     <>
       <Button
@@ -48,6 +63,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         size="icon"
         className="relative"
         onClick={() => setIsOpen(true)}
+        title={error ? `Error: ${error}` : 'Notificaciones'}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
