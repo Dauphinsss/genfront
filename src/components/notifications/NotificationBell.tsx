@@ -1,59 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getUnreadCount } from '@/services/notifications';
 import { NotificationModal } from './NotificationModal';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationBellProps {
   userId: number;
 }
 
 export function NotificationBell({ userId }: NotificationBellProps) {
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchUnreadCount = async () => {
-    try {
-      console.log('[NotificationBell] Fetching unread count for user:', userId);
-      const count = await getUnreadCount(userId);
-      console.log('[NotificationBell] Unread count:', count);
-      setUnreadCount(count);
-      setError(null);
-    } catch (error) {
-      console.error('[NotificationBell] Error fetching unread count:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error');
-    }
-  };
-
-  useEffect(() => {
-    if (!userId) {
-      console.warn('[NotificationBell] No userId provided');
-      return;
-    }
-
-    console.log('[NotificationBell] Initializing with userId:', userId);
-    fetchUnreadCount();
-
-    // Poll every 30 seconds for new notifications
-    const interval = setInterval(fetchUnreadCount, 30000);
-
-    return () => clearInterval(interval);
-  }, [userId]);
+  const { unreadCount, isConnected, error, refreshCount } = useNotifications(userId);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       // Refresh count when modal closes
-      fetchUnreadCount();
+      refreshCount();
     }
   };
 
   if (error) {
-    console.error('[NotificationBell] Rendering with error:', error);
+    console.error('[NotificationBell] Error:', error);
   }
 
   return (
@@ -63,7 +34,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         size="icon"
         className="relative"
         onClick={() => setIsOpen(true)}
-        title={error ? `Error: ${error}` : 'Notificaciones'}
+        title={error ? `Error: ${error}` : isConnected ? 'Notificaciones (En tiempo real)' : 'Notificaciones'}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -74,13 +45,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             {unreadCount > 9 ? '9+' : unreadCount}
           </Badge>
         )}
+        {isConnected && (
+          <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-background" />
+        )}
       </Button>
 
       <NotificationModal
         userId={userId}
         isOpen={isOpen}
         onOpenChange={handleOpenChange}
-        onNotificationRead={fetchUnreadCount}
+        onNotificationRead={refreshCount}
       />
     </>
   );
