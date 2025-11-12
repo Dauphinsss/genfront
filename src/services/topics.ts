@@ -5,7 +5,9 @@ import type {
   CreateContentDto,
   UpdateContentDto,
   UploadResourceResponse,
-  TopicType
+  TopicType,
+  HistoricContent,
+  Content
 } from '@/types/topic';
 
 const API_BASE_URL = 'http://localhost:4000';
@@ -139,4 +141,31 @@ export const deleteResource = async (resourceId: number): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/content/resource/${resourceId}`, {
     headers: getAuthHeaders(),
   });
+};
+
+// Historial de contenido
+export const getContentHistory = async (contentId: number): Promise<HistoricContent[]> => {
+  const response = await axios.get(`${API_BASE_URL}/content/${contentId}/history`, {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};
+
+export const restoreContentVersion = async (
+  contentId: number,
+  historyId: number,
+  restoredBy: string,
+  changeSummary?: string
+): Promise<Content> => {
+  const response = await axios.post(
+    `${API_BASE_URL}/content/${contentId}/restore/${historyId}`,
+    {
+      restoredBy,
+      changeSummary: changeSummary || "Restauró una versión anterior",
+    },
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+  return response.data;
 };

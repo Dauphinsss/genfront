@@ -55,3 +55,13 @@ export interface UploadResourceResponse {
   message: string
   data: Resource
 }
+
+export interface HistoricContent {
+  id: number
+  contentId: number
+  performedBy: string
+  changeSummary: string | null
+  snapshotDescription: string | null
+  snapshotBlocksJson: BlockNoteContent | null
+  createdAt: string
+}

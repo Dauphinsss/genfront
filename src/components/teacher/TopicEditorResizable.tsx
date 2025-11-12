@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateContent, updateTopic, createContent } from "@/services/topics";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Info, LayoutGrid, Moon, Sun, Eye, Edit } from "lucide-react";
-import type { Topic, BlockNoteContent } from "@/types/topic";
+import { Loader2, Info, LayoutGrid, Moon, Sun, Eye, Edit, Clock } from "lucide-react";
+import type { Topic, BlockNoteContent, Content } from "@/types/topic";
 import {
   ContentBlock,
   TemplateType,
@@ -15,6 +15,7 @@ import {
 import { ContentBlockEditor } from "./ContentBlockEditor";
 import { TemplateSelector } from "./TemplateSelector";
 import { ContentPreview } from "./ContentPreview";
+import { ContentHistoryModal } from "./ContentHistoryModal";
 import { createDocumentFromTemplate } from "@/lib/templates";
 import {
   Dialog,
@@ -59,6 +60,7 @@ export function TopicEditorResizable({
     !initialTemplate
   );
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   useEffect(() => {
     if (!topic) {
@@ -189,6 +191,30 @@ export function TopicEditorResizable({
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleRestore = (restoredContent: Content) => {
+    if (restoredContent.blocksJson) {
+      try {
+        const doc = restoredContent.blocksJson as unknown as ContentDocument;
+        setDocument(doc);
+        if (restoredContent.description) {
+          setDescription(restoredContent.description);
+        }
+        toast({
+          title: "Éxito",
+          description: "Contenido restaurado. Recuerda guardar los cambios.",
+          variant: "success",
+        });
+      } catch (err) {
+        console.error("Error procesando contenido restaurado:", err);
+        toast({
+          title: "Error",
+          description: "No se pudo cargar el contenido restaurado",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -342,6 +368,16 @@ export function TopicEditorResizable({
         >
           <Info className="w-4 h-4" />
         </Button>
+        {!showTemplateSelector && topic?.content?.id && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowHistoryModal(true)}
+            title="Ver historial de cambios"
+          >
+            <Clock className="w-4 h-4" />
+          </Button>
+        )}
         {!showTemplateSelector && (
           <Button
             variant="ghost"
@@ -378,6 +414,16 @@ export function TopicEditorResizable({
           Recuerda siempre guardar los cambios antes de salir
         </p>
       </div>
+
+      {/* Modal de historial */}
+      {topic?.content?.id && (
+        <ContentHistoryModal
+          open={showHistoryModal}
+          onOpenChange={setShowHistoryModal}
+          contentId={topic.content.id}
+          onRestore={handleRestore}
+        />
+      )}
     </div>
   );
 }
