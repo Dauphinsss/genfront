@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Notification } from '@/services/notifications';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/api';
 
-const API_URL = 'http://localhost:4000';
+const API_URL = API_BASE_URL;
 
 export function useNotifications(userId: number | undefined) {
   const [unreadCount, setUnreadCount] = useState(0);

@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "@/config/api";
 
-const API_URL = "http://localhost:4000/api/me";
+const API_URL = `${API_BASE_URL}/api/me`;
 
 export async function getProfile(token: string) {
   const res = await axios.get(API_URL, {

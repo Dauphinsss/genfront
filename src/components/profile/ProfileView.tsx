@@ -27,6 +27,7 @@ import { Mail, Pencil, User, Copy, Check, LogOut, X } from "lucide-react";
 import { updateProfile } from "@/services/profile";
 import { cn } from "@/lib/utils";
 import { useAuthenticatedImage } from "@/lib/image-utils";
+import { API_BASE_URL } from "@/config/api";
 
 interface ProfileViewProps {
   user: {
@@ -185,7 +186,7 @@ export function ProfileView({
       const formData = new FormData();
       formData.append("avatar", file);
       const activeToken = localStorage.getItem("pyson_token");
-      const response = await fetch("http://localhost:4000/api/me/avatar", {
+      const response = await fetch(`${API_BASE_URL}/api/me/avatar`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${activeToken}`,

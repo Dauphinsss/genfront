@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_BASE_URL = "http://localhost:4000";
+import { API_BASE_URL } from "@/config/api";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("pyson_token");

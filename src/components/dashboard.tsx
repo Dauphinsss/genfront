@@ -14,6 +14,7 @@ import { ProfileView } from "@/components/profile";
 import axios from "axios";
 import CourseBaseAdminPanel from "@/components/course_base/CourseBaseAdminPanel";
 import CourseBaseView from "@/components/course_base/course-base-view";
+import { API_BASE_URL } from "@/config/api";
 interface DashboardProps {
   user: {
     id: number;
@@ -144,7 +145,7 @@ export function Dashboard({
         const token = localStorage.getItem("pyson_token");
 
         const response = await axios.post(
-          "http://localhost:4000/courses/join",
+          `${API_BASE_URL}/courses/join`,
           {
             courseCode: courseCode.trim(),
           },

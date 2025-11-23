@@ -6,6 +6,7 @@ import { LoginSection } from "@/components/login-section";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider } from "@/components/context/AuthContext";
 import { Loading } from "@/components/ui/loading";
+import { API_BASE_URL } from "@/config/api";
 
 const ParticleBackground = lazy(
   () => import("@/components/particleBackground")
@@ -63,9 +64,9 @@ function HomeContent() {
     setIsAuthLoading(true);
 
     if (provider === "google") {
-      window.location.href = `http://localhost:4000/auth/google`;
+      window.location.href = `${API_BASE_URL}/auth/google`;
     } else {
-      window.location.href = `http://localhost:4000/auth/microsoft`;
+      window.location.href = `${API_BASE_URL}/auth/microsoft`;
     }
   };
 
