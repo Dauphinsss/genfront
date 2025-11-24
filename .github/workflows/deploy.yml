@@ -33,12 +33,6 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Build application
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
-        run: npm run build
-
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
