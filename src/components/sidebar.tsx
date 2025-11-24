@@ -406,7 +406,7 @@ export function Sidebar({
       <div className="flex flex-col h-full">
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-2">
-            {/* Menú estático */}
+            {}
             {STATIC_MENU_ITEMS.map((item) => (
               <MenuItem
                 key={item.id}
@@ -417,7 +417,7 @@ export function Sidebar({
               />
             ))}
 
-            {/* Sección Profesor */}
+            {}
             <TeacherSection
               dynamicTeacherItems={dynamicTeacherItems}
               currentView={currentView}
@@ -427,7 +427,7 @@ export function Sidebar({
               onViewChange={onViewChange}
             />
 
-            {/* Administración Dinámica */}
+            {}
             <AdminSection
               dynamicAdminItems={dynamicAdminItems}
               currentView={currentView}
@@ -509,7 +509,7 @@ export function MobileSidebar({
 
           <nav className="flex-1 overflow-y-auto py-4">
             <ul className="space-y-1 px-2">
-              {/* Menú estático */}
+              {}
               {STATIC_MENU_ITEMS.map((item) => (
                 <MenuItem
                   key={item.id}
@@ -521,7 +521,7 @@ export function MobileSidebar({
                 />
               ))}
 
-              {/* Sección Profesor */}
+              {}
               <TeacherSection
                 dynamicTeacherItems={dynamicTeacherItems}
                 currentView={currentView}
@@ -533,7 +533,7 @@ export function MobileSidebar({
                 isMobile
               />
 
-              {/* Administración Dinámica */}
+              {}
               <AdminSection
                 dynamicAdminItems={dynamicAdminItems}
                 currentView={currentView}

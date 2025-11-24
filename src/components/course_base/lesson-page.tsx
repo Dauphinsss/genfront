@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useCourse } from "@/lib/course-context"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { StudentTopicView } from "./StudentTopicView"
 
 export default function CourseBase() {
   const { course, currentUnitIndex, currentLessonIndex, currentTopicIndex, setCurrentTopic, goToNextTopic } =
@@ -95,23 +96,18 @@ export default function CourseBase() {
 
   const getAllTopicsInLesson = () => currentLesson?.topics || []
 
-  // Variables de color dinámicas
   const bg = "bg-[var(--background)]"
   const fg = "text-[var(--foreground)]"
   const border = "border-[var(--border)]"
   const sidebarBg = "bg-[var(--sidebar)]"
-  const sidebarFg = "text-[var(--sidebar-foreground)]"
 
   if (!hasAnyContent) {
     return (
-      <div className={`min-h-screen ${bg} ${fg} flex flex-col lg:flex-row relative`}>
-        {/* Main Empty Content */}
-        <div className={`flex-1 flex flex-col border-b lg:border-b-0 lg:border-r ${border} transition-all duration-300 ${isSidebarOpen ? "lg:mr-[400px]" : "lg:mr-0"}`}>
+      <div className={`h-screen overflow-hidden ${bg} ${fg} flex flex-col relative`}>
+        {/* Contenido principal */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div className={`border-b ${border} p-4 md:p-8 flex items-center justify-between`}>
             <div className="h-8 bg-gray-500/30 rounded w-64 animate-pulse"></div>
-            <button className="text-gray-400 hover:text-white lg:hidden flex-shrink-0" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
           <div className="flex-1 p-4 md:p-8 flex items-center justify-center">
             <div className="text-center space-y-4">
@@ -127,59 +123,68 @@ export default function CourseBase() {
           </div>
         </div>
 
-        {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-
-        {/* Sidebar Empty */}
-        <div className={`fixed lg:fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] lg:w-[400px] flex flex-col ${sidebarBg} transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} border-l ${border}`}>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 bg-[var(--background)] border ${border} rounded-l-lg p-2 hover:bg-gray-800 transition-colors z-10">
-            {isSidebarOpen ? <ChevronRight className="w-4 h-4 text-gray-400" /> : <ChevronLeft className="w-4 h-4 text-gray-400" />}
-          </button>
-          <div className="p-4 md:p-6 border-b ${border}">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-black" />
+        {/* Sidebar compacto flotante */}
+        <div className={`fixed top-4 right-4 z-50 w-[320px] ${sidebarBg} border ${border} rounded-xl shadow-2xl transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[400px] pointer-events-none'}`}>
+          <div className="p-4 border-b border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <BookOpen className="w-4 h-4 text-black" />
               </div>
-              <div className={`${sidebarFg} text-sm md:text-base font-medium line-clamp-2`}>{course.title}</div>
+              <h2 className="text-sm font-medium line-clamp-1">{course.title}</h2>
             </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="p-4">
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-lg p-3 md:p-4 bg-gray-800/30 animate-pulse">
-                  <div className="h-5 bg-gray-700/50 rounded w-3/4"></div>
+                <div key={i} className="rounded-lg p-3 bg-gray-800/30 animate-pulse">
+                  <div className="h-4 bg-gray-700/50 rounded w-3/4"></div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="border-t ${border} p-4">
-            <Button variant="outline" className={`w-full border-white/20 ${sidebarFg} hover:bg-white hover:text-black bg-transparent`} onClick={() => router.push("/admin")}>
-              <Settings className="w-4 h-4 mr-2" />
-              Administrar Curso
+          <div className="border-t border-border/50 p-3">
+            <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => router.push("/admin")}>
+              <Settings className="w-3 h-3 mr-1" />
+              Administrar
             </Button>
           </div>
         </div>
+
+        {/* Botón flotante para abrir el sidebar */}
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className={`fixed top-4 right-4 z-50 ${sidebarBg} border ${border} rounded-lg p-3 shadow-lg hover:scale-110 transition-transform`}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
       </div>
     )
   }
 
   return (
-    <div className={`min-h-screen ${bg} ${fg} flex flex-col lg:flex-row relative`}>
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col border-b lg:border-b-0 lg:border-r ${border}`}>
-        {/* Header */}
+    <div className={`h-screen overflow-hidden ${bg} ${fg} flex flex-col relative`}>
+      {/* Contenido principal - ocupa toda la pantalla */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Título del tópico */}
         <div className={`border-b ${border} p-4 md:p-8 flex items-center justify-between`}>
           <h1 className="text-lg md:text-2xl font-semibold pr-4">{currentTopic?.title}</h1>
-          <button className="text-gray-400 hover:text-white lg:hidden flex-shrink-0" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
 
-        {/* Topic Content */}
-        <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <p className="text-[var(--foreground)] text-base md:text-lg leading-relaxed">{currentTopic?.description}</p>
+        {/* Vista del contenido del tópico */}
+        <div className="flex-1 overflow-hidden">
+          <StudentTopicView
+            title={currentTopic?.title || ''}
+            description={currentTopic?.description}
+            content={currentTopic?.content}
+          />
         </div>
 
-        {/* Footer Navigation */}
+        {/* Botón siguiente */}
         <div className={`border-t ${border} p-4 md:p-6 flex items-center justify-end`}>
           <Button
             className="bg-gray-700/70 hover:bg-gray-600/70 text-white text-sm md:text-base disabled:bg-gray-800/30 disabled:text-gray-600"
@@ -192,67 +197,76 @@ export default function CourseBase() {
         </div>
       </div>
 
-      {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-
-      {/* Sidebar */}
-      <div className={`transition-all duration-300 overflow-hidden ${isSidebarOpen ? "w-full sm:w-[380px] lg:w-[400px]" : "w-0"} flex flex-col ${sidebarBg} border-l ${border} lg:rounded-l-2xl rounded-t-2xl`}>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 bg-[var(--background)] border ${border} rounded-l-lg p-2 hover:bg-gray-800 transition-colors z-10">
-          {isSidebarOpen ? <ChevronRight className="w-4 h-4 text-gray-400" /> : <ChevronLeft className="w-4 h-4 text-gray-400" />}
-        </button>
-
-        {/* Course Header */}
-        <div className="p-4 md:p-6 border-b ${border}">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-black" />
+      {/* Sidebar compacto flotante en la esquina superior derecha */}
+      <div className={`fixed top-4 right-4 z-50 w-[320px] ${sidebarBg} border ${border} rounded-xl shadow-2xl transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[400px] pointer-events-none'}`}>
+        {/* Header compacto */}
+        <div className="p-4 border-b border-border/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-4 h-4 text-black" />
             </div>
-            <h2 className="text-sm md:text-base font-medium line-clamp-2">{course.title}</h2>
+            <h2 className="text-sm font-medium line-clamp-1">{course.title}</h2>
+          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Navegación de lección */}
+        <div className="p-4 border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <button className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed p-1" onClick={goToPreviousLesson} disabled={currentUnitIndex === 0 && currentLessonIndex === 0}>
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="text-center flex-1 px-2 min-w-0">
+              <div className="text-xs font-semibold mb-0.5">{currentUnit.title}</div>
+              <div className="text-xs text-muted-foreground truncate">{currentLesson.title}</div>
+            </div>
+            <button className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed p-1" onClick={goToNextLesson} disabled={currentUnitIndex === course.units.length - 1 && currentLessonIndex === currentUnit.lessons.length - 1}>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Lesson Navigation */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <button className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed p-1" onClick={goToPreviousLesson} disabled={currentUnitIndex === 0 && currentLessonIndex === 0}>
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="text-center flex-1 px-2 min-w-0">
-              <div className="text-[var(--sidebar-accent-foreground)] text-xs md:text-sm font-semibold mb-1">{currentUnit.title}</div>
-              <div className="text-xs md:text-sm text-[var(--sidebar-foreground)] truncate">{currentLesson.title}</div>
-            </div>
-            <button className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed p-1" onClick={goToNextLesson} disabled={currentUnitIndex === course.units.length - 1 && currentLessonIndex === currentUnit.lessons.length - 1}>
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="space-y-2">
+        {/* Lista de tópicos - máximo 300px de alto con scroll */}
+        <div className="max-h-[300px] overflow-y-auto p-4">
+          <div className="space-y-1">
             {getAllTopicsInLesson().map((topic, index) => {
               const isActive = index === currentTopicIndex
               return (
                 <div
                   key={topic.id}
-                  className={`rounded-lg p-3 md:p-4 flex items-center gap-3 cursor-pointer transition-colors ${isActive ? "bg-[var(--sidebar-primary)]" : "hover:bg-[var(--sidebar-accent)]"}`}
+                  className={`rounded-lg p-2.5 flex items-center gap-2 cursor-pointer transition-colors text-sm ${isActive ? "bg-[var(--sidebar-primary)]" : "hover:bg-[var(--sidebar-accent)]"}`}
                   onClick={() => {
                     setCurrentTopic(currentUnitIndex, currentLessonIndex, index)
-                    setIsSidebarOpen(false)
                   }}
                 >
-                  <CheckCircle2 className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ${isActive ? "text-[var(--sidebar-primary-foreground)]" : "text-[var(--sidebar-foreground)]"}`} />
-                  <span className={`text-sm md:text-base ${isActive ? "text-[var(--sidebar-primary-foreground)] font-medium" : "text-[var(--sidebar-foreground)]"}`}>{topic.title}</span>
+                  <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-[var(--sidebar-primary-foreground)]" : "text-[var(--sidebar-foreground)]"}`} />
+                  <span className={`${isActive ? "text-[var(--sidebar-primary-foreground)] font-medium" : "text-[var(--sidebar-foreground)]"} line-clamp-2`}>{topic.title}</span>
                 </div>
               )
             })}
           </div>
         </div>
 
-        {/* Footer */}
-        <div className={`border-t border-[var(--sidebar)] p-4`}>
-          <Button variant="outline" className={`w-full text-white hover:bg-white hover:text-black bg-transparent`} onClick={() => router.push("/admin")}>
-            <Settings className="w-4 h-4 mr-2" />
-            Administrar Curso
+        {/* Botón administrar */}
+        <div className="border-t border-border/50 p-3">
+          <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => router.push("/admin")}>
+            <Settings className="w-3 h-3 mr-1" />
+            Administrar
           </Button>
         </div>
       </div>
+
+      {/* Botón flotante para abrir el sidebar cuando está cerrado */}
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className={`fixed top-4 right-4 z-50 ${sidebarBg} border ${border} rounded-lg p-3 shadow-lg hover:scale-110 transition-transform`}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
     </div>
-  )
+  );
 }

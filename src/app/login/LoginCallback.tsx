@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { Loading } from "@/components/ui/loading";
+import { API_BASE_URL } from "@/config/api";
 
 export default function LoginCallback() {
   const searchParams = useSearchParams();
@@ -18,13 +19,11 @@ export default function LoginCallback() {
         return;
       }
 
-      // Guardamos el token en localStorage
       localStorage.setItem("pyson_token", token);
 
       try {
-        // Llamamos al backend con axios
         const { data: user } = await axios.get(
-          "http://localhost:4000/auth/me",
+          `${API_BASE_URL}/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -32,11 +31,10 @@ export default function LoginCallback() {
           }
         );
 
-        // Guardamos usuario en localStorage
         localStorage.setItem("pyson_user", JSON.stringify(user));
- 
+
         const { data: privileges } = await axios.get(
-          "http://localhost:4000/privileges/me",
+          `${API_BASE_URL}/privileges/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -49,7 +47,7 @@ export default function LoginCallback() {
       } catch (err) {
         console.error("Error en login:", err);
       } finally {
-        router.push("/"); // Redirigimos siempre al home
+        router.push("/");
       }
     };
 

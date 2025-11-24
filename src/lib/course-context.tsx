@@ -2,11 +2,13 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { ContentDocument } from "@/types/content-blocks"
 
 export interface Topic {
   id: string
   title: string
   description: string
+  content?: ContentDocument
 }
 
 export interface Lesson {
@@ -77,14 +79,12 @@ const defaultCourse: Course = {
   ],
 }
 
-
 export function CourseProvider({ children }: { children: React.ReactNode }) {
   const [course, setCourse] = useState<Course>(defaultCourse)
   const [currentUnitIndex, setCurrentUnitIndex] = useState(0)
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0)
   const [currentTopicIndex, setCurrentTopicIndex] = useState(0)
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedCourse = localStorage.getItem("course-data")
     const savedPosition = localStorage.getItem("course-position")
@@ -101,7 +101,6 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Save to localStorage when course or position changes
   useEffect(() => {
     localStorage.setItem("course-data", JSON.stringify(course))
   }, [course])
@@ -127,16 +126,13 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
     const currentUnit = course.units[currentUnitIndex]
     const currentLesson = currentUnit.lessons[currentLessonIndex]
 
-    // Check if there's a next topic in current lesson
     if (currentTopicIndex < currentLesson.topics.length - 1) {
       setCurrentTopicIndex(currentTopicIndex + 1)
     }
-    // Check if there's a next lesson in current unit
     else if (currentLessonIndex < currentUnit.lessons.length - 1) {
       setCurrentLessonIndex(currentLessonIndex + 1)
       setCurrentTopicIndex(0)
     }
-    // Check if there's a next unit
     else if (currentUnitIndex < course.units.length - 1) {
       setCurrentUnitIndex(currentUnitIndex + 1)
       setCurrentLessonIndex(0)
@@ -145,17 +141,14 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
   }
 
   const goToPreviousTopic = () => {
-    // Check if there's a previous topic in current lesson
     if (currentTopicIndex > 0) {
       setCurrentTopicIndex(currentTopicIndex - 1)
     }
-    // Check if there's a previous lesson in current unit
     else if (currentLessonIndex > 0) {
       const prevLesson = course.units[currentUnitIndex].lessons[currentLessonIndex - 1]
       setCurrentLessonIndex(currentLessonIndex - 1)
       setCurrentTopicIndex(prevLesson.topics.length - 1)
     }
-    // Check if there's a previous unit
     else if (currentUnitIndex > 0) {
       const prevUnit = course.units[currentUnitIndex - 1]
       const lastLesson = prevUnit.lessons[prevUnit.lessons.length - 1]
@@ -167,7 +160,6 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
 
   const updateCourse = (newCourse: Course) => {
     setCourse(newCourse)
-    // Reset to first topic when course is updated
     setCurrentUnitIndex(0)
     setCurrentLessonIndex(0)
     setCurrentTopicIndex(0)

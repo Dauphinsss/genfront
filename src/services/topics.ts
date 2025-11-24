@@ -1,14 +1,15 @@
 import axios from 'axios';
-import type { 
-  Topic, 
-  CreateTopicDto, 
-  CreateContentDto, 
+import type {
+  Topic,
+  CreateTopicDto,
+  CreateContentDto,
   UpdateContentDto,
   UploadResourceResponse,
-  TopicType 
+  TopicType,
+  HistoricContent,
+  Content
 } from '@/types/topic';
-
-const API_BASE_URL = 'http://localhost:4000';
+import { API_BASE_URL } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('pyson_token');
@@ -17,7 +18,22 @@ const getAuthHeaders = () => {
   };
 };
 
-{ /* Topic Section */}
+// Interceptor para manejar errores de autenticación
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado o inválido - limpiar y redirigir
+      localStorage.removeItem('pyson_token');
+      localStorage.removeItem('pyson_user');
+      localStorage.removeItem('pyson_privileges');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
+
+{ }
 
 export const createTopic = async (data: CreateTopicDto): Promise<Topic> => {
   const response = await axios.post(`${API_BASE_URL}/topics`, data, {
@@ -54,7 +70,7 @@ export const deleteTopic = async (id: number): Promise<void> => {
   });
 };
 
-{ /* Content Section */}
+{ }
 
 export const createContent = async (topicId: number, data: CreateContentDto): Promise<Topic> => {
   const response = await axios.post(`${API_BASE_URL}/content/topic/${topicId}`, data, {
@@ -82,7 +98,7 @@ export const deleteContent = async (contentId: number): Promise<void> => {
   });
 };
 
-{/* Resource Section - Used for upload files into GCS */}
+{}
 
 export const uploadResource = async (
   contentId: number, 
@@ -110,6 +126,9 @@ export const uploadResource = async (
   return response.data;
 };
 
+
+
+
 export const getResourcesByContentId = async (contentId: number) => {
   const response = await axios.get(`${API_BASE_URL}/content/${contentId}/resources`, {
     headers: getAuthHeaders(),
@@ -121,4 +140,31 @@ export const deleteResource = async (resourceId: number): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/content/resource/${resourceId}`, {
     headers: getAuthHeaders(),
   });
+};
+
+// Historial de contenido
+export const getContentHistory = async (contentId: number): Promise<HistoricContent[]> => {
+  const response = await axios.get(`${API_BASE_URL}/content/${contentId}/history`, {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};
+
+export const restoreContentVersion = async (
+  contentId: number,
+  historyId: number,
+  restoredBy: string,
+  changeSummary?: string
+): Promise<Content> => {
+  const response = await axios.post(
+    `${API_BASE_URL}/content/${contentId}/restore/${historyId}`,
+    {
+      restoredBy,
+      changeSummary: changeSummary || "Restauró una versión anterior",
+    },
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+  return response.data;
 };

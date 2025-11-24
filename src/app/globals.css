@@ -189,3 +189,199 @@
   }
 }
 
+/* Estilos para el editor de texto personalizado */
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 0.875rem;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 2.25rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin-top: 0;
+  margin-bottom: 0.625rem;
+}
+
+.prose p {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.625rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 1.625rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose blockquote {
+  font-style: italic; /* Las citas deben estar en cursiva */
+  border-left: 4px solid hsl(var(--border));
+  padding-left: 1rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.prose pre {
+  background: linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--muted) / 0.8) 100%);
+  border: 1px solid hsl(var(--border));
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.prose pre::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    hsl(var(--primary)) 0%, 
+    hsl(var(--primary) / 0.5) 50%, 
+    hsl(var(--primary)) 100%);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Clase específica para bloques de código con mayor especificidad */
+.editor-code-block,
+pre.editor-code-block,
+.prose pre {
+  background: rgba(0, 0, 0, 0.05) !important; /* Fondo gris suave en modo claro */
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  padding: 1.25rem !important;
+  border-radius: 0.75rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+  overflow-x: auto !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  position: relative !important;
+  display: block !important;
+}
+
+.editor-code-block::before,
+pre.editor-code-block::before,
+.prose pre::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, 
+    rgba(0, 0, 0, 0.1) 0%, 
+    rgba(0, 0, 0, 0.2) 50%, 
+    rgba(0, 0, 0, 0.1) 100%) !important;
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+}
+
+.prose hr {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    rgba(0, 0, 0, 0.2) 20%, 
+    rgba(0, 0, 0, 0.3) 50%, 
+    rgba(0, 0, 0, 0.2) 80%, 
+    transparent 100%);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 2px;
+}
+
+/* Modo oscuro para separador */
+.dark .prose hr {
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 20%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.2) 80%, 
+    transparent 100%);
+}
+
+/* Modo oscuro */
+.dark .prose blockquote {
+  color: hsl(var(--muted-foreground));
+  border-left-color: hsl(var(--border));
+}
+
+.dark .prose pre {
+  background: linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--muted) / 0.9) 100%);
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Modo oscuro para clase específica de código */
+.dark .editor-code-block,
+.dark pre.editor-code-block,
+.dark .prose pre {
+  background: rgba(255, 255, 255, 0.08) !important; /* Fondo gris claro en modo oscuro */
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .editor-code-block::before,
+.dark pre.editor-code-block::before,
+.dark .prose pre::before {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.25) 50%, 
+    rgba(255, 255, 255, 0.15) 100%) !important;
+}
+
+/* Estilos adicionales para el editor */
+.prose code:not(pre code) {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.dark .prose code:not(pre code) {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+

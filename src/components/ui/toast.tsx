@@ -87,7 +87,6 @@ const ToastClose = React.forwardRef<
 ))
 ToastClose.displayName = ToastPrimitives.Close.displayName
 
-// Nuevo componente para el icono
 const ToastIcon = ({ variant }: { variant?: string }) => {
   const icons = {
     default: <Info className="h-5 w-5" />,

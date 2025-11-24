@@ -12,9 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, User, LogOut, Sun, Moon } from "lucide-react";
+import { useAuthenticatedImage } from "@/lib/image-utils";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface HeaderProps {
   user?: {
+    id: number;
     name: string;
     email: string;
     avatar: string;
@@ -35,12 +38,16 @@ export function Header({
   isDark,
   onMenuToggle,
 }: HeaderProps) {
+  const { imageSrc } = useAuthenticatedImage(user?.avatar);
+
   if (!user) {
     return (
       <header className="w-full bg-background/80 backdrop-blur-md border-b border-border">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="text-2xl font-bold text-foreground">Pyson</div>
+            <Link href="/" className="text-2xl font-bold text-foreground hover:text-foreground/80 transition-colors">
+              Pyson
+            </Link>
 
             <Button
               variant="ghost"
@@ -81,7 +88,9 @@ export function Header({
             </Link>
           </div>
 
-          <div className="flex items-center ">
+          <div className="flex items-center gap-1">
+            <NotificationBell userId={user.id} />
+
             <Button
               variant="ghost"
               size="sm"
@@ -104,7 +113,7 @@ export function Header({
                 >
                   <Avatar className="w-8 h-8">
                     <AvatarImage
-                      src={user.avatar || "/placeholder.svg"}
+                      src={imageSrc}
                       alt={user.name}
                     />
                     <AvatarFallback>

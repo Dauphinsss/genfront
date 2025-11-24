@@ -8,7 +8,7 @@ export function DesktopOnlyScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!containerRef.current || !iconRef.current) return;
 
     gsap.fromTo(

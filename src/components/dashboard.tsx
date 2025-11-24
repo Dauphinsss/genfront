@@ -9,13 +9,15 @@ import { Header } from "./header";
 import { Sidebar, MobileSidebar, DashboardView } from "./sidebar";
 import { Plus, BookOpen, GraduationCap, History } from "@/lib/icons";
 import { UsersManagement } from "@/components/admin/UsersManagement";
-import { TopicsView } from "@/components/teacher/TopicsView";
+import { TopicsGridView } from "@/components/teacher/TopicsGridView";
 import { ProfileView } from "@/components/profile";
 import axios from "axios";
+import CourseBaseAdminPanel from "@/components/course_base/CourseBaseAdminPanel";
 import CourseBaseView from "@/components/course_base/course-base-view";
-import CourseBaseEdit  from "@/components/course_base/course-base-units";
+import { API_BASE_URL } from "@/config/api";
 interface DashboardProps {
   user: {
+    id: number;
     name: string;
     email: string;
     avatar: string;
@@ -112,16 +114,13 @@ export function Dashboard({
   const [enrolledCourse, setEnrolledCourse] = useState<
     (typeof mockCourses)[0] | null
   >(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Inicia colapsado
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Función para manejar el toggle del menú
   const handleMenuToggle = () => {
-    // En móvil: abrir/cerrar sidebar móvil
     if (window.innerWidth < 768) {
       setIsMobileSidebarOpen(!isMobileSidebarOpen);
     } else {
-      // En desktop: toggle pin del sidebar
       setIsSidebarCollapsed(!isSidebarCollapsed);
     }
   };
@@ -134,7 +133,10 @@ export function Dashboard({
     email: string;
     avatar: string;
   }) => {
-    setCurrentUser(updatedUser);
+    setCurrentUser({
+      ...currentUser,
+      ...updatedUser,
+    });
   };
 
   const handleJoinCourse = async () => {
@@ -143,7 +145,7 @@ export function Dashboard({
         const token = localStorage.getItem("pyson_token");
 
         const response = await axios.post(
-          "http://localhost:4000/courses/join",
+          `${API_BASE_URL}/courses/join`,
           {
             courseCode: courseCode.trim(),
           },
@@ -193,14 +195,14 @@ export function Dashboard({
         onMenuToggle={handleMenuToggle}
       />
 
-      {/* Desktop Sidebar */}
+      {}
       <Sidebar
         currentView={currentView}
         onViewChange={setCurrentView}
         isCollapsed={isSidebarCollapsed}
       />
 
-      {/* Mobile Sidebar */}
+      {}
       <MobileSidebar
         isOpen={isMobileSidebarOpen}
         onClose={() => setIsMobileSidebarOpen(false)}
@@ -298,7 +300,7 @@ export function Dashboard({
 
           {currentView === "teacher-topics" && (
             <div className="max-w-7xl mx-auto">
-              <TopicsView />
+              <TopicsGridView />
             </div>
           )}
 
@@ -316,7 +318,7 @@ export function Dashboard({
 
           {currentView === "admin-base-course-edit" && (
             <div className="max-w-7xl mx-auto">
-              <CourseBaseEdit />
+              <CourseBaseAdminPanel />
             </div>
           )}
 

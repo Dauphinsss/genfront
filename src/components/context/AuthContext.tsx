@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "@/config/api";
 
 interface Privilege {
   id: number;
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (token) {
       axios
-        .get("http://localhost:4000/privileges/me", {
+        .get(`${API_BASE_URL}/privileges/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshPrivileges = async () => {
     const token = localStorage.getItem("pyson_token");
     if (!token) return;
-    const { data } = await axios.get("http://localhost:4000/privileges/me", {
+    const { data } = await axios.get(`${API_BASE_URL}/privileges/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setPrivileges(data);
