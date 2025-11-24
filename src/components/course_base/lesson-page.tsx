@@ -100,7 +100,6 @@ export default function CourseBase() {
   const fg = "text-[var(--foreground)]"
   const border = "border-[var(--border)]"
   const sidebarBg = "bg-[var(--sidebar)]"
-  const sidebarFg = "text-[var(--sidebar-foreground)]"
 
   if (!hasAnyContent) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,17 +41,7 @@ export function ContentHistoryModal({
   const [selectedEntry, setSelectedEntry] = useState<HistoricContent | null>(null);
   const [restoring, setRestoring] = useState(false);
 
-  useEffect(() => {
-    if (open && contentId) {
-      loadHistory();
-    } else {
-      setHistory([]);
-      setSelectedEntry(null);
-      setError(null);
-    }
-  }, [open, contentId]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     if (!contentId) return;
 
     setLoading(true);
@@ -70,7 +60,17 @@ export function ContentHistoryModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [contentId, toast]);
+
+  useEffect(() => {
+    if (open && contentId) {
+      loadHistory();
+    } else {
+      setHistory([]);
+      setSelectedEntry(null);
+      setError(null);
+    }
+  }, [open, contentId, loadHistory]);
 
   const handleRestore = async () => {
     if (!selectedEntry || !contentId || !user) return;

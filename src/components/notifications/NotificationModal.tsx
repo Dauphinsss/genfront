@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Check, CheckCheck, Bell } from 'lucide-react';
 import {
   Dialog,
@@ -34,7 +34,7 @@ export function NotificationModal({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllNotifications(userId);
@@ -44,13 +44,13 @@ export function NotificationModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
     }
-  }, [isOpen, userId]);
+  }, [isOpen, userId, fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
