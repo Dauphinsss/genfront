@@ -26,5 +26,8 @@
     "**/.DS_Store": true,
     "**/.next": true
   },
-  "typescript.preferences.includePackageJsonAutoImports": "off"
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "yaml.schemas": {
+    "": ".github/workflows/*.yml"
+  }
 }
