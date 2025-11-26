@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Notification } from '@/services/notifications';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/api';
 
@@ -26,7 +25,6 @@ export function useNotifications(userId: number | undefined) {
     if (!userId) return;
 
     try {
-      console.log('[useNotifications] Fetching unread count for user:', userId);
       const response = await axios.get(
         `${API_URL}/notifications/user/${userId}/unread-count`,
         getAuthHeaders()
@@ -42,11 +40,8 @@ export function useNotifications(userId: number | undefined) {
   // Initialize WebSocket connection
   useEffect(() => {
     if (!userId) {
-      console.warn('[useNotifications] No userId provided');
       return;
     }
-
-    console.log('[useNotifications] Initializing WebSocket for user:', userId);
 
     // Create socket connection
     const socket = io(API_URL, {
@@ -59,7 +54,6 @@ export function useNotifications(userId: number | undefined) {
     socketRef.current = socket;
 
     socket.on('connect', async () => {
-      console.log('[useNotifications] WebSocket connected:', socket.id);
       setIsConnected(true);
       setError(null);
 
@@ -70,7 +64,6 @@ export function useNotifications(userId: number | undefined) {
           { userId, socketId: socket.id },
           getAuthHeaders()
         );
-        console.log('[useNotifications] Socket registered with backend');
       } catch (error) {
         console.error('[useNotifications] Error registering socket:', error);
       }
@@ -80,7 +73,6 @@ export function useNotifications(userId: number | undefined) {
     });
 
     socket.on('disconnect', () => {
-      console.log('[useNotifications] WebSocket disconnected');
       setIsConnected(false);
     });
 
@@ -91,20 +83,17 @@ export function useNotifications(userId: number | undefined) {
     });
 
     // Listen for new notifications
-    socket.on('newNotification', (notification: Notification) => {
-      console.log('[useNotifications] New notification received:', notification);
+    socket.on('newNotification', () => {
       // The backend will also emit unread count update
     });
 
     // Listen for unread count updates
     socket.on('unreadCountUpdate', (data: { count: number }) => {
-      console.log('[useNotifications] Unread count update:', data.count);
       setUnreadCount(data.count);
     });
 
     // Cleanup on unmount
     return () => {
-      console.log('[useNotifications] Cleaning up WebSocket connection');
       socket.disconnect();
     };
   }, [userId, getAuthHeaders, fetchUnreadCount]);

@@ -15,7 +15,6 @@ export interface Notification {
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('pyson_token');
-  console.log('[Notifications Service] Token found:', token ? 'Yes' : 'No');
   return {
     headers: {
       Authorization: `Bearer ${token}`,
